@@ -1,0 +1,40 @@
+#! /usr/local/bin/perl
+
+sub round {
+	my($val) = @_;
+	if ($val >= 0) { $val += 0.5; }
+	else { $val -= 0.5; }
+	return int($val);
+}
+
+if ($#ARGV < 1 || $#ARGV > 2) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd freq Fs\n";
+	exit 1;
+}
+if ($#ARGV == 2) { $damp = $ARGV[2]; }
+else { $damp = 1.0; }
+
+$freq = eval(shift);
+$Fs = eval(shift);
+
+$pi = 4 * atan2(1, 1);
+$w = 2 * $pi * $freq / $Fs;
+$coef_b = (2 - cos($w)) - sqrt((2 - cos($w))**2 - 1);
+$coef_a = $damp * (1 - $coef_b);
+
+$coef_as = int(log(abs($coef_a))/log(2));
+if ($coef_as < 0) { $coef_as = 0; }
+if ($coef_as == 3) { $coef_as = 2; }
+$coef_bs = int(log(abs($coef_b))/log(2));
+if ($coef_bs < 0) { $coef_bs = 0; }
+if ($coef_bs == 3) { $coef_bs = 2; }
+
+printf "coef_a = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_a, $coef_a / 2**$coef_as, $coef_as, round($coef_a * 0x800000),
+	0xffff & round($coef_a / 2**$coef_as * 0x8000), $coef_as;
+
+printf "coef_b = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_b, $coef_b / 2**$coef_bs, $coef_bs, round($coef_b * 0x800000),
+	0xffff & round($coef_b / 2**$coef_bs * 0x8000), $coef_bs;

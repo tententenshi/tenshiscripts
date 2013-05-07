@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>SyntaxHighlighter Build Test Page</title>
+<!--
+	<script type="text/javascript" src="scripts/shCore.js"></script>
+-->
+	<script type="text/javascript" src="src/shCore.js"></script>
+	<script type="text/javascript" src="scripts/shBrushBash.js"></script>
+	<script type="text/javascript" src="scripts/shBrushCpp.js"></script>
+	<script type="text/javascript" src="scripts/shBrushCSharp.js"></script>
+	<script type="text/javascript" src="scripts/shBrushCss.js"></script>
+	<script type="text/javascript" src="scripts/shBrushDelphi.js"></script>
+	<script type="text/javascript" src="scripts/shBrushDiff.js"></script>
+	<script type="text/javascript" src="scripts/shBrushGroovy.js"></script>
+	<script type="text/javascript" src="scripts/shBrushJava.js"></script>
+	<script type="text/javascript" src="scripts/shBrushJScript.js"></script>
+	<script type="text/javascript" src="scripts/shBrushPerl.js"></script>
+	<script type="text/javascript" src="scripts/shBrushPhp.js"></script>
+	<script type="text/javascript" src="scripts/shBrushPlain.js"></script>
+	<script type="text/javascript" src="scripts/shBrushPython.js"></script>
+	<script type="text/javascript" src="scripts/shBrushRuby.js"></script>
+	<script type="text/javascript" src="scripts/shBrushScala.js"></script>
+	<script type="text/javascript" src="scripts/shBrushSql.js"></script>
+	<script type="text/javascript" src="scripts/shBrushVb.js"></script>
+	<script type="text/javascript" src="scripts/shBrushXml.js"></script>
+
+	<script type="text/javascript" src="test.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/shCore.css"/>
+	<link type="text/css" rel="stylesheet" href="styles/shThemeEmacs.css"/>
+
+	<script type="text/javascript">
+		SyntaxHighlighter.all();
+	</script>
+</head>
+
+<body onload="body_load();">
+<h1>SyntaxHihglighter Test</h1>
+<p>This is a test file to insure that everything is working well.</p>
+
+
+<div id="exampleDiv">
+<select id="themeSelect" onchange="return loadStyle();" disabled>
+<option>Default</option>
+<option>Django</option>
+<option>Eclipse</option>
+<option>Emacs</option>
+<option>FadeToGrey</option>
+<option>Midnight</option>
+<option>RDark</option>
+</select>
+
+
+<pre id="codePre" class="brush: c-sharp;">
+/*
+  long comment
+  test
+*/
+function test() : String	// one line comment
+{
+	sign = (eval(valstr[0]) & 0x8000) / 0x8000;
+	return 10;
+}
+</pre>
+
+<pre id="codePre" class="brush: perl;">
+#! /usr/bin/perl
+
+while ($str = shift) {	# comment is like this
+	my @tmparray = split(/[,\s]+/, $str);
+	push @valstr, @tmparray;
+}
+
+if ($#valstr &gt;= 0) {
+	$sign = (eval($valstr[0]) & 0x8000) / 0x8000;
+	$shift = (eval($valstr[0]) & 0x6000) / 0x2000;
+
+	$hexstr = "0x";
+	$hexstr .= sprintf("%04x", (eval($valstr[0]) & 0x1fff));
+	$digit = 4;
+
+	for (my $i = 1; $i &lt;= $#valstr; $i++) {
+		$hexstr .= sprintf("%04x", eval($valstr[$i]));
+		$digit += 4;
+	}
+}
+
+if ($str =~ /[+-]?((0[xX][A-Fa-f0-9]+)|(([\d]*\.)?[\d]+([eE][+-]?[\d]+)?))u?((int(8|16|32|64))|L)?/g) {
+}
+
+print "sign: $sign, shift: $shift, hex: $hexstr\n";
+
+$hexval = eval($hexstr) / (1&lt;&lt; (16 - $shift*4)) / 320;
+for (my $digitremain = 4; $digitremain &lt; $digit; $digitremain += 4) {
+	$hexval /= (1 &lt;&lt; 16);
+}
+
+printf ("CoefData: 0x%08x, float: %g\n", $hexval * 0x00800000, $hexval);
+
+</pre>
+
+<div id="caption">C++ code highlighted using the <code id="themeCode">nedit</code> theme</div>
+</div>
+
+</html>

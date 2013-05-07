@@ -1,0 +1,27 @@
+#! /usr/bin/perl
+
+while ($str = <>) {
+	if ($str =~ /^\s*SYSX:(.+)$/) {
+		$valstr .= $1;
+#		print "valstr:$valstr\n";
+	} else {
+
+		@valarray = split(/ /, $valstr);
+		foreach $val (@valarray) {
+			$val = eval("0x".$val);
+		}
+
+		$excstr = pack("c*", @valarray);
+		print "$excstr\n";
+
+		$valstr = "";
+	}
+}
+		@valarray = split(/ /, $valstr);
+		foreach $val (@valarray) {
+			$val = eval("0x".$val);
+		}
+
+		$excstr = pack("c*", @valarray);
+		print "$excstr\n";
+

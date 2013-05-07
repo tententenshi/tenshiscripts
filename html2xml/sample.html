@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-jp">
+	<meta http-equiv="Content-Script-Type" content="text/javascript">
+	<meta http-equiv="Content-Style-Type" content="text/css">
+
+    <script type="text/javascript" src="patent_list.js"></script>
+    <title>特許リスト サンプル</title>
+
+    <style type="text/css">
+      body {
+        font-size: small;
+      }
+    </style>
+
+  </head>
+
+  <body onLoad="load('out.xml', 'patent_list.xsl', 'result')">
+    <h1>特許リスト サンプル</h1>
+
+    <div id="result">ここに変換結果が表示されます。</div>
+
+  </body>
+</html>

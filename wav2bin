@@ -1,0 +1,85 @@
+#! /usr/local/bin/perl
+
+use strict;
+my $option;
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- wav to binary converter --\n";
+	print "usage: $cmd [--convert-endian] inFile(*.wav) outFile(*.bin)\n";
+	print "\n";
+}
+
+if ($ARGV[0] =~ /--(.+)/) {
+	$option = $1;
+	shift;
+}
+
+if ($#ARGV != 1) {
+	usage();
+	exit 1;
+}
+
+my $infile = shift;
+my $outfile = shift;
+
+open(IN, "$infile") or die "cannot open $infile!\n";
+open(OUT, "> $outfile") or die "cannot open $outfile!\n";
+binmode IN;
+binmode OUT;
+
+my $buf;
+read IN, $buf, 4;	# RIFF
+read IN, $buf, 4;	# size
+read IN, $buf, 4;	# WAVE
+read IN, $buf, 4;	# fmt 
+read IN, $buf, 4;	# size of fmt
+my $size = unpack "V", $buf;
+read IN, $buf, 2;	# type (PCM)
+read IN, $buf, 2;	# num of channel
+read IN, $buf, 4;	# sample rate
+read IN, $buf, 4;	# bit rate (= sample_rate * num_of_channel * bit_length / 8)
+read IN, $buf, 2;	# block size (= bit_length / 8 * num_of_channel)
+read IN, $buf, 2;	# bit_length
+my $BIT_LENGTH = unpack "v", $buf;
+
+read IN, $buf, ($size - 16);	# skip remaining fmt
+
+read IN, $buf, 4;	# data
+my $chunk = $buf;
+while ($chunk ne "data") {
+	print "skipping chunk $chunk...\n";
+	read IN, $buf, 4;	# size of fmt
+	my $size = unpack "V", $buf;
+	read IN, $buf, $size;
+	read IN, $buf, 4;
+	$chunk = $buf;
+}
+
+read IN, $buf, 4;	# size of fmt
+my $size = unpack "V", $buf;
+
+while($size > 0) {
+	if ($BIT_LENGTH == 16) {
+		my $buf;
+		read IN, $buf, 2;	# wav body
+		if ($option eq "convert-endian") {
+			my $data = unpack "v", $buf;
+			$buf = pack "n", ($data);
+		}
+		print (OUT $buf);
+	} elsif ($BIT_LENGTH == 32) {
+		my $buf;
+		read IN, $buf, 4;	# wav body
+		if ($option eq "convert-endian") {
+			my $data = unpack "V", $buf;
+			$buf = pack "N", ($data);
+		}
+		print (OUT $buf);
+	}
+	$size -= $BIT_LENGTH / 8;
+}
+
+close(IN);
+close(OUT);

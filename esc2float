@@ -1,0 +1,27 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $val = eval(shift);
+
+my $sign = $val >> 31;
+my $exp = ($val & 0x60000000) >> 29;
+my $frac = ($val & 0x1fffffff);
+
+my $fVal;
+
+if ($exp == 0) {
+	$fVal = $frac / 0x80000000 / 2;
+} elsif ($exp == 1) {
+	$fVal = $frac / 0x10000000;
+} elsif ($exp == 2) {
+	$fVal = $frac / 0x01000000;
+} elsif ($exp == 3) {
+	$fVal = $frac / 0x00100000;
+}
+
+if ($sign) {
+	$fVal = -$fVal;
+}
+
+printf("%g\n", $fVal);

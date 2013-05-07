@@ -1,0 +1,394 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $CHATTER_THRES = 10e-3 / 120e-6;	# 10msec
+my $PRINT_IRREGULAR = 0;
+my $PRINT_CHATTER = 0;
+
+my $count_offset = 0;
+my @history;
+
+my @prev_state;
+my @p_on_count;
+my @p_off_count;
+my @m_on_count;
+my @m_off_count;
+my @s_on_count;
+my @s_off_count;
+my @is_on;
+my @irregular_level;
+sub Init_State {
+	my ($key) = @_;
+	$prev_state[$key] = "000";
+#	$p_on_count[$key] = 0;
+#	$p_off_count[$key] = 0;
+#	$m_on_count[$key] = 0;
+#	$m_off_count[$key] = 0;
+#	$s_on_count[$key] = 0;
+#	$s_off_count[$key] = 0;
+	$irregular_level[$key] = 0;
+
+	@{ $history[$key] } = ();
+}
+sub KeyString {
+	my ($key) = @_;
+	my @keyStrTbl = ("C ", "C#", "D ", "Eb", "E ", "F ", "F#", "G ", "G#", "A ", "Bb", "B ");
+	my $note = $key + 21;
+	my $octave = int($note / 12) - 1;
+	my $keyStr = $keyStrTbl[$note % 12] . $octave;
+	return $keyStr;
+}
+
+sub State_Analysis {
+	my ($key, $pattern, $count) = @_;
+
+	my $prev_pattern = "000";
+	my $prev_state = "WaitPrimOn";
+	if (defined $history[$key] && (@{ $history[$key] } > 0)) {
+		$prev_pattern = $history[$key][-1]->[0];
+		$prev_state = $history[$key][-1]->[2];
+	}
+
+	my $state = $prev_state;
+	$pattern =~ /(.)(.)(.)/;
+	my ($p, $m, $s) = (eval($1), eval($2), eval($3));
+
+	my $isChatter = 0;
+	if ($pattern eq "000") {
+		if (($prev_state ne "WaitPrimOff") && ($prev_state ne "WaitMidOn")) {
+			print "!!!!!!!!!!!!!!!!!! irregular ($prev_state --> pattern 000) !!!!!!!!!!!!!!!!!!!!!!\n";
+		}
+		$state = "WaitPrimOn";
+		$is_on[$key] = 0;
+		if ($count - $p_off_count[$key] > $CHATTER_THRES) {
+			$p_off_count[$key] = $count;
+		} else {
+			$isChatter = 1;
+			if ($PRINT_CHATTER) {
+				printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+					   "poff --> pon --> poff", KeyString($key), $prev_pattern, $p_off_count[$key], $pattern, $count);
+			}
+		}
+	} elsif ($prev_state eq "WaitPrimOff") {
+		if (!$p) {
+			print "!!!!!!!!!!!!!!!!!! irregular (WaitPrimOff with not pattern 000) !!!!!!!!!!!!!!!!!!!!!!\n";
+			$state = "WaitPrimOn";
+			$is_on[$key] = 0;
+			if ($count - $p_off_count[$key] > $CHATTER_THRES) {
+				$p_off_count[$key] = $count;
+			} else {
+				$isChatter = 1;
+				if ($PRINT_CHATTER) {
+					printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+						   "poff --> pon --> poff", KeyString($key), $prev_pattern, $p_off_count[$key], $pattern, $count);
+				}
+			}
+		} elsif ($m) {
+			$state = "WaitSecdOnRep";
+			$m_on_count[$key] = $count;
+		}
+	} elsif ($prev_state eq "WaitMidOff") {
+		if (!$m) {
+			$state = "WaitPrimOff";
+			$m_off_count[$key] = $count;
+		} elsif ($s) {
+			$state = "WaitSecdOff";
+			if ($count - $s_on_count[$key] > $CHATTER_THRES) {
+				$s_on_count[$key] = $count;
+			} else {
+				$isChatter = 1;
+				if ($PRINT_CHATTER) {
+					printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+						   "soff --> son", KeyString($key), $prev_pattern, $s_on_count[$key], $pattern, $count);
+				}
+			}
+		}
+	} elsif ($prev_state eq "WaitSecdOff") {
+		if (!$s) {
+			$state = "WaitMidOff";
+			$s_off_count[$key] = $count;
+		}
+	} elsif ($prev_state eq "WaitPrimOn") {
+		if ($p) {
+			$state = "WaitMidOn";
+			if ($count - $p_on_count[$key] > $CHATTER_THRES) {
+				$p_on_count[$key] = $count;
+			} else {
+				$isChatter = 1;
+				if ($PRINT_CHATTER) {
+					printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+						   "pon --> poff --> pon", KeyString($key), $prev_pattern, $p_on_count[$key], $pattern, $count);
+				}
+			}
+		} elsif ($m) {
+			$state = "WaitSecdOn";
+			$p_on_count[$key] = $count - 1900;
+			$m_on_count[$key] = $count;
+		}
+	} elsif ($prev_state eq "WaitMidOn") {
+		if (!$p) {
+			print "!!!!!!!!!!!!!!!!!! irregular (WaitMidOn never come here) !!!!!!!!!!!!!!!!!!!!!!\n";
+			$state = "WaitPrimOn";
+			$is_on[$key] = 0;
+			$p_off_count[$key] = $count;
+		} elsif ($s) {
+			$state = "WaitSecdOff";
+			$m_on_count[$key] = $count;
+			$s_on_count[$key] = $count;
+			$is_on[$key]++;
+		} elsif ($m) {
+			$state = "WaitSecdOn";
+			$m_on_count[$key] = $count;
+		}
+	} elsif ($prev_state eq "WaitSecdOn") {
+		if (!$m) {
+			$state = "WaitMidOn";
+			if ($count - $m_on_count[$key] > $CHATTER_THRES) {
+				$m_off_count[$key] = $count;
+			} else {
+				$isChatter = 1;
+				if ($PRINT_CHATTER) {
+					printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+						   "mon --> moff", KeyString($key), $prev_pattern, $m_on_count[$key], $pattern, $count);
+				}
+			}
+		} elsif ($s) {
+			$state = "WaitSecdOff";
+			$s_on_count[$key] = $count;
+			$is_on[$key]++;
+		}
+	} elsif ($prev_state eq "WaitSecdOnRep") {
+		if (!$m) {
+			$state = "WaitPrimOff";
+			if ($count - $m_on_count[$key] > $CHATTER_THRES) {
+				$m_off_count[$key] = $count;
+			} else {
+				$isChatter = 1;
+				if ($PRINT_CHATTER) {
+					printf("\t\t\t\tchatter found (%s): key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+						   "mon --> moff", KeyString($key), $prev_pattern, $m_on_count[$key], $pattern, $count);
+				}
+			}
+		} elsif ($s) {
+			$state = "WaitSecdOff";
+			$s_on_count[$key] = $count;
+			$is_on[$key]++;
+		}
+	}
+
+	if ($pattern eq "000") {
+		if ($prev_pattern eq "100") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "001") {
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+		$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+	} elsif ($pattern eq "010") {
+		if      ($prev_pattern eq "000") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "110") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "011") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} else {
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+	} elsif ($pattern eq "011") {
+		if      ($prev_pattern eq "010") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "111") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} else {
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+	} elsif ($pattern eq "100") {
+		if ($prev_pattern eq "110") {
+		} elsif ($prev_pattern eq "000") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "101") {
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+		$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+	} elsif ($pattern eq "110") {
+		if ($prev_pattern eq "100") {
+		} elsif ($prev_pattern eq "010") {
+		} elsif ($prev_pattern eq "111") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "111") {
+		if ($prev_pattern eq "110") {
+		} elsif ($prev_pattern eq "011") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	}
+
+	push @{ $history[$key] }, [$pattern, $count, $state, $p_on_count[$key], $m_on_count[$key], $s_on_count[$key], $s_off_count[$key], $m_off_count[$key], $p_off_count[$key], $isChatter, $is_on[$key]];
+}
+
+my @velo_tbl_w = (
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+			0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+			0x02,0x02,0x02,0x02,0x02,0x03,0x03,0x03,
+			0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x03,
+			0x03,0x03,0x03,0x03,0x04,0x04,0x04,0x04,
+			0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,
+			0x04,0x05,0x05,0x05,0x05,0x05,0x05,0x05,
+			0x05,0x05,0x05,0x05,0x06,0x06,0x06,0x06,
+			0x06,0x06,0x06,0x06,0x06,0x06,0x06,0x07,
+			0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,
+			0x07,0x07,0x08,0x08,0x08,0x08,0x08,0x08,
+			0x08,0x08,0x08,0x09,0x09,0x09,0x09,0x09,
+			0x09,0x09,0x09,0x09,0x0a,0x0a,0x0a,0x0a,
+			0x0a,0x0a,0x0a,0x0b,0x0b,0x0b,0x0b,0x0b,
+			0x0b,0x0c,0x0c,0x0c,0x0c,0x0c,0x0d,0x0d,
+			0x0d,0x0d,0x0e,0x0e,0x0e,0x0e,0x0f,0x0f,
+			0x0f,0x0f,0x10,0x10,0x10,0x11,0x11,0x12,
+			0x12,0x12,0x13,0x13,0x14,0x14,0x15,0x16,
+			0x16,0x17,0x17,0x18,0x18,0x19,0x19,0x1a,
+			0x1b,0x1b,0x1c,0x1c,0x1d,0x1d,0x1e,0x1f,
+			0x1f,0x20,0x21,0x21,0x22,0x23,0x24,0x25,
+			0x26,0x27,0x28,0x2a,0x2b,0x2c,0x2e,0x2f,
+			0x31,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e,
+			0x40,0x42,0x44,0x46,0x48,0x4a,0x4d,0x4f,
+			0x51,0x54,0x56,0x58,0x5b,0x5e,0x60,0x63,
+			0x66,0x69,0x6d,0x70,0x74,0x77,0x7b,0x7f,
+			0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,
+				  0x7f,
+);
+my @velo_tbl_b = (
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+			0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+			0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+			0x02,0x02,0x02,0x02,0x03,0x03,0x03,0x03,
+			0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x03,
+			0x03,0x03,0x03,0x04,0x04,0x04,0x04,0x04,
+			0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,
+			0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,
+			0x05,0x05,0x05,0x06,0x06,0x06,0x06,0x06,
+			0x06,0x06,0x06,0x06,0x06,0x06,0x07,0x07,
+			0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,
+			0x07,0x08,0x08,0x08,0x08,0x08,0x08,0x08,
+			0x08,0x08,0x09,0x09,0x09,0x09,0x09,0x09,
+			0x09,0x09,0x09,0x0a,0x0a,0x0a,0x0a,0x0a,
+			0x0a,0x0a,0x0b,0x0b,0x0b,0x0b,0x0b,0x0b,
+			0x0c,0x0c,0x0c,0x0c,0x0c,0x0d,0x0d,0x0d,
+			0x0d,0x0e,0x0e,0x0e,0x0e,0x0f,0x0f,0x0f,
+			0x0f,0x10,0x10,0x10,0x11,0x11,0x12,0x12,
+			0x12,0x13,0x13,0x14,0x14,0x15,0x16,0x16,
+			0x17,0x17,0x18,0x18,0x19,0x19,0x1a,0x1b,
+			0x1b,0x1c,0x1c,0x1d,0x1d,0x1e,0x1f,0x1f,
+			0x20,0x21,0x21,0x22,0x23,0x24,0x25,0x26,
+			0x27,0x28,0x2a,0x2b,0x2c,0x2e,0x2f,0x31,
+			0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e,0x40,
+			0x42,0x44,0x46,0x48,0x4a,0x4d,0x4f,0x51,
+			0x54,0x56,0x58,0x5b,0x5e,0x60,0x63,0x66,
+			0x69,0x6d,0x70,0x74,0x77,0x7b,0x7f,0x7f,
+			0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,
+				  0x7f,
+);
+
+sub Report_Pattern {
+	my ($key) = @_;
+
+	my $prev_is_on = 0;
+	my $prev_pattern = "000";
+	foreach my $item (@{ $history[$key] }) {
+		my ($pattern, $count, $state, $p_on_count, $m_on_count, $s_on_count, $s_off_count, $m_off_count, $p_off_count, $isChatter, $is_on) = @$item;
+
+		my $chatter_str = ($isChatter) ? "*" : "";
+		if ($irregular_level[$key] == 1) {
+			printf("irregular! %s: \"%s\" %d (%s%s)\n", KeyString($key), $pattern, $count, $state, $chatter_str);
+		} elsif ($irregular_level[$key] == 2) {
+			printf("SUPER irregular! %s: \"%s\" %d (%s%s)\n", KeyString($key), $pattern, $count, $state, $chatter_str);
+		} else {
+			printf("%s: \"%s\" %d (%s%s)\n", KeyString($key), $pattern, $count, $state, $chatter_str);
+		}
+
+		if ($is_on > $prev_is_on) {
+			my $is_sharp = (KeyString($key) =~ /[#b]/);
+
+			my $tmp_count = $s_on_count - $p_on_count;
+			if ($is_on > 1) {
+				$tmp_count = int(($s_on_count - $m_on_count) * 42 / 19);
+			}
+			my $index = 0xff - $tmp_count * 120 / 360;
+			$index = ($index < 0) ? 0 : $index;
+			my $index_int = int($index);
+			my $index_frac = $index - $index_int;
+#			print "index: $index, index_int: $index_int, index_frac: $index_frac\n";
+			my $velo;
+			if ($is_sharp) {
+				$velo = int($velo_tbl_b[$index_int] * (1 - $index_frac) + $velo_tbl_b[$index_int + 1] * $index_frac);
+			} else {
+				$velo = int($velo_tbl_w[$index_int] * (1 - $index_frac) + $velo_tbl_w[$index_int + 1] * $index_frac);
+			}
+			if ($is_on == 1) {
+				printf("\t  Note On! %s (%d): velo(%3d) PM(%d) MS(%d) PS(%d)  p(%s), m(%s), s(%s)\n",
+					   KeyString($key), $count, $velo, $m_on_count - $p_on_count, $s_on_count - $m_on_count, $s_on_count - $p_on_count,
+					   $p_on_count, $m_on_count, $s_on_count);
+			} else {
+				printf("\t  Note On Rep! %s (%d): velo(%3d)         MS(%d)  p(%s), m(%s), s(%s)\n",
+					   KeyString($key), $count, $velo, $s_on_count - $m_on_count, $p_on_count, $m_on_count, $s_on_count);
+			}
+		}
+
+		$pattern =~ /(.)(.)(.)/;
+		my ($p, $m, $s) = (eval($1), eval($2), eval($3));
+
+		if (($s) && ($is_on == 0)) {
+			print "!!!!!!!!!!!!!!!!!! irregular (Note On not issued) !!!!!!!!!!!!!!!!!!!!!!\n";
+		}
+
+		if ($is_on < $prev_is_on) {
+			printf("\t**Note Off! %s (%d):         MP(%d)  p(%s), m(%s), s(%s)\n",
+				   KeyString($key), $count, $p_off_count - $m_off_count, $p_off_count, $m_off_count, $s_off_count);
+		}
+
+		$prev_is_on = $is_on;
+		$prev_pattern = $pattern;
+	}
+}
+
+
+
+#
+# Main
+#
+Init_State();
+while (my $str = <>) {
+	if ($str =~ /(\d+)\s+(\d+)\s+(\d+)/) {
+		my ($key, $pattern, $count) = ($1, $2, $3);
+
+		my $absolute_count = $count + $count_offset;
+
+		State_Analysis($key, $pattern, $absolute_count);
+		if ($pattern eq "000") {
+			Report_Pattern($key);
+			Init_State($key);
+		}
+	} elsif ($str =~ /Overflow/) {
+		$count_offset += (1 << 14);
+	}
+}
+
+

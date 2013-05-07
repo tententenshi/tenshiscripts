@@ -1,0 +1,145 @@
+#! /usr/local/bin/perl
+
+sub round {
+	my($val) = @_;
+	if ($val >= 0) { $val += 0.5; }
+	else { $val -= 0.5; }
+	return int($val);
+}
+
+sub hex2dec {
+	my ($val) = @_;
+
+	while ($val =~ /^(.*)(0[Xx][\da-fA-F]+)(.*)$/) {
+		my ($pre, $hex, $post) = ($1, $2, $3);
+		if ($hex =~ /0[Xx][\da-fA-F]{6}/) {			# CoefData
+			$VAL1_0 = 0x00800000;
+			$VAL_POS_MAX = 0x80000000;
+		} else {
+			$VAL1_0 = 0x8000;
+			$VAL_POS_MAX = 0x8000;
+		}
+		my $dec;
+		if (eval($hex) >= $VAL_POS_MAX) {
+			$dec = (eval($hex) - $VAL_POS_MAX * 2) / $VAL1_0;
+		} else {
+			$dec = eval($hex) / $VAL1_0;
+		}
+		$val = $pre . $dec . $post;
+	}
+	$val =~ s/<</*2**/g;
+	$val =~ s/>>/*2**-/g;
+	return eval($val);
+}
+
+sub tan { sin($_[0]) / cos($_[0]); }
+
+if ($#ARGV != 6) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd a0 a1 fr0 q fr1 g Fs\n";
+	print "    +---------------------------------------+\n";
+	print "    |                                  g     \\\n";
+	print "    |                            +-----|>----(+)-------------------->\n";
+	print "    |   a0             fr0       |\n";
+	print "  --+---|>-----( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+	print "    |           /\\ \\           \\        |  fr1     \\     |   |\n";
+	print "   [ ]         /  \\ \\           +-------+           \\   [ ]  |\n";
+	print "    |         /    \\ \\                  |            \\   |   |\n";
+	print "    +---|>---+      \\ +-----<|----------+             +--+   |\n";
+	print "        a1           \\      q                                |\n";
+	print "                      +-----------------------<|-------------+\n";
+	print "                                             -1.0\n";
+	exit 1;
+}
+
+$a0 = shift;
+$a1 = shift;
+$fr0 = shift;
+$q = shift;
+$fr1 = shift;
+$g = shift;
+$Fs = eval(shift);
+
+$a0  = ($a0 =~ /0[Xx]/)  ? hex2dec($a0)  : eval($a0);
+$a1  = ($a1 =~ /0[Xx]/)  ? hex2dec($a1)  : eval($a1);
+$fr0 = ($fr0 =~ /0[Xx]/) ? hex2dec($fr0) : eval($fr0);
+$q   = ($q =~ /0[Xx]/)   ? hex2dec($q)   : eval($q);
+$fr1 = ($fr1 =~ /0[Xx]/) ? hex2dec($fr1) : eval($fr1);
+$g   = ($g =~ /0[Xx]/)   ? hex2dec($g)   : eval($g);
+
+# Transfer Function as LPF
+#                   (a0 + a1 * z**-1) * (fr0 * fr1 * z**-1)
+# H(z) = --------------------------------------------------------------------
+#        1 - (fr0 * q + fr0 * fr1 * (-1) + 2) * z**-1 + (1 + fr0 * q) * z**-2
+
+# Transfer Function as HPF
+#                   (a0 + a1 * z**-1) * (1 - z**-1)**2
+# H(z) = --------------------------------------------------------------------
+#        1 - (fr0 * q + fr0 * fr1 * (-1) + 2) * z**-1 + (1 + fr0 * q) * z**-2
+
+# Transfer Function as PKG
+#                            (a0 + a1 * z**-1) * fr0 * (1 - z**-1)
+# H(z) = 1 + g * --------------------------------------------------------------------
+#                1 - (fr0 * q + fr0 * fr1 * (-1) + 2) * z**-1 + (1 + fr0 * q) * z**-2
+
+
+#as LPF
+{
+	my $ma0 = $a0 * $fr0 * $fr1;
+	my $ma1 = $a1 * $fr0 * $fr1;
+	my $ma2 = 0;
+	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+	my $mb2 = -(1 + $fr0 * $q);
+
+	print "as LPF...\n";
+	print "a0 as EA --> $ma0\n";
+	print "a1 as EA --> $ma1\n";
+	print "a2 as EA --> $ma2\n";
+	print "b1 as EA --> $mb1\n";
+	print "b2 as EA --> $mb2\n";
+	system ("./ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	print "\n";
+}
+
+#as HPF
+{
+	#ignore a1
+	my $ma0 = $a0;
+	my $ma1 = -2 * $a0;
+	my $ma2 = $a0;
+	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+	my $mb2 = -(1 + $fr0 * $q);
+
+	print "as HPF...\n";
+	print "a0 as EA --> $ma0\n";
+	print "a1 as EA --> $ma1\n";
+	print "a2 as EA --> $ma2\n";
+	print "b1 as EA --> $mb1\n";
+	print "b2 as EA --> $mb2\n";
+	system ("./ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	print "\n";
+}
+
+#as PKG
+{
+	my $ma0 = $a0 * $fr0;
+	my $ma1 = (-$a0 + $a1) * $fr0;
+	my $ma2 = -$a1 * $fr0;
+	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+	my $mb2 = -(1 + $fr0 * $q);
+	my $mm0 = 1.0;
+	my $mm1 = $g;
+
+	print "as PKG...\n";
+	print "a0 as EA --> $ma0\n";
+	print "a1 as EA --> $ma1\n";
+	print "a2 as EA --> $ma2\n";
+	print "b1 as EA --> $mb1\n";
+	print "b2 as EA --> $mb2\n";
+	print "m0 as EA --> $mm0\n";
+	print "m1 as EA --> $mm1\n";
+	print "\n";
+	system ("./ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+}
+

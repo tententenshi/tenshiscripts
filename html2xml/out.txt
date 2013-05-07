@@ -1,0 +1,1738 @@
+html | body | table ^
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td: 1         ～　20　／　203         件中 ()
+html | body | table | tr | td: 次の検索結果 -&gt; (FMPro?-db=pojp.fmj&-format=%2fpojp%2fsearch%5fresults%5fout.htm&-lay=jp&-sortfield=-%82%c8%82%b5-&-op=cn&%83%4c%81%5b%83%8f%81%5b%83%68=%8c%9f%8f%6f&-max=20&-skip=20&-find=)
+html | body | table | tr v
+html | body | table v
+html | body | table ^
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 1 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=48.059959&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 48.059959 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=48.059959&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 50.011107 ()
+html | body | table | tr | td | table | tr | td: 55.044959 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 日本電気 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 480529 ()
+html | body | table | tr | td | table | tr | td: 500205 ()
+html | body | table | tr | td | table | tr | td: 551114 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: ピッチ抽出回路。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 2 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.057187&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 49.057187 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.057187&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 50.149335 ()
+html | body | table | tr | td | table | tr | td: 55.051189 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 松下電器 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 490520 ()
+html | body | table | tr | td | table | tr | td: 501129 ()
+html | body | table | tr | td | table | tr | td: 551232 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: ピッチ等の平均値記憶装置。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 3 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.092173&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 49.092173 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.092173&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 51.020816 ()
+html | body | table | tr | td | table | tr | td: 56.015519 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ヤマハ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 490812 ()
+html | body | table | tr | td | table | tr | td: 510219 ()
+html | body | table | tr | td | table | tr | td: 560410 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td: 　376 ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査非抵触 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 登録 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: あるサイクルにおいてスイッチマトリクスをブロックでスキャンし、各ブロック１つの以内のＯＮを抽出し、結果を一時記憶し、以降のサイクルで各ブロックの結果をスキャンし、１サイクルに１ブロックの結果を出力することによって、シリアルのスイッチ情報を得る。ＯＮしていないブロックのスキャンが不要になる。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: キースキャン、グループ、検出、マトリクス ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 4 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.098126&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 49.098126 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.098126&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 51.025175 ()
+html | body | table | tr | td | table | tr | td: 55.020600 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 松下電器 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 490826 ()
+html | body | table | tr | td | table | tr | td: 510301 ()
+html | body | table | tr | td | table | tr | td: 550603 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 公告決定 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 基本周波数抽出装置。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 5 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.098127&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 49.098127 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=49.098127&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 51.025176 ()
+html | body | table | tr | td | table | tr | td: 57.022119 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 松下電器 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 490826 ()
+html | body | table | tr | td | table | tr | td: 510301 ()
+html | body | table | tr | td | table | tr | td: 570511 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 基本周波数抽出装置。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 6 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.047714&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.047714 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.047714&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 51.123133 ()
+html | body | table | tr | td | table | tr | td: 53.033264 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 松下電器 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500418 ()
+html | body | table | tr | td | table | tr | td: 511027 ()
+html | body | table | tr | td | table | tr | td: 530913 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査無関係 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 公告決定 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: ギター信号の立上がり等の不安定な部分の基本波成分の抽出。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 7 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.074730&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.074730 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.074730&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 51.150377 ()
+html | body | table | tr | td | table | tr | td: 56.016887 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: コルグ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500618 ()
+html | body | table | tr | td | table | tr | td: 511223 ()
+html | body | table | tr | td | table | tr | td: 560418 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: Ｆ－Ｖ変換に依って調律を行なうチューナ。<br/>入力楽音信号と、ＶＣＯの周波数を比較し、その比を表示。<br/> ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 8 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.083263&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.083263 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.083263&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.007284 ()
+html | body | table | tr | td | table | tr | td: 56.016888 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: コルグ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500707 ()
+html | body | table | tr | td | table | tr | td: 520120 ()
+html | body | table | tr | td | table | tr | td: 560418 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: Ｆ－Ｖ変換に依って調律を行なうチューナ。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 9 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.083264&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.083264 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.083264&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.007285 ()
+html | body | table | tr | td | table | tr | td: 56.016889 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: コルグ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500707 ()
+html | body | table | tr | td | table | tr | td: 520120 ()
+html | body | table | tr | td | table | tr | td: 560418 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: Ｆ－Ｖ変換に依って調律を行なうチューナ。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 10 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.097263&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.097263 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.097263&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.020882 ()
+html | body | table | tr | td | table | tr | td: 56.016891 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: コルグ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500809 ()
+html | body | table | tr | td | table | tr | td: 520217 ()
+html | body | table | tr | td | table | tr | td: 560418 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: Ｆ－Ｖ変換に依って調律を行なうチューナ。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 11 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.099151&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.099151 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.099151&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.023323 ()
+html | body | table | tr | td | table | tr | td: 59.041197 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ヤマハ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 500815 ()
+html | body | table | tr | td | table | tr | td: 520222 ()
+html | body | table | tr | td | table | tr | td: 591005 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td: 　1172 ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査無関係 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 登録 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 押圧中のキースイッチがあるグループを並列的に同時に検出し、検出されたグループのうちの動作キースイッチを順次検出する。全鍵スキャンは行なわない。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: キースキャン、グループ、並列、検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 12 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142692&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142692 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142692&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070624 ()
+html | body | table | tr | td | table | tr | td: 58.038790 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 13 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142693&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142693 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142693&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070625 ()
+html | body | table | tr | td | table | tr | td: 58.038791 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．表示の際に音名も出す．トラッキングフィルタを使うようにした．ゼロ点検出をする． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 14 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142694&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142694 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142694&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070626 ()
+html | body | table | tr | td | table | tr | td: 58.038792 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．音階のみ表示する． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 15 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142695&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142695 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142695&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070627 ()
+html | body | table | tr | td | table | tr | td: 58.038793 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．階名の文字の表示位置を変えた． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 16 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142696&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142696 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142696&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070628 ()
+html | body | table | tr | td | table | tr | td: 58.038794 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．画面上の表示の拡大／縮小ができる． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出、マルチメディア、 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 17 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142697&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142697 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142697&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070629 ()
+html | body | table | tr | td | table | tr | td: 58.038795 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．書込回数を減らした． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 18 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142698&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142698 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142698&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070630 ()
+html | body | table | tr | td | table | tr | td: 58.038796 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．表示範囲を変えられるようにした． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 19 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142699&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.142699 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.142699&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.070631 ()
+html | body | table | tr | td | table | tr | td: 58.038797 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: ソニー ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501128 ()
+html | body | table | tr | td | table | tr | td: 520613 ()
+html | body | table | tr | td | table | tr | td: 580825 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 歌を音程データとオクターブデータに分解．モニタに音程の時間的変化を表示する．入力信号の無い時には書込をしないようにした． ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 20 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.156350&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 50.156350 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=50.156350&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 52.082372 ()
+html | body | table | tr | td | table | tr | td: 56.016892 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: コルグ ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 501229 ()
+html | body | table | tr | td | table | tr | td: 520709 ()
+html | body | table | tr | td | table | tr | td: 560418 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td: 未調査 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 権利期間満了 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (http://web.patrol.hosoe.roland.co.jp/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: Ｆ－Ｖ変換に依って調律を行なうチューナ。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: ピッチ検出 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td | table ^
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 1 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=101.240472&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 出願番号 ()
+html | body | table | tr | td | table | tr | td: 公開番号 ()
+html | body | table | tr | td | table | tr | td: 公告番号 ()
+html | body | table | tr | td | table | tr | td: 登録番号 ()
+html | body | table | tr | td | table | tr | td: 重要特許 ()
+html | body | table | tr | td | table | tr | td: 出願人　　　　 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: no. ()
+html | body | table | tr | td | table | tr | td: 101.240472 (FMPro?-db=poJP.fmj&-lay=JP&-op=eq&ganno=101.240472&-Format=record_detail_out.htm&-Script=era_all&-Script=HD&-Find)
+html | body | table | tr | td | table | tr | td: 103.102397 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 2605885 ()
+html | body | table | tr | td | table | tr | td: ヤマハ株式会社 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 和暦 ()
+html | body | table | tr | td | table | tr | td: 1010916 ()
+html | body | table | tr | td | table | tr | td: 1030426 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td: 1090430 ()
+html | body | table | tr | td | table | tr | td: 関連番号 ()
+html | body | table | tr | td | table | tr | td: 　2998 ()
+html | body | table | tr | td | table | tr | td: 管理番号 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 判断 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td: 経過 ()
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td: 登録 ()
+html | body | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td:  (/koho/r//-frame.htm)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr | td:  ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td: 登録 ()
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr | td: B-2605885 (/koho/pdf2/B-2605885.pdf)
+html | body | table | tr | td | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr | td | table v
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: 概要 ()
+html | body | table | tr | td | table | tr | td: 名称：楽音発生装置<br/>音高に対応する定位（広がり感）の実現方法。　音高毎に、第１音に対する第２音の発生タイミングずれ及び音量差、第１音に対する第３音の発生タイミングずれ及び音量差、第３音に対する第４音の発生タイミングずれ及び音量差を指示し、第１，２音を異なるスピーカに供給し、第３，４音を異なるスピーカに供給する。 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table | tr ^
+html | body | table | tr | td | table | tr | td: keyw ()
+html | body | table | tr | td | table | tr | td: 重要特許、定位、チェイス 音像定位 ()
+html | body | table | tr | td | table | tr v
+html | body | table | tr | td | table v
+html | body | table | tr v
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr v
+html | body | table v
+html | body | table ^
+html | body | table | tr ^
+html | body | table | tr | td:  ()
+html | body | table | tr | td: 1         ～　20　／　203         件中 ()
+html | body | table | tr | td: 次の検索結果 -&gt; (FMPro?-db=pojp.fmj&-format=%2fpojp%2fsearch%5fresults%5fout.htm&-lay=jp&-sortfield=-%82%c8%82%b5-&-op=cn&%83%4c%81%5b%83%8f%81%5b%83%68=%8c%9f%8f%6f&-max=20&-skip=20&-find=)
+html | body | table | tr v
+html | body | table v

@@ -1,0 +1,126 @@
+#! /usr/local/bin/perl
+
+use strict;
+use FindBin;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+my $MAX_OVERTONE = 10;
+my @coef_table;
+my @dist_table = (
+				  0,	# 0 no meaning
+				  0.0,	# 1 original wave
+				  0.2,	# 2
+				  0.2,	# 3
+				  0.2,	# 4
+				  0.2,	# 5
+				  0.2,	# 6
+				  0,	# 7
+				  0,	# 8
+				  0,	# 9
+				  0,	#10
+);
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- add harmonic distortion --\n";
+	print "usage: $cmd inFile(*.wav) outFile(*.dat)\n";
+	print "\n";
+}
+
+if ($#ARGV != 1) {
+	usage();
+	exit 1;
+}
+
+
+sub MakeCoefTable {
+	for (my $i = 0; $i <= $MAX_OVERTONE; $i++) {
+		for (my $coef = 0; $coef <= $MAX_OVERTONE; $coef++) {
+			$coef_table[$i][$coef] = 0;
+		}
+	}
+
+	$coef_table[0][0] = 1;
+	$coef_table[1][1] = 1;
+	for (my $i = 2; $i <= $MAX_OVERTONE; $i++) {
+		$coef_table[$i][0] = - $coef_table[$i - 2][0];
+		for (my $coef = 1; $coef <= $i; $coef++) {
+			$coef_table[$i][$coef] = 2 * $coef_table[$i - 1][$coef - 1] - $coef_table[$i - 2][$coef];
+		}
+	}
+}
+
+
+sub AddHarmonicDistortion {
+	my ($data, $ch) = @_;
+
+	my $overtones = 0;
+	for (my $i = 2; $i <= $MAX_OVERTONE; $i++) {
+		my $tmp = 0;
+		for (my $coef = 0; $coef <= $i; $coef++) {
+			$tmp += $coef_table[$i][$coef] * $data**$coef;
+#			printf("data: %g order: %d coef: %d --> %g\n", $data, $i, $coef, $coef_table[$i][$coef] * $data**$coef);
+		}
+		$tmp *= $dist_table[$i];
+#		printf("data: %g order: %d total --> %g\n", $data, $i, $tmp);
+		$overtones += $tmp;
+	}
+
+	return $data * $dist_table[1] + $overtones;
+}
+
+
+#
+# main
+#
+{
+	MakeCoefTable();
+	for (my $i = 0; $i <= $MAX_OVERTONE; $i++) {
+		printf("T_%d(x) = ", $i);
+		for (my $coef = $MAX_OVERTONE; $coef >= 0; $coef--) {
+			printf("%gx**%d ", $coef_table[$i][$coef], $coef);
+		}
+		printf("\n");
+	}
+
+	my $infile = shift;
+	my $outfile = shift;
+
+	my $fhIn, my $fhOut;
+	open($fhIn, "$infile") or die "cannot open $infile!\n";
+	open($fhOut, "> $outfile") or die "cannot open $outfile!\n";
+	binmode $fhIn;
+	binmode $fhOut;
+
+	my %infoHash;
+	my @preChunkBuf, my @postChunkBuf;
+	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
+	wav_util::WriteWavHeader($fhOut, \@preChunkBuf);
+
+	my $remain = $dataSize;
+	while($remain > 0) {
+		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
+
+		for (my $i = 0; $i <= $#dataArray; $i++) {
+			my $tmpdata = $dataArray[$i];
+			$tmpdata /= (1 << ($infoHash{ "BIT_LENGTH" } - 1));
+			my $tmp_out = AddHarmonicDistortion($tmpdata, $i);
+			$tmp_out *= (1 << ($infoHash{ "BIT_LENGTH" } - 1));
+			$dataArray[$i] = $tmp_out;
+		}
+
+		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);
+
+		$remain -= $infoHash{ "BLOCK_SIZE" };
+	}
+
+	wav_util::WriteWavTrailer($fhOut, \@postChunkBuf);
+
+	close ($fhIn);
+	close ($fhOut);
+
+	wav_util::MaintainWavHeader($outfile, \%infoHash, $dataSize);
+}

@@ -1,0 +1,71 @@
+#! /usr/local/bin/perl
+
+sub round {
+	my($val) = @_;
+	if ($val >= 0) { $val += 0.5; }
+	else { $val -= 0.5; }
+	return int($val);
+}
+
+if ($#ARGV != 1) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd coef_as_b1 Fs\n";
+	print " --+-|>-(+)----+--\n";
+	print "   | a0 / \\    |  \n";
+	print "   +-|>+   +<|-+  \n";
+	print "     a1     b1    \n";
+	exit 1;
+}
+
+$coef = shift;
+if ($coef =~ /0[Xx]/) { $coef = eval($coef) / 0x8000; }
+else { $coef = eval($coef); }
+$Fs = eval(shift);
+
+$pi = 4 * atan2(1, 1);
+$freq = $Fs / $pi * atan2((1-$coef), (1+$coef));
+
+print "freq --> $freq\n\n";
+
+## as LPF
+
+$coef_a = (1 - $coef) / 2;
+$coef_b = $coef_a;
+
+$coef_as = int(log(abs($coef_a))/log(2));
+if ($coef_as < 0) { $coef_as = 0; }
+if ($coef_as == 3) { $coef_as = 2; }
+$coef_bs = int(log(abs($coef_b))/log(2));
+if ($coef_bs < 0) { $coef_bs = 0; }
+if ($coef_bs == 3) { $coef_bs = 2; }
+
+print "as LPF...\n";
+printf "coef_a = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_a, $coef_a / 2**$coef_as, $coef_as, round($coef_a * 0x800000),
+	0xffff & round($coef_a / 2**$coef_as * 0x8000), $coef_as;
+
+printf "coef_b = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_b, $coef_b / 2**$coef_bs, $coef_bs, round($coef_b * 0x800000),
+	0xffff & round($coef_b / 2**$coef_bs * 0x8000), $coef_bs;
+
+## as HPF
+
+$coef_a = (1 + $coef) / 2;
+$coef_b = -$coef_a;
+
+$coef_as = int(log(abs($coef_a))/log(2));
+if ($coef_as < 0) { $coef_as = 0; }
+if ($coef_as == 3) { $coef_as = 2; }
+$coef_bs = int(log(abs($coef_b))/log(2));
+if ($coef_bs < 0) { $coef_bs = 0; }
+if ($coef_bs == 3) { $coef_bs = 2; }
+
+print "as HPF...\n";
+printf "coef_a = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_a, $coef_a / 2**$coef_as, $coef_as, round($coef_a * 0x800000),
+	0xffff & round($coef_a / 2**$coef_as * 0x8000), $coef_as;
+
+printf "coef_b = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%d)\n",
+	$coef_b, $coef_b / 2**$coef_bs, $coef_bs, round($coef_b * 0x800000),
+	0xffff & round($coef_b / 2**$coef_bs * 0x8000), $coef_bs;

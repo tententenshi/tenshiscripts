@@ -1,0 +1,178 @@
+#! /usr/local/bin/perl
+
+use strict;
+use FindBin;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+my $HEAD_LEADER = 1.0;	# 0.2 sec
+my $Freq_Start = 440;
+my $Freq_End = 440;
+my $Time_Span = 30;	# 10 sec
+my $VOLUME = 0.5 * 0x8000;
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- wav to dat converter --\n";
+	print "usage: $cmd outFile(*.dat)\n";
+	print "\n";
+}
+
+if ($#ARGV != 0) {
+	usage();
+	exit 1;
+}
+
+
+sub pi { return 4 * atan2(1,1); }
+
+my $sin_buf = 0;
+my $cos_buf = 1.0;
+sub ModOsc {
+	my ($freq, $FS) = @_;
+
+	my $cos_coef = cos(2*pi()*$freq / $FS);
+	my $sin_coef = sin(2*pi()*$freq / $FS);
+
+	my $tmp = $cos_buf * $cos_coef - $sin_buf * $sin_coef;
+	$sin_buf = $sin_buf * $cos_coef + $cos_buf * $sin_coef;
+	$cos_buf = $tmp;
+
+	return ($sin_buf, $cos_buf);
+}
+
+my @apf_buf1;
+my @apf_buf2;
+sub APF1 {
+	my ($data0) = @_;
+
+	my $APF00 =  0.993551;
+	my $APF01 = -0.977820;
+	my $APF02 =  0.952320;
+	my $APF03 = -0.906600;
+	my $APF04 =  0.824390;
+	my $APF05 = -0.683398;
+	my $APF06 =  0.463090;
+	my $APF07 = -0.165550;
+
+	my $data1 = -$data0 * $APF00 + $apf_buf1[0] + $apf_buf1[1] * $APF00;
+	my $data2 = -$data1 * $APF01 + $apf_buf1[1] + $apf_buf1[2] * $APF01;
+	my $data3 = -$data2 * $APF02 + $apf_buf1[2] + $apf_buf1[3] * $APF02;
+	my $data4 = -$data3 * $APF03 + $apf_buf1[3] + $apf_buf1[4] * $APF03;
+	my $data5 = -$data4 * $APF04 + $apf_buf1[4] + $apf_buf1[5] * $APF04;
+	my $data6 = -$data5 * $APF05 + $apf_buf1[5] + $apf_buf1[6] * $APF05;
+	my $data7 = -$data6 * $APF06 + $apf_buf1[6] + $apf_buf1[7] * $APF06;
+	my $data8 = -$data7 * $APF07 + $apf_buf1[7] + $apf_buf1[8] * $APF07;
+
+	$apf_buf1[0] = $data0;
+	$apf_buf1[1] = $data1;
+	$apf_buf1[2] = $data2;
+	$apf_buf1[3] = $data3;
+	$apf_buf1[4] = $data4;
+	$apf_buf1[5] = $data5;
+	$apf_buf1[6] = $data6;
+	$apf_buf1[7] = $data7;
+	$apf_buf1[8] = $data8;
+
+	return $data8;
+}
+
+sub APF2 {
+	my ($data0) = @_;
+
+	my $APF10 = -0.993551;
+	my $APF11 =  0.977820;
+	my $APF12 = -0.952320;
+	my $APF13 =  0.906600;
+	my $APF14 = -0.824390;
+	my $APF15 =  0.683398;
+	my $APF16 = -0.463090;
+	my $APF17 =  0.165550;
+
+	my $data1 = -$data0 * $APF10 + $apf_buf2[0] + $apf_buf2[1] * $APF10;
+	my $data2 = -$data1 * $APF11 + $apf_buf2[1] + $apf_buf2[2] * $APF11;
+	my $data3 = -$data2 * $APF12 + $apf_buf2[2] + $apf_buf2[3] * $APF12;
+	my $data4 = -$data3 * $APF13 + $apf_buf2[3] + $apf_buf2[4] * $APF13;
+	my $data5 = -$data4 * $APF14 + $apf_buf2[4] + $apf_buf2[5] * $APF14;
+	my $data6 = -$data5 * $APF15 + $apf_buf2[5] + $apf_buf2[6] * $APF15;
+	my $data7 = -$data6 * $APF16 + $apf_buf2[6] + $apf_buf2[7] * $APF16;
+	my $data8 = -$data7 * $APF17 + $apf_buf2[7] + $apf_buf2[8] * $APF17;
+
+	$apf_buf2[0] = $data0;
+	$apf_buf2[1] = $data1;
+	$apf_buf2[2] = $data2;
+	$apf_buf2[3] = $data3;
+	$apf_buf2[4] = $data4;
+	$apf_buf2[5] = $data5;
+	$apf_buf2[6] = $data6;
+	$apf_buf2[7] = $data7;
+	$apf_buf2[8] = $data8;
+
+	return $data8;
+}
+
+sub Hirbert {
+	my ($freq, $FS, $data) = @_;
+
+	my $sin_data = APF1($data);
+	my $cos_data = APF2($data);
+	my ($sin_osc, $cos_osc) = ModOsc($freq, $FS);
+	my $shift_data = $sin_data * $cos_osc - $cos_data * $sin_osc;
+
+	return ($sin_data, $shift_data);
+}
+
+#
+# main
+#
+{
+	my %infoHash;
+	$infoHash{ "FORMAT_ID" } =  1;	# Linear PCM
+	$infoHash{ "NUM_OF_CH" } =  2;	# Number of Channels
+	$infoHash{ "FS" } = 	    44100;	# Sampling Rate
+	$infoHash{ "BIT_LENGTH" } = 16;
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+	my $outfile = shift;
+
+	my $fhOut;
+	open($fhOut, "> $outfile") or die "cannot open $outfile!\n";
+	binmode $fhOut;
+	wav_util::WriteWavHeader($fhOut);
+
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+
+	my $wav_size = 0;
+
+	for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
+		my @data = Hirbert(0.35, $infoHash{ "FS" }, 0);
+		wav_util::WriteWavData($fhOut, \%infoHash, @data);
+		$wav_size += $infoHash{ "BLOCK_SIZE" };
+	}
+
+	my $PI = 4 * atan2(1,1);
+	my $phase = 0;
+	my $tmp_freq = $Freq_Start;
+	my $Time_Span_Sample = $Time_Span * $infoHash{ "FS" };
+
+	for (my $time = 0; $time <= $Time_Span_Sample; $tmp_freq = ($Freq_End/$Freq_Start)**($time/$Time_Span_Sample) * $Freq_Start) { # exponential
+		$phase = $phase + 2 * $PI * $tmp_freq / $infoHash{ "FS" };
+		my $sine_wave = sin($phase);
+
+		my @data = Hirbert(1.0, $infoHash{ "FS" }, $sine_wave * $VOLUME);
+		wav_util::WriteWavData($fhOut, \%infoHash, @data);
+		$wav_size += $infoHash{ "BLOCK_SIZE" };
+		$time++;
+	}
+
+	close ($fhOut);
+
+	wav_util::MaintainWavHeader($outfile, \%infoHash, $wav_size);
+}
+

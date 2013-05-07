@@ -1,0 +1,7 @@
+# replall: Replace All matched files
+
+case $# in
+0|1) echo 'Usage: replace str1 str2' 1>&2; exit 1
+esac
+
+replace "$1" "$2" `find  . \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" \) -print -type f | xargs grep -l "$1" `

@@ -1,0 +1,36 @@
+#! /usr/local/bin/perl
+
+use Math::Complex;
+
+$ERROR_BITDEPTH = (1 << 19);
+
+sub round {
+	my($val) = @_;
+	if ($val >= 0) { $val += 0.5; }
+	else { $val -= 0.5; }
+	return int($val);
+}
+
+$pole1_re = shift;
+$pole1_im = shift;
+
+$pole2_re =  $pole1_re;
+$pole2_im = -$pole1_im;
+
+$pole1 = cplx($pole1_re, $pole1_im);
+$pole2 = cplx($pole2_re, $pole2_im);
+$zero1 = $pole1 / abs($pole1)**2;
+$zero2 = $pole2 / abs($pole2)**2;
+
+printf "pole1 (%8.5f, %8.5f), pole2 (%8.5f, %8.5f) / zero1 (%8.5f, %8.5f), zero2 (%8.5f, %8.5f)\n", 
+	Re($pole1), Im($pole1), Re($pole2), Im($pole2), Re($zero1), Im($zero1), Re($zero2), Im($zero2);
+
+
+$a0 = 1 / ($zero1 * $zero2);
+$a1 = -($zero1 + $zero2) / ($zero1 * $zero2);
+$a2 = 1;
+$b1 = ($pole1 + $pole2);
+$b2 = -$pole1 * $pole2;
+
+print "coef as EA: $a0, $a1, $a2, $b1, $b2\n";
+print "($a0 + ($a1)*z(x)**-1 + ($a2)*z(x)**-2) / (1 - ($b1)*z(x)**-1 - ($b2)*z(x)**-2)\n";

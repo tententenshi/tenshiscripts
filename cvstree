@@ -1,0 +1,159 @@
+#! /usr/bin/perl
+
+$filename = shift;
+if ($filename eq "") {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "make cvs revision tree.\n";
+	print "usage: $cmd filename\n";
+	exit 1;
+}
+
+open (IN, "cvs status -v $filename |") or die "cannot open $filename\n";
+
+while ($str = <IN>) {
+	if ($str =~ /^\s*(\S+)\s*\(revision:\s*(.+)\)/) {
+		$tagname = $1;
+		$revision = $2;
+		$isBranch = 0;
+		unshift @{ $revData{ $revision }}, [ $tagname, $isBranch ];
+	} elsif ($str =~ /^\s*(\S+)\s*\(branch:\s*(.+)\)/) {
+		$tagname = $1;
+		$revision = $2;
+		$isBranch = 1;
+		unshift @{ $revData{ $revision }}, [ $tagname, $isBranch ];
+	}
+}
+
+close IN;
+
+sub numerically {
+	@revArrayA = split /\./, $a;
+	@revArrayB = split /\./, $b;
+	if ($#revArrayA < 0) { return -1; }
+	if ($#revArrayB < 0) { return 1; }
+	while (eval($revArrayA[0]) == eval($revArrayB[0])) {
+		shift @revArrayA;
+		shift @revArrayB;
+	}
+	return $revArrayA[0] <=> $revArrayB[0];
+}
+
+
+#OUTPUT
+$PLAIN_TEXT = 1;
+$XML = 2;
+$INDENT_TEXT = 3;
+
+#$MODE = $PLAIN_TEXT;
+#$MODE = $XML;
+$MODE = $INDENT_TEXT;
+
+if ($MODE == $PLAIN_TEXT) {
+	foreach $key (sort numerically keys %revData) {
+		my $revArray = $revData{ $key };
+		foreach $revStruct (@{$revArray}) {
+			my ($tagname, $isBranch) = @{ $revStruct };
+			print "rev:$key -> tag($tagname), branch($isBranch)\n";
+		}
+	}
+} elsif ($MODE == $XML) {
+
+	print "<cvslist>\n";
+
+	$cur_nestDepth = 0;
+
+	foreach $key (sort numerically keys %revData) {
+		my $revList = $revData{ $key };
+		my $new_rev_entered = 1;
+		my @revArray = split /\./, $key;
+		my $nestDepth = $#revArray + 1;
+
+		foreach $revStruct (@{$revList}) {
+			my ($tagname, $isBranch) = @{ $revStruct };
+			$wasBranch = $isBranch;
+
+#			print "cur_nestDepth --> $cur_nestDepth\n";
+#			print "rev:$key -> tag($tagname), branch($isBranch)\n";
+
+			if ($isBranch) {
+				while ($cur_nestDepth >= $nestDepth) {
+					$cur_nestDepth -= 2;
+					my $cur_key = pop @verStack;
+					print "</branch$cur_key>\n";
+				}
+				$cur_nestDepth = $nestDepth;
+				push @verStack, $key;
+				print "<branch$key>\n";
+				print "$tagname\n";
+				next;
+			}
+
+			if ($cur_nestDepth > $nestDepth) {
+				while ($cur_nestDepth > $nestDepth) {
+					$cur_nestDepth--;
+					my $cur_key = pop @verStack;
+					print "</branch$cur_key>\n";
+					if ($cur_nestDepth <= $nestDepth) { last; }
+					$cur_nestDepth--;
+				}
+			}
+			if ((!$isBranch) && ($new_rev_entered)) {
+				print "<version$key>\n";
+#				print "<tag>\n";
+				$new_rev_entered = 0;
+			}
+
+#			print "$tagname<br/>\n";
+			print "$tagname\n";
+		}
+		if (!$wasBranch) {
+#			print "</tag>\n";
+			print "</version$key>\n";
+		}
+	}
+	if ($cur_key = pop @verStack) {
+		print "</branch$cur_key>\n";
+	}
+
+	print "</cvslist>\n";
+
+} elsif ($MODE == $INDENT_TEXT) {
+	foreach $key (sort numerically keys %revData) {
+		my $revList = $revData{ $key };
+		my @revArray = split /\./, $key;
+		my $nestDepth = $#revArray + 1;
+
+		my $new_entry = 1;
+
+		foreach $revStruct (@{$revList}) {
+			my ($tagname, $isBranch) = @{ $revStruct };
+			my $count = 2;
+
+			print "   ";
+
+			if ($isBranch) {
+				while ($count++ < $nestDepth - 1) { print " | "; }	#INDENT
+				print " + ";
+			} else {
+				while ($count++ < $nestDepth) { print " | "; }	#INDENT
+			}
+
+			if ($new_entry) {
+				if ($isBranch) {
+					print "<$key> ";
+					$key_length = length("<$key> ");
+				} else {
+					print "$key ";
+					$key_length = length("$key ");
+				}
+				$new_entry = 0;
+			} else {
+				print " | ";
+				my $count2 = 3;
+				while ($count2++ < $key_length) { print " "; }
+			}
+			print "$tagname\n";
+		}
+	}
+}

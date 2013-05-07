@@ -1,0 +1,29 @@
+#! /usr/bin/perl
+
+while ($str = shift) {
+	my @tmparray = split(/[,\s]+/, $str);
+	push @valstr, @tmparray;
+}
+
+if ($#valstr >= 0) {
+	$sign = (eval($valstr[0]) & 0x8000) / 0x8000;
+	$shift = (eval($valstr[0]) & 0x6000) / 0x2000;
+
+	$hexstr = "0x";
+	$hexstr .= sprintf("%04x", (eval($valstr[0]) & 0x1fff));
+	$digit = 4;
+
+	for (my $i = 1; $i <= $#valstr; $i++) {
+		$hexstr .= sprintf("%04x", eval($valstr[$i]));
+		$digit += 4;
+	}
+}
+
+print "sign: $sign, shift: $shift, hex: $hexstr\n";
+
+$hexval = eval($hexstr) / (1<< (16 - $shift*4));
+for (my $digitremain = 4; $digitremain < $digit; $digitremain += 4) {
+	$hexval /= (1 << 16);
+}
+
+printf ("CoefData: 0x%08x, float: %g\n", $hexval * 0x00800000, $hexval);

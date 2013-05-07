@@ -1,0 +1,98 @@
+#! /usr/local/bin/perl
+
+use strict;
+use FindBin;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- wav to dat converter --\n";
+	print "usage: $cmd inFile(*.wav) outFile(*.dat)\n";
+	print "\n";
+}
+
+if ($#ARGV != 1) {
+	usage();
+	exit 1;
+}
+
+
+
+my @average_buf;
+my @average_sum;
+my $index = 1;
+my $AVERAGE_COUNT = int(0.05 * 44100);
+
+sub Average {
+	my ($data, $ch) = @_;
+
+	$data = abs($data);
+
+	if (defined($average_buf[$index]->[$ch])) {
+		$average_sum[$ch] -= $average_buf[$index]->[$ch];
+	}
+	$average_buf[$index]->[$ch] = $data;
+	$average_sum[$ch] += $data;
+
+	return $average_sum[$ch] / $AVERAGE_COUNT;
+}
+sub AverageIncrement {
+	$index++;
+	if ($index >= $AVERAGE_COUNT) {
+		$index = 0;
+	}
+}
+
+sub max {
+	my ($a, $b) = @_;
+	return ($a > $b) ? $a : $b;
+}
+
+#main
+
+{
+	my $infile = shift;
+	my $outfile = shift;
+
+	my $fhIn, my $fhOut;
+	open($fhIn, "$infile") or die "cannot open $infile!\n";
+	open($fhOut, "> $outfile") or die "cannot open $outfile!\n";
+	binmode $fhIn;
+	binmode $fhOut;
+
+	my %infoHash;
+	my @preChunkBuf, my @postChunkBuf;
+	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
+	wav_util::WriteWavHeader($fhOut, \@preChunkBuf);
+
+	my $remain = $dataSize;
+	while($remain > 0) {
+		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
+
+		for (my $i = 0; $i <= $#dataArray; $i++) {
+			$dataArray[$i] = Average($dataArray[$i], $i);
+		}
+
+ #		my $lr_ave = (abs($dataArray[0]) + abs($dataArray[1])) / 2;
+#		my $lr_max = max(abs($dataArray[0]), abs($dataArray[1]));
+#		my $mov_ave = Average($lr_max, 0);
+ #		my $mov_ave = Average($lr_ave **2 / 0x8000, 0);
+#		@dataArray = ($lr_max, $mov_ave);
+
+		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);
+
+		$remain -= $infoHash{ "BLOCK_SIZE" };
+		AverageIncrement();
+	}
+
+	wav_util::WriteWavTrailer($fhOut, \@postChunkBuf);
+
+	close ($fhIn);
+	close ($fhOut);
+
+	wav_util::MaintainWavHeader($outfile, \%infoHash, $dataSize);
+}
+

@@ -1,0 +1,216 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $CHATTER_THRES = 2e-3 / 120e-6;	# 2msec
+my $PRINT_IRREGULAR = 0;
+
+my $count_offset = 0;
+my @history;
+
+my @prev_chatter_count;
+my @prev_chatter_pattern;
+my @prev_state;
+my @p_on_count;
+my @p_off_count;
+my @m_on_count;
+my @m_off_count;
+my @s_on_count;
+my @s_off_count;
+my @irregular_level;
+sub Init_Chatter { @prev_chatter_count = (); }
+sub Init_State {
+	my ($key) = @_;
+	$prev_state[$key] = "000";
+	$p_on_count[$key] = 0;
+	$p_off_count[$key] = 0;
+	$m_on_count[$key] = 0;
+	$m_off_count[$key] = 0;
+	$s_on_count[$key] = 0;
+	$s_off_count[$key] = 0;
+	$irregular_level[$key] = 0;
+
+	@{ $history[$key] } = ();
+}
+sub KeyString {
+	my ($key) = @_;
+	my @keyStrTbl = ("C ", "C#", "D ", "Eb", "E ", "F ", "F#", "G ", "G#", "A ", "Bb", "B ");
+	my $note = $key + 21;
+	my $octave = int($note / 12) - 1;
+	my $keyStr = $keyStrTbl[$note % 12] . $octave;
+	return $keyStr;
+}
+
+sub Chatter_Analysis {
+	my ($key, $pattern, $absolute_count) = @_;
+
+	if ($absolute_count < $prev_chatter_count[$key] + $CHATTER_THRES) {
+		printf("chatter found: key(%s) \"%s\" (%d) - \"%s\" (%d)\n",
+			KeyString($key), $prev_chatter_pattern[$key], $prev_chatter_count[$key], $pattern, $absolute_count);
+	}
+
+	$prev_chatter_count[$key] = $absolute_count;
+	$prev_chatter_pattern[$key] = $pattern;
+}	
+
+sub Mark_Count {
+	my ($key, $prev_pattern, $pattern, $count) = @_;
+
+	$prev_pattern =~ /(.)(.)(.)/;
+	my ($prev_p, $prev_m, $prev_s) = ($1, $2, $3);
+	$pattern =~ /(.)(.)(.)/;
+	my ($p, $m, $s) = ($1, $2, $3);
+
+	if ($prev_p ne $p) {
+		if ($p eq "1") {
+			$p_on_count[$key] = $count;
+		} else {
+			$p_off_count[$key] = $count;
+		}
+	}
+	if ($prev_m ne $m) {
+		if ($m eq "1") {
+			$m_on_count[$key] = $count;
+		} else {
+			$m_off_count[$key] = $count;
+		}
+	}
+	if ($prev_s ne $s) {
+		if ($s eq "1") {
+			$s_on_count[$key] = $count;
+		} else {
+			$s_off_count[$key] = $count;
+		}
+	}
+}
+
+sub State_Analysis {
+	my ($key, $pattern, $count) = @_;
+
+	my $prev_pattern = "000";
+	if (defined $history[$key] && (@{ $history[$key] } > 0)) {
+		$prev_pattern = $history[$key][-1]->[0];
+	}
+
+	push @{ $history[$key] }, [$pattern, $count];
+
+	if ($pattern eq "000") {
+		if ($prev_pattern eq "100") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "001") {
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+		$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+	} elsif ($pattern eq "010") {
+		if      ($prev_pattern eq "000") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "110") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "011") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} else {
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+	} elsif ($pattern eq "011") {
+		if      ($prev_pattern eq "010") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} elsif ($prev_pattern eq "111") {
+			$irregular_level[$key] = ($irregular_level[$key] < 1) ? 1 : $irregular_level[$key];
+		} else {
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+	} elsif ($pattern eq "100") {
+		if ($prev_pattern eq "110") {
+		} elsif ($prev_pattern eq "000") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "101") {
+		if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+		$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+	} elsif ($pattern eq "110") {
+		if ($prev_pattern eq "100") {
+		} elsif ($prev_pattern eq "010") {
+		} elsif ($prev_pattern eq "111") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	} elsif ($pattern eq "111") {
+		if ($prev_pattern eq "110") {
+		} elsif ($prev_pattern eq "011") {
+		} else {
+			if ($PRINT_IRREGULAR) { print "irregular pattern $key($count) $prev_pattern --> $pattern\n"; }
+			$irregular_level[$key] = ($irregular_level[$key] < 2) ? 2 : $irregular_level[$key];
+		}
+	}
+}
+
+sub Report_Pattern {
+	my ($key) = @_;
+
+	my $is_on_issued = 0;
+	my $is_repetitive = 0;
+	my $prev_pattern = "000";
+	foreach my $item (@{ $history[$key] }) {
+		my ($pattern, $count) = @$item;
+
+		Mark_Count($key, $prev_pattern, $pattern, $count);
+
+		if (($pattern eq "111") && (!$is_on_issued)) {
+			if (!$is_repetitive) {
+				printf("Note On! %s (%d): PM(%d) MS(%d) PS(%d)\n",
+				KeyString($key), $count, $m_on_count[$key] - $p_on_count[$key], $s_on_count[$key] - $m_on_count[$key], $s_on_count[$key] - $p_on_count[$key]);
+			} else {
+				printf("Note On! %s (%d):         MS(%d)\n",
+				KeyString($key), $count, $s_on_count[$key] - $m_on_count[$key]);
+			}
+			$is_on_issued = 1;
+		}
+		if (($pattern eq "100") && ($is_on_issued)) {
+			$is_repetitive = 1;
+			$is_on_issued = 0;
+		}
+
+		if ($irregular_level[$key] == 1) {
+			printf("irregular! %s: \"%s\" %d\n", KeyString($key), $pattern, $count);
+		} elsif ($irregular_level[$key] == 2) {
+			printf("SUPER irregular! %s: \"%s\" %d\n", KeyString($key), $pattern, $count);
+		} else {
+			printf("%s: \"%s\" %d\n", KeyString($key), $pattern, $count);
+		}
+
+		$prev_pattern = $pattern;
+	}
+}
+
+
+
+#
+# Main
+#
+Init_Chatter();
+Init_State();
+while (my $str = <>) {
+	if ($str =~ /(\d+)\s+(\d+)\s+(\d+)/) {
+		my ($key, $pattern, $count) = ($1, $2, $3);
+
+		my $absolute_count = $count + $count_offset;
+
+#		Chatter_Analysis($key, $pattern, $absolute_count);
+		State_Analysis($key, $pattern, $absolute_count);
+		if ($pattern eq "000") {
+			Report_Pattern($key);
+			Init_State($key);
+		}
+	} elsif ($str =~ /Overflow/) {
+		$count_offset += (1 << 14);
+	}
+}
+
+

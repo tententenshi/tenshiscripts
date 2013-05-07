@@ -1,0 +1,80 @@
+#! /usr/bin/perl
+
+use strict;
+
+
+sub ModMath_pow {
+	my ($base, $power, $mod) = @_;
+	my $result = 1;
+	while ($power > 0) {
+		if (($power & 1) == 1) {
+			$result = ($result * $base) % $mod;
+		}
+		$base = ($base * $base) % $mod;
+		$power >>= 1;
+	}
+	return $result;
+}
+
+sub isPrime {
+	my ($n) = @_;
+	$n = abs($n);
+
+	if ($n == 2) { return 1; }
+	if (($n == 1) || (($n & 1) == 0)) { return 0; }
+
+	my $d = $n - 1;
+	while (($d & 1) == 0) { $d >>= 1; }
+
+	for (my $i = 0; $i < 20; $i++) {              # 20 は上の説明の k に相当
+		my $a = rand($n - 2) + 1;
+		my $t = $d;
+		my $y = ModMath_pow($a, $t, $n);          # 実装コードは下にある
+		while (($t != $n - 1) && ($y != 1) && ($y != $n - 1)) {
+			$y = ($y * $y) % $n;
+			$t <<= 1;
+		}
+		if (($y != $n - 1) && (($t & 1) == 0)) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+sub isNotPrime {
+	my ($n) = @_;
+
+	if ($n == 1) { return 1; }
+	if ($n == 2) { return 0; }
+
+	my $mod6 = $n % 6;
+	if (($mod6 != 1) && ($mod6 != 5)) {
+		if (($n & 1) == 0) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
+
+	for (my $i = 2; $i < sqrt($n); ++$i) {
+		if ($n % $i == 0) {
+			return $i;
+		}
+	}
+	return 0;
+}
+
+
+my $val = eval(shift);
+
+#if (isPrime($val)) {
+#	print "$val is prime -- by Miller-Rabin primality test\n";
+#} else {
+#	print "$val is NOT prime -- by Miller-Rabin primality test\n";
+#}
+
+if (my $denom = isNotPrime($val)) {
+	print "$val is NOT prime (divided by $denom)\n";
+} else {
+	print "$val is prime\n";
+}

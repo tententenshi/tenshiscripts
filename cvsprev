@@ -1,0 +1,139 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $trace_lev = 1;
+my $output_glance = 0;
+my $output_diff = 0;
+my $output_diff2 = 0;
+my @files;
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "get cvs previous revision.\n";
+	print "usage: $cmd [-num] -[pd] filename\n";
+	print "      option -num --> level to trace back\n";
+	print "      option -d   --> output diff\n";
+	print "      option -D   --> output diff with list style\n";
+	print "      option -p   --> output plain source\n";
+	exit 1;
+}
+
+sub process {
+	my ($filename, $cur_rev, $prev_rev) = @_;
+
+	if ($output_glance) {
+		system "cvs up -p -r $prev_rev \"$filename\" 2>&1";
+	} elsif ($output_diff) {
+		system "cvs diff -r $prev_rev \"$filename\" 2>&1";
+	} elsif ($output_diff2) {
+		my $column_width = $ENV{'COLUMNS'};	# envelop variable 'COLUMNS' should be exported
+		my $command = "cvs diff -y -W$column_width --left-column -r $prev_rev \"$filename\" 2>&1";
+		system $command;
+	} else {
+		if ($prev_rev ne $cur_rev) {
+			print "$filename: root($prev_rev) -> current($cur_rev)\n";
+		}
+	}
+}
+
+sub GetFileList {
+	my ($path) = @_;
+	my @files;
+
+	open (LOG, "cvs log \"$path\" |") or die "cannot execute cvs log $path\n";
+
+	while (my $log = <LOG>) {
+		if ($log =~ /Working file:\s*(.+)$/) {
+			push @files, $1;
+		}
+	}
+
+	return @files;
+}
+
+sub GetPrevRev {
+	my ($cur_rev, $trace_lev) = @_;
+
+#	print "cur_rev--> $cur_rev trace_lev--> $trace_lev\n";
+
+	while (($cur_rev ne "1.1") && ($trace_lev > 0)) {
+		my @rev_array = split(/\./, $cur_rev);
+		if ($rev_array[-1] eq 1) {
+			pop @rev_array;		# 1.1.2.[1]
+			pop @rev_array;		# 1.1.[2]
+		} else {
+			$rev_array[-1]--;
+		}
+
+		$cur_rev = join(".", @rev_array);
+
+#		print "cur_rev--> $cur_rev trace_lev--> $trace_lev\n";
+
+		$trace_lev--;
+	}
+
+	return $cur_rev;
+}
+
+
+while (my $str = shift) {
+	if ($str =~ /^-(.+)/) {
+		my $opt = $1;
+		if ($opt =~ /(\d+)/) {
+			$trace_lev = eval($1);
+		} elsif ($opt =~ /d/) {
+			$output_diff = 1;
+		} elsif ($opt =~ /D/) {
+			$output_diff2 = 1;
+		} elsif ($opt =~ /p/o) {
+			$output_glance = 1;
+		} else {
+			usage();
+		}
+	} else {
+		push(@files, $str);
+	}
+}
+
+{
+	my $dir_or_file = ".";
+	if ($#files >= 0) {
+		$dir_or_file = shift @files;
+	}
+
+	while (1) {
+		my @tmp_files = GetFileList($dir_or_file);
+		foreach my $filename (@tmp_files) {
+			my $cur_rev = "";
+			my $repositoryName = "";
+
+#			print "processing $filename...\n";
+			open (STATUS, "cvs status \"$filename\" |") or die "cannot open $filename\n";
+
+			while (my $str = <STATUS>) {
+				if ($str =~ /\s*Repository revision:\s*No revision control file/) {
+					last;
+				} elsif ($str =~ /\s*Repository revision:\s*(\S+)\s+(.+)/) {
+					$cur_rev = $1; $repositoryName = $2;
+				}
+			}
+
+			close STATUS;
+
+			if ($cur_rev eq "") { next; }
+
+			my $prev_rev = GetPrevRev($cur_rev, $trace_lev);
+
+			process $filename, $cur_rev, $prev_rev;
+		}
+
+		if ($#files >= 0) {
+			$dir_or_file = shift @files;
+#			print "switching to next path ($dir_or_file)\n";
+		} else {
+			last;
+		}
+	}
+}

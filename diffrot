@@ -1,0 +1,14 @@
+
+file1=$1;
+shift;
+
+for i
+do
+
+file2=$i
+
+echo "diff -w $file1 $file2" | sh -x 
+
+file1=$file2
+
+done

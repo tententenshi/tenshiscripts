@@ -1,0 +1,32 @@
+#! /usr/bin/perl
+
+$FS = 44100;
+
+sub time2count {
+	my ($val) = @_;
+
+	my ($minutes, $seconds, $sectors) = split(/:/, $val);
+
+	return ($minutes * 60 * $FS) + ($seconds * $FS) + ($sectors * 588);
+}
+
+$infile = shift;
+
+if ($infile =~ /(.+)\.bin/) {
+	$outfile = $1 . ".dat";
+	exec 'peakSearchSub', $infile, $outfile;
+} elsif ($infile =~ /(.+)\.toc/) {
+	$outfile = $1 . ".dat";
+	open (TOC, "$infile") or die "Cannot open $infile\n";
+	my $track = 1;
+	my $file, $time;
+	while (<TOC>) {
+		if (/^\s*FILE\s*\"(.+?)\"\s*([\d:]+)\s*[\d:]+/) {
+			($file, $time) = ($1, $2);
+			push @TOC, time2count($time);
+		}
+	}
+	exec 'peakSearchSub', $file, $outfile, @TOC;
+#	exec 'echo', $file, $outfile, @TOC;
+}
+

@@ -1,0 +1,9 @@
+#! /usr/bin/perl
+
+require Dump;
+
+
+$p = HTML::Dump->new();
+#$p->handler(start =>  "text", "self, dtext, is_cdata");
+$p->unbroken_text('TRUE'); 
+$p->parse_file(shift);

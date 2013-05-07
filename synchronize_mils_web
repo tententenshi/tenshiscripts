@@ -1,0 +1,34 @@
+set -x
+
+CMP="diff -w -q"
+#WEB_PATH=/mils03sv_web
+WEB_PATH=/usr/roland/web
+TARGET="
+	$WEB_PATH/piano/software/dsp/tools/ceqEAanalyze
+	$WEB_PATH/piano/software/dsp/tools/ceqFAanalyze
+	$WEB_PATH/piano/software/dsp/tools/ceqFDanalyze
+	$WEB_PATH/piano/software/dsp/tools/ceqHD
+	$WEB_PATH/piano/software/dsp/tools/ceqVEQanalyze
+	$WEB_PATH/piano/software/dsp/tools/ceqVEanalyze
+	$WEB_PATH/piano/software/dsp/tools/esc2float
+	$WEB_PATH/piano/software/dsp/tools/gnuplot2png
+	$WEB_PATH/piano/software/dsp/tools/mkTblLinear
+	$WEB_PATH/piano/software/dsp/tools/mkWav
+	$WEB_PATH/piano/software/dsp/cdgain/peakSearch
+	$WEB_PATH/piano/software/dsp/cdgain/peakSearchSub.c
+	$WEB_PATH/piano/software/dsp/tools/smf_read.pm
+	$WEB_PATH/piano/software/dsp/tools/smf_util.pm
+	$WEB_PATH/piano/software/dsp/tools/smf_write.pm
+	$WEB_PATH/piano/software/dsp/tools/smfdump.pl
+	$WEB_PATH/piano/software/dsp/tools/wav2dat
+	$WEB_PATH/piano/software/dsp/tools/wav_util.pm
+	$WEB_PATH/piano/software/dsp/eq_spec/eq_check/create_filtered_noise
+"
+
+for i in $TARGET;
+do
+	FILE=`basename $i`;
+	if ! $CMP $FILE $i; then
+		cp -f $FILE $i;
+	fi
+done

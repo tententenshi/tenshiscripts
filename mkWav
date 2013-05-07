@@ -1,0 +1,163 @@
+#! /usr/bin/perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+my $HEAD_LEADER = 0.0;	# 0.2 sec
+my $Freq_Start = 20;
+my $Freq_End = 20000;
+my $Time_Span = 30;	# 10 sec
+my $VOLUME = 0.5 * 0x8000;
+
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd [inFile.(dat|bin|raw)] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=16] [ENDIAN=LITTLE] outWavFile\n";
+	exit 1;
+}
+
+sub Round {
+	my ($val) = @_;
+	return floor($val + 0.5);
+}
+
+
+#
+# main
+#
+{
+	my %infoHash;
+	$infoHash{ "FORMAT_ID" } =  1;	# Linear PCM
+	$infoHash{ "NUM_OF_CH" } =  1;	# Number of Channels
+	$infoHash{ "FS" } = 	    44100;	# Sampling Rate
+	$infoHash{ "BIT_LENGTH" } = 16;
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+	my $data_file_mode = 0;
+	my $convert_endian = 0;
+	my $out_filename = "";
+
+	while (my $str = shift) {
+		if ($str =~ /.+\.dat$/) {
+			$data_file_mode = 1;
+			open(IN, "$str") or die "cannot open $str!\n";
+		} elsif ($str =~ /.+\.(bin|raw)$/) {
+			$data_file_mode = 2;
+			open(IN, "$str") or die "cannot open $str!\n";
+		} elsif ($str =~ /FORMAT_ID=(.+)/) {
+			$infoHash{ "FORMAT_ID" } = eval($1);
+		} elsif ($str =~ /FS=(.+)/) {
+			$infoHash{ "FS" } = eval($1);
+		} elsif ($str =~ /NUM_OF_CH=(.+)/) {
+			$infoHash{ "NUM_OF_CH" } = eval($1);
+		} elsif ($str =~ /BIT_LENGTH=(.+)/) {
+			$infoHash{ "BIT_LENGTH" } = eval($1);
+		} elsif ($str =~ /ENDIAN=(.+)/) {
+			if ($1 =~ /BIG/) {
+				$convert_endian = 1;
+			} else {
+				$convert_endian = 0;
+			}
+		} else {
+			$out_filename = $str;
+		}
+	}
+	if ($out_filename eq "") {
+		usage();
+	}
+
+	my $fhOut;
+	open($fhOut, "> $out_filename") or die "cannot open $out_filename!\n";
+	wav_util::WriteWavHeader($fhOut);
+
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+
+	my $wav_size = 0;
+
+	if ($data_file_mode == 0) {
+		for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
+			if ($infoHash{ "NUM_OF_CH" } == 1) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (0));
+			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (0, 0));
+			}
+			$wav_size += $infoHash{ "BLOCK_SIZE" };
+		}
+
+		my $PI = 4 * atan2(1,1);
+		my $phase = 0;
+		my $tmp_freq = $Freq_Start;
+		my $Time_Span_Sample = $Time_Span * $infoHash{ "FS" };
+
+		for (my $time = 0; $time <= $Time_Span_Sample; $tmp_freq = ($Freq_End/$Freq_Start)**($time/$Time_Span_Sample) * $Freq_Start) { # exponential
+#		for (my $time = 0; $time <= $Time_Span_Sample; $tmp_freq = ($Freq_End - $Freq_Start)*($time/$Time_Span_Sample) + $Freq_Start) {	# linear
+			$phase = $phase + 2 * $PI * $tmp_freq / $infoHash{ "FS" };
+			my $sine_wave = sin($phase);
+			if ($infoHash{ "NUM_OF_CH" } == 1) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (Round($sine_wave * $VOLUME)));
+			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (Round($sine_wave * $VOLUME), Round($sine_wave * $VOLUME)));
+			}
+			$wav_size += $infoHash{ "BLOCK_SIZE" };
+
+			$time++;
+		}
+	} elsif ($data_file_mode == 1) {
+		while (my $dat = <IN>) {
+			if ($dat =~ /(-?\d*\.[-\de]*)\s*[, ]\s*(-?\d*\.[-\de]*)/) {	#stereo float
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
+				if (($infoHash{ "NUM_OF_CH" } != 2) || ($infoHash{ "FORMAT_ID" } != 3)) {
+					die "data format is not matched! (2ch float)\n";
+				}
+#				print "stereo float val $1/$2\n";
+			} elsif ($dat =~ /(-?\d*\.[-\de]*)/) { #mono float
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
+				if (($infoHash{ "NUM_OF_CH" } != 1) || ($infoHash{ "FORMAT_ID" } != 3)) {
+					die "data format is not matched! (1ch float)\n";
+				}
+#				print "mono float val $1\n";
+			} elsif ($dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*[, ]\s*(-?0x[0-9a-f]+|-?\d+)/i) {	#stereo
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
+				if ($infoHash{ "NUM_OF_CH" } != 2) {
+					die "data format is not matched! (2ch fixed point)\n";
+				}
+#				print "stereo decimal val $1/$2\n";
+			} elsif ($dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i) { #mono
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
+				if ($infoHash{ "NUM_OF_CH" } != 1) {
+					die "data format is not matched! (1ch fixed point)\n";
+				}
+#				print "mono decimal val $1\n";
+			}
+			$wav_size += $infoHash{ "BLOCK_SIZE" };
+		}
+	} elsif ($data_file_mode == 2) {
+		$wav_size = (stat(IN))[7];
+
+		if ($convert_endian == 0) {
+			while(read IN, my $buf, 16384) {
+				print ($fhOut $buf);
+			}
+		} else {
+			while(read IN, my $buf, 4) {
+				my ($dataL, $dataR) = unpack "n2", $buf; # short big endian
+				my $out = pack "v2", ($dataL, $dataR);	# short little endian
+				print ($fhOut $out);
+			}
+		}
+	}
+
+	close(IN);
+	close($fhOut);
+
+	wav_util::MaintainWavHeader($out_filename, \%infoHash, $wav_size);
+}

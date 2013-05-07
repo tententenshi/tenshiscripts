@@ -1,0 +1,23 @@
+#! /usr/local/bin/perl
+
+sub usage {
+	my ($cmd) = @_;
+	print "Vrms --> dBu converter\n";
+	print "usage: $cmd Vrms_value\n";
+}
+
+if ($#ARGV != 0) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	usage($cmd);
+	exit 1;
+}
+
+
+$rms = shift;
+
+$val0dBu = sqrt(0.6);	# 0dBu = 0.775Vrms (= sqrt(0.6)
+
+$dBuval = 20 * log($rms / $val0dBu) / log(10);
+
+print "$dBuval\n";

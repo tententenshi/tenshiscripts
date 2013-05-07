@@ -1,0 +1,442 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>ConversionForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>ConversionForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>460</width>
+            <height>355</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Metric Conversion</string>
+    </property>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>layout4</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>11</x>
+                <y>314</y>
+                <width>438</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>clearPushButton</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Clear</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>calculatePushButton</cstring>
+                </property>
+                <property name="text">
+                    <string>Calculate</string>
+                </property>
+                <property name="default">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <spacer>
+                <property name="name">
+                    <cstring>spacer2</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>21</width>
+                        <height>20</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>quitPushButton</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Quit</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel4</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>12</x>
+                <y>102</y>
+                <width>111</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Result:</string>
+        </property>
+    </widget>
+    <widget class="QLineEdit">
+        <property name="name">
+            <cstring>numberLineEdit</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>129</x>
+                <y>12</y>
+                <width>319</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="alignment">
+            <set>AlignRight</set>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>12</x>
+                <y>42</y>
+                <width>111</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Convert &amp;From:</string>
+        </property>
+        <property name="buddy" stdset="0">
+            <cstring>fromComboBox</cstring>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel5</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>12</x>
+                <y>132</y>
+                <width>111</width>
+                <height>26</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;Decimals:</string>
+        </property>
+        <property name="buddy" stdset="0">
+            <cstring>decimalsSpinBox</cstring>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>12</x>
+                <y>12</y>
+                <width>111</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Enter &amp;Number:</string>
+        </property>
+        <property name="buddy" stdset="0">
+            <cstring>numberLineEdit</cstring>
+        </property>
+    </widget>
+    <widget class="QComboBox">
+        <item>
+            <property name="text">
+                <string>Kilometers</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Meters</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Centimeters</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Millimeters</string>
+            </property>
+        </item>
+        <property name="name">
+            <cstring>fromComboBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>129</x>
+                <y>42</y>
+                <width>319</width>
+                <height>24</height>
+            </rect>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel3</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>12</x>
+                <y>72</y>
+                <width>111</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Convert &amp;To:</string>
+        </property>
+        <property name="buddy" stdset="0">
+            <cstring>toComboBox</cstring>
+        </property>
+    </widget>
+    <widget class="QLineEdit">
+        <property name="name">
+            <cstring>resultLineEdit</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>129</x>
+                <y>102</y>
+                <width>319</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <property name="paletteBackgroundColor">
+            <color>
+                <red>251</red>
+                <green>255</green>
+                <blue>211</blue>
+            </color>
+        </property>
+        <property name="alignment">
+            <set>AlignRight</set>
+        </property>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>layout2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>129</x>
+                <y>132</y>
+                <width>319</width>
+                <height>26</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <spacer>
+                <property name="name">
+                    <cstring>spacer1</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>133</width>
+                        <height>24</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QSpinBox">
+                <property name="name">
+                    <cstring>decimalsSpinBox</cstring>
+                </property>
+                <property name="maxValue">
+                    <number>6</number>
+                </property>
+                <property name="value">
+                    <number>3</number>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QComboBox">
+        <item>
+            <property name="text">
+                <string>Miles</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Yards</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Feet</string>
+            </property>
+        </item>
+        <item>
+            <property name="text">
+                <string>Inches</string>
+            </property>
+        </item>
+        <property name="name">
+            <cstring>toComboBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>129</x>
+                <y>72</y>
+                <width>319</width>
+                <height>24</height>
+            </rect>
+        </property>
+    </widget>
+    <spacer>
+        <property name="name">
+            <cstring>spacer3</cstring>
+        </property>
+        <property name="orientation">
+            <enum>Vertical</enum>
+        </property>
+        <property name="sizeType">
+            <enum>Expanding</enum>
+        </property>
+        <property name="sizeHint">
+            <size>
+                <width>20</width>
+                <height>50</height>
+            </size>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>220</x>
+                <y>258</y>
+                <width>20</width>
+                <height>50</height>
+            </rect>
+        </property>
+    </spacer>
+    <widget class="QCheckBox">
+        <property name="name">
+            <cstring>checkBox1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>130</x>
+                <y>170</y>
+                <width>102</width>
+                <height>21</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>checkBox1</string>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>clearPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>numberLineEdit</receiver>
+        <slot>clear()</slot>
+    </connection>
+    <connection>
+        <sender>clearPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>resultLineEdit</receiver>
+        <slot>clear()</slot>
+    </connection>
+    <connection>
+        <sender>clearPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>numberLineEdit</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>quitPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>ConversionForm</receiver>
+        <slot>close()</slot>
+    </connection>
+    <connection>
+        <sender>calculatePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>ConversionForm</receiver>
+        <slot>convert()</slot>
+    </connection>
+    <connection>
+        <sender>decimalsSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>ConversionForm</receiver>
+        <slot>convert()</slot>
+    </connection>
+    <connection>
+        <sender>fromComboBox</sender>
+        <signal>activated(int)</signal>
+        <receiver>ConversionForm</receiver>
+        <slot>convert()</slot>
+    </connection>
+    <connection>
+        <sender>toComboBox</sender>
+        <signal>activated(int)</signal>
+        <receiver>ConversionForm</receiver>
+        <slot>convert()</slot>
+    </connection>
+    <connection>
+        <sender>checkBox1</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>resultLineEdit</receiver>
+        <slot>deselect()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>numberLineEdit</tabstop>
+    <tabstop>fromComboBox</tabstop>
+    <tabstop>toComboBox</tabstop>
+    <tabstop>resultLineEdit</tabstop>
+    <tabstop>decimalsSpinBox</tabstop>
+    <tabstop>clearPushButton</tabstop>
+    <tabstop>calculatePushButton</tabstop>
+    <tabstop>quitPushButton</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in implementation">conversionform.ui.h</include>
+</includes>
+<slots>
+    <slot>convert()</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

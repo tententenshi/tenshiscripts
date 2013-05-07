@@ -1,0 +1,66 @@
+#! /usr/local/bin/perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- wav to dat converter --\n";
+	print "usage: $cmd inFile(*.wav) outFile(*.dat)\n";
+	print "\n";
+}
+
+if ($#ARGV != 1) {
+	usage();
+	exit 1;
+}
+
+
+sub PrintWavData {
+	my ($fhOut, $format, @dataArray) = @_;
+
+	for (my $i = 0; $i <= $#dataArray; $i++) {
+		if ($format == 1) {
+			printf ($fhOut "%d  ", $dataArray[$i]);
+		} elsif ($format == 3) {
+			printf ($fhOut "%g  ", $dataArray[$i]);
+		}
+	}
+	print ($fhOut "\n");
+}
+
+
+
+#
+# main
+#
+{
+	my $infile = shift;
+	my $outfile = shift;
+
+	my $fhIn, my $fhOut;
+	open($fhIn, "$infile") or die "cannot open $infile!\n";
+	open($fhOut, "> $outfile") or die "cannot open $outfile!\n";
+	binmode $fhIn;
+	binmode $fhOut;
+
+	my %infoHash;
+	my @preChunkBuf, my @postChunkBuf;
+	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
+
+	my $remain = $dataSize;
+	while($remain > 0) {
+		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
+		PrintWavData($fhOut, $infoHash{ "FORMAT_ID"}, @dataArray);
+
+		$remain -= $infoHash{ "BLOCK_SIZE" };
+	}
+
+	close ($fhIn);
+	close ($fhOut);
+}

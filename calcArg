@@ -1,0 +1,106 @@
+#! /usr/local/bin/perl
+
+use Math::Complex;
+
+sub tan { sin($_[0]) / cos($_[0]); }
+$pi = 4 * atan2(1,1);
+
+
+if ($#ARGV != 5) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd a0 a1 a2 b1 b2 Fs\n";
+	print " --+-|>---(+)------+--\n";
+	print "   | a0  // \\\\     |  \n";
+	print "   +-|>-+/   \\+-<|-+  \n";
+	print "   | a1 /     \\ b1 |  \n";
+	print "   +-|>+       +<|-+  \n";
+	print "     a2         b2    \n";
+	exit 1;
+}
+
+$a0_ = shift;
+$a1_ = shift;
+$a2_ = shift;
+$b1_ = shift;
+$b2_ = shift;
+$Fs = eval(shift);
+
+$a0 = (($a0_ =~ /0[Xx]/) ? (eval($a0_) / 0x8000) : eval($a0_)) + 0*i;
+$a1 = (($a1_ =~ /0[Xx]/) ? (eval($a1_) / 0x8000) : eval($a1_)) + 0*i;
+$a2 = (($a2_ =~ /0[Xx]/) ? (eval($a2_) / 0x8000) : eval($a2_)) + 0*i;
+$b1 = (($b1_ =~ /0[Xx]/) ? (eval($b1_) / 0x8000) : eval($b1_)) + 0*i;
+$b2 = (($b2_ =~ /0[Xx]/) ? (eval($b2_) / 0x8000) : eval($b2_)) + 0*i;
+
+$pole1 = ($b1 + sqrt($b1**2 + 4*$b2)) / 2;
+$pole2 = ($b1 - sqrt($b1**2 + 4*$b2)) / 2;
+
+$zero1 = (-$a1 + sqrt($a1**2 - 4*$a0*$a2)) / (2*$a0);
+$zero2 = (-$a1 - sqrt($a1**2 - 4*$a0*$a2)) / (2*$a0);
+
+
+
+printf "Re(pole1)-->%f\n", Re($pole1);
+printf "Im(pole1)-->%f\n", Im($pole1);
+printf "abs(pole1)-->%f\n", abs($pole1);
+printf "arg(pole1)-->%f\n", arg($pole1);
+printf "arg_d(pole1)-->%f\n", arg($pole1) * 180 / $pi;
+printf "arg_f(pole1)-->%f\n", arg($pole1) * 44100 / (2*$pi);
+
+
+if (arg($pole1) <= $pi) {
+	$n_pole1 = cplxe(abs($pole1), arg($pole1)*44100/48000);
+} else {
+	$n_pole1 = cplxe(abs($pole1), (arg($pole1) - 2*$pi)*44100/48000);
+}
+if (arg($pole2) <= $pi) {
+	$n_pole2 = cplxe(abs($pole2), arg($pole2)*44100/48000);
+} else {
+	$n_pole2 = cplxe(abs($pole2), (arg($pole2) - 2*$pi)*44100/48000);
+}
+if (arg($zero1) <= $pi) {
+	$n_zero1 = cplxe(abs($zero1), arg($zero1)*44100/48000);
+} else {
+	$n_zero1 = cplxe(abs($zero1), (arg($zero1) - 2*$pi)*44100/48000);
+}
+if (arg($zero2) <= $pi) {
+	$n_zero2 = cplxe(abs($zero2), arg($zero2)*44100/48000);
+} else {
+	$n_zero2 = cplxe(abs($zero2), (arg($zero2) - 2*$pi)*44100/48000);
+}
+
+#printf "arg_d(n_pole1)-->%f\n", arg($n_pole1) * 180 / $pi;
+#printf "arg_f(n_pole1)-->%f\n", arg($n_pole1) * 48000 / (2*$pi);
+#printf "arg_d(n_pole2)-->%f\n", arg($n_pole2) * 180 / $pi;
+#printf "arg_f(n_pole2)-->%f\n", arg($n_pole2) * 48000 / (2*$pi);
+#printf "arg_d(n_zero1)-->%f\n", arg($n_zero1) * 180 / $pi;
+#printf "arg_f(n_zero1)-->%f\n", arg($n_zero1) * 48000 / (2*$pi);
+#printf "arg_d(n_zero2)-->%f\n", arg($n_zero2) * 180 / $pi;
+#printf "arg_f(n_zero2)-->%f\n", arg($n_zero2) * 48000 / (2*$pi);
+
+#print "pole1-->$pole1\n";
+#print "pole2-->$pole2\n";
+
+if (arg($n_pole1) == 0) {
+	$n_b1 = $n_pole1 + $n_pole2;
+	$n_b2 = -$n_pole1 * $n_pole2;
+} else {
+	$n_b1 = 2*Re($n_pole1);
+	$n_b2 = -(Re($n_pole1)**2 + Im($n_pole1)**2);
+}
+
+$n_a0 = $a0;
+
+if (arg($n_zero1) == 0) {
+	$n_a1 = $n_zero1 + $n_zero2			* $a0;
+	$n_a2 = -($n_zero1 * $n_zero2)			* $a0;
+} else {
+	$n_a1 = -(2*Re($n_zero1))			* $a0;
+	$n_a2 = (Re($n_zero1)**2 + Im($n_zero1)**2)	* $a0;
+}
+
+print "n_a0 --> $n_a0\n";
+print "n_a1 --> $n_a1\n";
+print "n_a2 --> $n_a2\n";
+print "n_b1 --> $n_b1\n";
+print "n_b2 --> $n_b2\n";

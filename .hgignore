@@ -1,0 +1,26 @@
+syntax: glob
+\#*
+*.bak
+*.o
+*~
+eq_tools
+dsp
+ceq
+ceqvsEmbedded
+create_filtered_noise
+create_filtered_wav
+create_fir_wav
+create_modulated_wav
+create_optimized_wav
+dec2hex
+esp_dump
+espsyms
+float2hex
+gramchk
+hex2dec
+kscale
+mpy
+mpytest
+q2tx
+rand
+showinst

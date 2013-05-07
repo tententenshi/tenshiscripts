@@ -1,0 +1,12 @@
+# omitline: omit lines which contains str in files
+
+case $# in
+0|1) echo 'Usage: omitlines str files' 1>&2; exit 1
+esac
+
+left="$1"; shift;
+
+for i
+do
+	overwrite $i sed "/$left/d" $i
+done

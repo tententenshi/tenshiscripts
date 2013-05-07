@@ -1,0 +1,65 @@
+#! /usr/bin/perl
+
+@dat = (
+	0x5F, 0xE4, 0x00, 0x24, 0x00, 0x04, 0x02, 0x04, 0x02, 0x04, 0x00, 0x04, 0x03, 0xFC, 0x00, 0x9C, 
+	0x01, 0x24, 0x00, 0x04, 0x01, 0x24, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 
+	0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x00,
+);
+
+
+@prm = (
+[    0,    4,	  0,	0,    0,    0,	  5 ],	#/*  000-003 oooo____ ________ ________ ________ NEFV_REV_TYPE		*/
+[    0,    7,	  4,	0,  127,    0,	127 ],	#/*  000-003 ____oooo ooo_____ ________ ________ NEFV_REV_LEVEL		*/
+[    1,    2,	  3,	0,    0,    0,	  3 ],	#/*  001-004 ___oo___ ________ ________ ________ NEFV_REV_OUT_ASGN	*/
+[    1,   16,	  5,32768,    0,-20000,20000 ],	#/*  001-004 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM1		*/
+[    3,   16,	  5,32768,    0,-20000,20000 ],	#/*  003-006 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM2		*/
+[    5,   16,	  5,32768,    0,-20000,20000 ],	#/*  005-008 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM3		*/
+[    7,   16,	  5,32768,    0,-20000,20000 ],	#/*  007-00A _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM4		*/
+[    9,   16,	  5,32768,    0,-20000,20000 ],	#/*  009-00C _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM5		*/
+[   11,   16,	  5,32768,    0,-20000,20000 ],	#/*  00B-00E _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM6		*/
+[   13,   16,	  5,32768,    0,-20000,20000 ],	#/*  00D-010 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM7		*/
+[   15,   16,	  5,32768,    0,-20000,20000 ],	#/*  00F-012 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM8		*/
+[   17,   16,	  5,32768,    0,-20000,20000 ],	#/*  011-014 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM9		*/
+[   19,   16,	  5,32768,    0,-20000,20000 ],	#/*  013-016 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM10		*/
+[   21,   16,	  5,32768,    0,-20000,20000 ],	#/*  015-018 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM11		*/
+[   23,   16,	  5,32768,    0,-20000,20000 ],	#/*  017-01A _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM12		*/
+[   25,   16,	  5,32768,    0,-20000,20000 ],	#/*  019-01C _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM13		*/
+[   27,   16,	  5,32768,    0,-20000,20000 ],	#/*  01B-01E _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM14		*/
+[   29,   16,	  5,32768,    0,-20000,20000 ],	#/*  01D-020 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM15		*/
+[   31,   16,	  5,32768,    0,-20000,20000 ],	#/*  01F-022 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM16		*/
+[   33,   16,	  5,32768,    0,-20000,20000 ],	#/*  021-024 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM17		*/
+[   35,   16,	  5,32768,    0,-20000,20000 ],	#/*  023-026 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM18		*/
+[   37,   16,	  5,32768,    0,-20000,20000 ],	#/*  025-028 _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM19		*/
+[   39,   16,	  5,32768,    0,-20000,20000 ],	#/*  027-02A _____ooo oooooooo ooooo___ ________ NEFV_REV_PRM20		*/
+[   41,    3,	  5,	0,    0,    0,	  0 ],	#/*  029-02C _____ooo ________ ________ ________ NEFV_DUMMY		*/
+);
+
+for $i (0 .. $#prm) {
+	$byteStart = $prm[$i][0];
+	$bitRest = $prm[$i][1];
+	$bitStart = $prm[$i][2];
+	$aDat = 0;
+	do {
+		$maskBit = $bitRest;
+		if ($bitRest >= 8) { $maskBit = 8; }
+		$mask = (((1 << $maskBit) -1) << (8 - $maskBit)) >> $bitStart;
+		$aDat |= ($dat[$byteStart] & $mask);
+
+		$bitRest -= 8 - $bitStart;
+		if ($bitRest >= 0) { $aDat <<= 8; }
+		else { $aDat >>= -$bitRest; }
+
+		$byteStart++;
+		$bitStart = 0;
+	} while ($bitRest > 0);
+
+	printf "prm No.$i --> 0x%x\n", $aDat;
+}
+
+
+$type		= ($dat[$i] & 0xf0) >>4 | ($dat[$i+1] & 0x00) >>0;
+$outLevel	= ($dat[$i] & 0x0f) <<3 | ($dat[$i+1] & 0xe0) >> 5;
+$outAssign	= ($dat[$i] & 0x18) >>3 | ($dat[$i+1] & 0x00) >> 0;
+
+
+

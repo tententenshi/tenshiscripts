@@ -1,0 +1,26 @@
+#! /usr/bin/perl
+
+if ($#ARGV < 1) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd out.bin size_str\n";
+	print "	size_str: 16384\n";
+	print "	          0x4000\n";
+	print "	          0x40000 - 0x2c00\n";
+	print "	          etc.\n";
+	exit 1;
+}
+
+$filename = shift;
+while ($str = shift) { $sizestr .= $str; }
+$size = eval($sizestr);
+
+printf "size: 0x%x\n\n", $size; 
+
+open(OUT, "> $filename") or die "cannot open $filename\n";
+
+$buf = pack "C", 0x55;
+
+for ($i = 0; $i < $size; $i++) {
+	print OUT $buf;
+}

@@ -1,0 +1,153 @@
+#! /usr/bin/perl
+
+$PI = 4 * atan2(1,1);
+$FS = 44100;
+$PTR_MAX = 0.3 * $FS;
+
+sub rms {
+	my ($val) = @_;
+	my $fVal = $val / 0x8000;
+	my $rms = $fVal * $PI / 2;	# average --> rms
+
+	my $dB = ($rms <= 0) ? -99 : 20 * log($rms)/log(10);
+	return $dB;
+}
+
+
+sub timeformat {
+	my ($val) = @_;
+	my $track, $tmpcount;
+
+	if ($#TOC == -1) {
+		my $minutes = int($val / 60 / $FS);
+		my $seconds = int($val / $FS) % 60;
+		my $sectors = int(($val % $FS) / 588);
+
+		return sprintf "%3d:%2d:%2d", $minutes, $seconds, $sectors;
+	} else {
+		my $tmptrack = 1;
+		my $tmpval = $val;
+		foreach $tmp (@TOC) {
+			($track, $tmpcount) = @{ $tmp };
+#			print "track->$track, count->$tmpcount\n";
+			if ($tmpcount > $val) {
+				last;
+			} else {
+				$tmptrack = $track;
+				$tmpval = $val - $tmpcount;
+			}
+		}
+		my $minutes = int($tmpval / 60 / $FS);
+		my $seconds = int($tmpval / $FS) % 60;
+		my $sectors = int(($tmpval % $FS) / 588);
+
+		return sprintf "%2d-%3d:%2d:%2d", $tmptrack, $minutes, $seconds, $sectors;
+	}
+}
+
+sub time2count {
+	my ($val) = @_;
+
+	my ($minutes, $seconds, $sectors) = split(/:/, $val);
+
+	return ($minutes * 60 * $FS) + ($seconds * $FS) + ($sectors * 588);
+}
+
+$infile = shift;
+$outfile = shift;
+
+if ($infile eq "data.bin") {
+	open (IN, "$infile") or die "Cannot open $infile\n";
+	$size = (stat(IN))[7];
+} else {
+	open (TOC, "$infile") or die "Cannot open $infile\n";
+	my $track = 1;
+	my $file, $time;
+	while (<TOC>) {
+		if (/^\s*FILE\s*\"(.+?)\"\s*([\d:]+)\s*[\d:]+/) {
+			($file, $time) = ($1, $2);
+			push @TOC, [$track, time2count($time)];
+			$track++;
+		}
+	}
+	open (IN, "$file") or die "Cannot open $file\n";
+	$size = (stat(IN))[7];
+}
+
+open (OUT, "> $outfile") or die "Cannot open $outfile\n";
+
+$ptr = 0;
+
+$count = 0;
+$peakL = 1;
+$peakR = 1;
+$curprogress = 0;
+$progressStep = $size / 1000;
+print "\n";
+
+binmode(IN);
+while(read(IN, $buf, 4)) {
+#	($dataL, $dataR) = unpack "v2", $buf;	# short by little endian
+	($dataL, $dataR) = unpack "n2", $buf;	# short by little endian
+
+	if ($dataL >= 0x8000) { $dataL = 0x10000 - $dataL; }
+	if ($dataR >= 0x8000) { $dataR = 0x10000 - $dataR; }
+
+	$absL = abs($dataL);
+	$absR = abs($dataR);
+
+	if ($peakL[0] < $absL) {
+		@peakL = ($absL, $count);
+#		printf "peakL 0x%04x at 0x%08x(%s)\n", $peakL[0], $count*4, timeformat($count);
+	}
+	if ($peakR[0] < $absR) {
+		@peakR = ($absR, $count);
+#		printf "peakR 0x%04x at 0x%08x(%s)\n", $peakR[0], $count*4, timeformat($count);
+	}
+
+	$vuArrayL[$ptr] = $absL;
+	$vuArrayR[$ptr] = $absR;
+
+	my $ptrNext = ($ptr + 1 < $PTR_MAX) ? $ptr + 1 : 0;
+
+	$vuSumL -= $vuArrayL[$ptrNext];
+	$vuSumR -= $vuArrayR[$ptrNext];
+	$vuSumL += $absL;
+	$vuSumR += $absR;
+
+	$ptr = $ptrNext;
+
+	$vuL = $vuSumL / $PTR_MAX;
+	$vuR = $vuSumR / $PTR_MAX;
+
+	if ($vupeakL[0] < $vuL) {
+		@vupeakL = ($vuL, $count);
+#		printf "vupeakL %7.3fdB at 0x%08x(%s)\n", rms($vupeakL[0]), $count*4, timeformat($count);
+	}
+	if ($vupeakR[0] < $vuR) {
+		@vupeakR = ($vuR, $count);
+#		printf "vupeakR %7.3fdB at 0x%08x(%s)\n", rms($vupeakR[0]), $count*4, timeformat($count);
+	}
+
+	if ($count % ($FS/10) == 0) {
+		printf OUT "%7.3fdB, %7.3fdB\n", rms($vuL), rms($vuR);
+	}
+	if ($count * 4 > $curprogress) {
+		printf "\x1bM%5.1f%%\n", $curprogress / $size * 100;
+		$curprogress += $progressStep;
+	}
+	$count++;
+}
+
+print "\n";
+printf "peakL --> 0x%04x at %s\n", $peakL[0], timeformat($peakL[1]);
+printf "peakR --> 0x%04x at %s\n", $peakR[0], timeformat($peakR[1]);
+
+printf "vuPeakL --> %7.3fdB at %s\n", rms($vupeakL[0]), timeformat($vupeakL[1]);
+printf "vuPeakR --> %7.3fdB at %s\n", rms($vupeakR[0]), timeformat($vupeakR[1]);
+
+printf OUT "#peakL --> 0x%04x at %s\n", $peakL[0], timeformat($peakL[1]);
+printf OUT "#peakR --> 0x%04x at %s\n", $peakR[0], timeformat($peakR[1]);
+
+printf OUT "#vuPeakL --> %7.3fdB at %s\n", rms($vupeakL[0]), timeformat($vupeakL[1]);
+printf OUT "#vuPeakR --> %7.3fdB at %s\n", rms($vupeakR[0]), timeformat($vupeakR[1]);

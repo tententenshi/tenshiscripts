@@ -1,0 +1,41 @@
+#! /bin/sh
+
+PATH=/usr/ucb:/usr/bin:/bin:/etc:/usr/lib:/usr/local/bin:/usr/jbin:
+
+func(){
+	HOME=`ypcat passwd.byname | grep '^'$1':' | gawk -F: '{ print $6 }'`
+	if test "$HOME" = ""; then
+		MEMB=`ypmatch $1 mail.aliases |sed 's/,/ /g'`
+		for i in $MEMB
+		do
+#			jdare $i | awk "\$1==\"$i\"{ print }"
+			echo $i
+		done
+	fi
+	if [ -f $HOME/.forward ]; then
+		for i in `awk '/^[a-z]/ { print $0 }' $HOME/.forward`
+		do
+#			jdare $i | awk "\$1==\"$i\"{ print }"
+			echo $i
+		done
+	else
+		MEMB=`ypmatch $1 aliases |sed 's/,/ /g'|sed 's/@[A-z0-9]*//g'`
+		for i in $MEMB
+		do
+#			jdare $i | awk "\$1==\"$i\"{ print }"
+			echo $i
+		done
+	fi
+}
+
+if [ $# == 0 ]; then
+	echo " Usage: member mail_aliases"
+	exit 1
+else
+	for i in $*
+	do
+	    func $i
+	done
+	exit 0
+fi
+

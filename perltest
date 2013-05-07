@@ -1,0 +1,174 @@
+#! /usr/bin/perl
+
+use strict;
+
+#
+# hash member copy check
+#
+print "\nhash member copy and modify check...\n\n";
+
+my %test_hash = (
+	"part" => "defaultPart",
+	"pin" => "defaultPin",
+	"sign" => 1,
+);
+
+my %aHash = %test_hash;
+
+$aHash{ "part" } = "renewPart";
+$aHash{ "pin" } = "renewPin";
+
+my @value = values( %aHash );
+print "@value \n";
+
+
+#
+# input to undef test
+#
+print "\ninput to undef test...\n\n";
+
+my @aArray;
+push @aArray, ["num1", "elem1"];
+push @aArray, ["num2", "elem2"];
+push @aArray, ["num3", "elem3"];
+
+foreach my $tmpNode (@aArray) {
+#	my ($str1, $str2) = @$tmpNode;
+	my ($str1, undef) = @$tmpNode;
+#foreach my ($str1, $str2) (@aArray) {
+#	print "$str1, $str2\n";
+	print "$str1,\n";
+}
+
+
+#
+# list test
+#
+print "\nlist test...\n\n";
+
+my %default_prev_node = (
+	"part" => "",
+	"pin" => "",
+	"sign" => 1,
+);
+my %default_next_node = (
+	"part" => "",
+	"pin" => "",
+);
+
+my $tmpPart = "tmpPart";
+my $cur_part = "cur_part";
+my $pin_name = "cur_pin";
+my $tmpPin = "tmpPin";
+my %partHash;
+
+			my %aPrevNode = %default_prev_node;
+			my %aNextNode = %default_next_node;
+			$aPrevNode{ "part" } = $tmpPart; $aPrevNode{ "pin" } = $pin_name;
+			$aNextNode{ "part" } = $cur_part; $aNextNode{ "pin" } = $tmpPin;
+			push @{ $partHash{ $cur_part }->{ "prev" } }, \%aPrevNode;	# connect to list
+			push @{ $partHash{ $tmpPart }->{ "next" } }, \%aNextNode;	# connect to list
+
+foreach my $tmpRef (@{ $partHash{ "cur_part" }->{ "prev" } }) {
+	while ( my ($key, $value) = each(%$tmpRef) ) {
+		print "key:$key, value:$value\n";
+	}
+}
+
+foreach my $tmpRef (@{ $partHash{ "tmpPart" }->{ "next" } }) {
+	while ( my ($key, $value) = each(%$tmpRef) ) {
+		print "key:$key, value:$value\n";
+	}
+}
+
+
+#
+# modify member of "array of array"
+#
+print "\nmodify member of \"array of array\"...\n\n";
+
+my @orgArray;
+#push @orgArray, ("part" => "test1", "pin" => "I1", "sign" => 1);
+push @orgArray, {"part" => "test1", "pin" => "I1", "sign" => 1};
+push @orgArray, {"part" => "test2", "pin" => "I", "sign" => -1};
+push @orgArray, {"part" => "test3", "pin" => "I3", "sign" => 1};
+
+my @newArray;
+foreach my $node (@orgArray) {
+	push @newArray, $node;
+}
+
+#my @newArray2 = @orgArray;
+#my @newArray2 = map { {%{$_}} } @orgArray;
+my @newArray2;
+foreach my $tmpRef (@orgArray) {
+	my %tmpHash = %$tmpRef;
+	push @newArray2, \%tmpHash;
+}
+
+#use Clone qw(clone);
+#my @newArray2 = clone(@orgArray);
+
+foreach my $node (@newArray) {
+	if ($node->{ "part" } eq "test2") {
+		$node->{ "sign" } *= -1;
+		$node->{ "pin" } = "modified";
+	}
+}
+
+foreach my $tmpRef (@orgArray) {
+	print "node start\n";
+	while ( my ($key, $value) = each(%$tmpRef) ) {
+		print "key:$key, value:$value\n";
+	}
+}
+
+foreach my $tmpRef (@newArray) {
+	print "node start\n";
+	while ( my ($key, $value) = each(%$tmpRef) ) {
+		print "key:$key, value:$value\n";
+	}
+}
+
+print "\nnewArray2\n";
+foreach my $tmpRef (@newArray2) {
+	print "node start\n";
+	while ( my ($key, $value) = each(%$tmpRef) ) {
+		print "key:$key, value:$value\n";
+	}
+}
+
+
+#
+# Label check
+#
+print "\nlabel check...\n\n";
+
+OUTLOOP:
+for (my $i = 0; $i < 10; $i++) {
+	print "1st i:$i, ";
+	for (my $j = 0; $j < 11; $j++) {
+
+		print "j:$j, ";
+		if ($j == 5) {
+			print "JUMPED!\n";
+			next OUTLOOP;
+		}
+	}
+	print "\n";
+}
+
+OUTLOOP:
+for (my $i = 0; $i < 10; $i++) {
+	print "2nd i:$i, ";
+	for (my $j = 0; $j < 11; $j++) {
+
+		print "j:$j, ";
+		if ($j == 5) {
+			print "JUMPED!\n";
+			next OUTLOOP;
+		}
+	}
+	print "\n";
+}
+

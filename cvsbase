@@ -1,0 +1,139 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $CVS_ROOT = "/usr/roland/project/cvs";
+
+my $output_glance = 0;
+my $output_diff = 0;
+my $output_diff2 = 0;
+my @files;
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "get cvs branch root revision.\n";
+	print "usage: $cmd [-num] -[pd] filename\n";
+	print "      option -d   --> output diff\n";
+	print "      option -D   --> output diff with list style\n";
+	print "      option -p   --> output plain source\n";
+	exit 1;
+}
+
+sub process {
+	my ($filename, $cur_rev, $branch_root) = @_;
+
+	if ($output_glance) {
+		system "cvs up -p -r $branch_root \"$filename\" 2>&1";
+	} elsif ($output_diff) {
+		system "cvs diff -r $branch_root \"$filename\" 2>&1";
+	} elsif ($output_diff2) {
+		my $column_width = $ENV{'COLUMNS'};	# envelop variable 'COLUMNS' should be exported
+		my $command = "cvs diff -y -W$column_width --left-column -r $branch_root \"$filename\" 2>&1";
+		system $command;
+	} else {
+		if ($branch_root ne $cur_rev) {
+			print "$filename: root($branch_root) -> current($cur_rev)\n";
+		}
+	}
+}
+
+
+while (my $str = shift) {
+	if ($str =~ /^-(.+)/) {
+		my $opt = $1;
+		if ($opt =~ /^d/) {
+			$output_diff = 1;
+		} elsif ($opt =~ /^D/) {
+			$output_diff2 = 1;
+		} elsif ($opt =~ /^p/o) {
+			$output_glance = 1;
+		} else {
+			usage();
+		}
+	} else {
+		push(@files, $str);
+	}
+}
+
+{
+	open (CVS_Repository, "CVS/Repository") or die "cannot open CVS/Repository file.\n";
+	my $base_directory = <CVS_Repository>;
+	chomp $base_directory;
+	close (CVS_Repository);
+	my $base_repository_directory = $CVS_ROOT . "/" . $base_directory;
+
+	my $dir_or_file = ".";
+	if ($#files >= 0) {
+		$dir_or_file = shift @files;
+	}
+
+	my $filename;
+	my $cur_directory = ".";
+	my $cur_rev = "";
+	my $repositoryName = "";
+	my $isBranch = 0;
+	my $branch_name = "";
+	my $branch_root;
+	my $filename_sub;
+
+	while (1) {
+		if (-f $dir_or_file) {
+			$cur_directory = `dirname $dir_or_file`;
+			chomp $cur_directory;
+		}
+
+		open (STATUS, "cvs -f status \"$dir_or_file\" 2>&1 |") or die "cannot open $dir_or_file\n";
+
+		while (my $str = <STATUS>) {
+			if ($str =~ /cvs status: Examining (.+)/) {
+				$cur_directory = $1;
+				next;
+			} elsif ($str =~ /File: (.+?)\s+Status:/) {
+				$filename_sub = $1;
+
+				if (defined($filename) &&
+					($cur_rev ne "") &&
+					($branch_root ne $cur_rev) &&
+					($isBranch)) {	# process previous file
+					process $filename, $cur_rev, $branch_root;
+				}
+
+#				$filename = $cur_directory . "/" . $filename_sub;
+#				print "processing $filename...\n";
+				$cur_rev = "";
+				$repositoryName = "";
+				$isBranch = 0;
+				$branch_name = "";
+			} elsif ($str =~ /\s*Repository revision:\s*No revision control file/) {
+				last;
+			} elsif ($str =~ /\s*Repository revision:\s*(\S+)\s+(.+)/) {
+				$cur_rev = $1; $repositoryName = $2;
+				$repositoryName =~ m|$base_repository_directory/(.+)\Q$filename_sub\E,v$|;
+				my $filepath = $1;
+				$filepath =~ s|Attic/$||;
+				$filename = $filepath . $filename_sub;
+#				print "processing $filename...\n";
+			} elsif ($str =~ /Sticky Tag:\s*(\S+)\s*\(branch:\s*(.+)\)/) {
+				$branch_name = $1; my $branch_rev = $2;
+				$branch_root = $branch_rev;
+				$branch_root =~ s/(\.\d+)$//;
+				$isBranch = 1;
+			}
+		}
+		close STATUS;
+
+		if ($#files >= 0) {
+			$dir_or_file = shift @files;
+#			print "switching to next path ($dir_or_file)\n";
+		} else {
+			if (defined($filename) &&
+				($cur_rev ne "") &&
+				($branch_root ne $cur_rev) &&
+				($isBranch)) {	# process previous file
+				process $filename, $cur_rev, $branch_root;
+			}
+			last;
+		}
+	}
+}

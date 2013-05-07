@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:element name="特許情報">
+    <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="特許" maxOccurs="unbounded">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="出願番号" type="出願id" />
+                <xsd:element name="URL" type="xsd:anyURI" />
+                <xsd:element name="公開番号" type="公開id" />
+                <xsd:element name="公告番号" type="公告id" />
+                <xsd:element name="登録番号" type="登録id" />
+                <xsd:element name="出願人" type="xsd:string" />
+                <xsd:sequence>
+                  <xsd:element name="発明者" type="xsd:string" minOccurs="1" maxOccurs="unbounded" />
+                </xsd:sequence>
+                <xsd:element name="出願日" type="特許date" />
+                <xsd:element name="公開日" type="特許date" />
+                <xsd:element name="公告日" type="特許date" />
+                <xsd:element name="登録日" type="特許date" />
+                <xsd:element name="公開URL" type="xsd:anyURI" minOccurs="0" />
+                <xsd:element name="公告URL" type="xsd:anyURI" minOccurs="0" />
+                <xsd:element name="登録URL" type="xsd:anyURI" minOccurs="0" />
+                <xsd:element name="概要" type="xsd:anyType" />
+                <xsd:sequence>
+                  <xsd:element name="keyw" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+                </xsd:sequence>
+                <xsd:element name="コメント" type="xsd:anyType" />
+              </xsd:sequence>
+              <xsd:attribute name="status" type="idStatus"/>
+              <xsd:attribute name="notice" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:simpleType name="出願id">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="(実願)?([SH][0-9]{2}|[0-9]{4})-[0-9]{6}"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="公開id">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="(実開)?([SH][0-9]{2}|[0-9]{4})-[0-9]{6}"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="公告id">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="((実公)?([SH][0-9]{2}|[0-9]{4})-[0-9]{6})?"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="登録id">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="(([0-9])?[0-9]{7})?"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="特許date">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="([0-9]{4}-[0-9]{2}-[0-9]{2}|--)"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+  <xsd:simpleType name="idStatus">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value=""/>
+      <xsd:enumeration value="登録"/>
+      <xsd:enumeration value="取下げ"/>
+      <xsd:enumeration value="拒絶"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+</xsd:schema>
+

@@ -1,0 +1,121 @@
+#! /usr/bin/perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+my $HEAD_LEADER = 0.0;	# 0.0 sec
+my $Freq = 440;
+my $Time = 30;
+my $VOLUME = 0.5 * 0x8000;
+
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd [FREQ=440] [TIME=30 (sec)] [VOLUME=0x4000] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=2] [BIT_LENGTH=16] outWavFile\n";
+	print "\tmake genuine square wave without alias noise, using Bandlimited Impulse Trains (BLIT) (http://www.geocities.jp/daichi1969/synthprog/index.html)\n";
+	exit 1;
+}
+
+sub Round {
+	my ($val) = @_;
+	return floor($val + 0.5);
+}
+
+
+#
+# main
+#
+{
+	my %infoHash;
+	$infoHash{ "FORMAT_ID" } =  1; # Linear PCM
+	$infoHash{ "NUM_OF_CH" } =  1; # Number of Channels
+	$infoHash{ "FS" } = 	    44100; # Sampling Rate
+	$infoHash{ "BIT_LENGTH" } = 16;
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+	my $out_filename = "";
+
+	while (my $str = shift) {
+		if ($str =~ /FREQ=(.+)/) {
+			$Freq = eval($1);
+		} elsif ($str =~ /TIME=(.+)/) {
+			$Time = eval($1);
+		} elsif ($str =~ /VOLUME=(.+)/) {
+			$VOLUME = eval($1);
+		} elsif ($str =~ /FREQ=(.+)/) {
+			$Freq = eval($1);
+		} elsif ($str =~ /FORMAT_ID=(.+)/) {
+			$infoHash{ "FORMAT_ID" } = eval($1);
+		} elsif ($str =~ /FS=(.+)/) {
+			$infoHash{ "FS" } = eval($1);
+		} elsif ($str =~ /NUM_OF_CH=(.+)/) {
+			$infoHash{ "NUM_OF_CH" } = eval($1);
+		} elsif ($str =~ /BIT_LENGTH=(.+)/) {
+			$infoHash{ "BIT_LENGTH" } = eval($1);
+		} else {
+			$out_filename = $str;
+		}
+	}
+	if ($out_filename eq "") {
+		usage();
+	}
+
+	my $fhOut;
+	open($fhOut, "> $out_filename") or die "cannot open $out_filename!\n";
+	wav_util::WriteWavHeader($fhOut);
+
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+
+	my $wav_size = 0;
+	my $Time_Span = $Time * $infoHash{ "FS" };
+
+	for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
+		if ($infoHash{ "NUM_OF_CH" } == 1) {
+			wav_util::WriteWavData($fhOut, \%infoHash, (0));
+		} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
+			wav_util::WriteWavData($fhOut, \%infoHash, (0, 0));
+		}
+		$wav_size += $infoHash{ "BLOCK_SIZE" };
+	}
+
+	{
+		my $FS = $infoHash{ "FS" };
+		my $PI = 4 * atan2(1,1);
+		my $phase = 0;
+		my $output = 0.5;
+
+		for (my $time = 0; $time <= $Time_Span; $time++) {
+			$phase = $phase + 2 * $PI * $Freq / $FS;
+			$phase = ($phase >= 2 * $PI) ? ($phase - 2 * $PI) : $phase;
+
+			my $p = 0.5 * $FS / $Freq;
+			my $m = 2 * int($p / 2 + 1);
+			my $denom = sin($phase) * $p;
+			if ($denom == 0) {
+				$output += $m / $p;
+			} else {
+				$output += sin($m * $phase) / $denom;
+			}
+
+			if ($infoHash{ "NUM_OF_CH" } == 1) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (Round($output * $VOLUME)));
+			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
+				wav_util::WriteWavData($fhOut, \%infoHash, (Round($output * $VOLUME), Round($output * $VOLUME)));
+			}
+			$wav_size += $infoHash{ "BLOCK_SIZE" };
+		}
+	}
+
+	close($fhOut);
+
+	wav_util::MaintainWavHeader($out_filename, \%infoHash, $wav_size);
+}

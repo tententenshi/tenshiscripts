@@ -1,0 +1,26 @@
+#! /usr/bin/perl
+
+while ($data = shift) {
+	if (!($data =~ /0x/)) {
+		$data = "0x". $data;
+	}
+	push(@exclusive, eval($data));
+}
+
+$time = 0;
+foreach $data (@exclusive) {
+	print "data --> $data\n";
+	$time += 125*1e-6;	#start bit
+	for ($i = 0; $i < 8; $i++) {
+		if ($data & 0x01) {
+			$time += 125*1e-6;
+		} else {
+			$time += 250*1e-6;
+		}
+		$data >>= 1;
+	}
+	$time += 500*1e-6;	#start bit
+}
+
+$totaltime = $time * 1000;
+print "total time --> $totaltime msec\n";

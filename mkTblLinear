@@ -1,0 +1,124 @@
+#! /usr/local/bin/perl
+
+sub Usage {
+	print "Usage: $0 (-[hodfx]) (file)\n";
+	print "         table --> flat value stream converter or\n";
+	print "         flat value stream --> table converter\n";
+	print "         options-> o: original\n";
+	print "                   d: decimal\n";
+	print "                   f: hex --> float\n";
+	print "                   x: hex\n";
+	exit 1;
+}
+
+sub hex2float {
+	my($hexVal, $hexByte) = @_;
+	my $retVal;
+
+	if ($hexByte <= 4) {		# 2Byte
+		if ($hexVal < 0x80) { $retVal = $hexVal / 128.0; }
+		else { $retVal = ($hexVal - 0x100) / 128.0; }
+	} elsif ($hexByte <= 6) {	# 4Byte
+		if ($hexVal < 0x8000) { $retVal = $hexVal / 32768.0; }
+		else { $retVal = ($hexVal - 0x10000) / 32768.0; }
+	} elsif ($hexByte <= 10) {	# 8Byte
+#		$retVal = $hexVal / 8388608.0;
+		if ($hexVal < 0x80000000) { $retVal = $hexVal / 8388608.0; }
+#		else { $retVal = -1 * (($hexVal & 0x7fffffff) + 0x80000000) / 8388608.0; }
+		else { $retVal = $hexVal / 8388608.0 - 0x200; }
+	}
+	return $retVal;
+}
+
+
+
+$option = "o";
+if ($ARGV[0] =~ /^-(.+)/) {
+	if ($1 =~ /([odfx])/) {
+		$option = $1;
+		shift;
+	} else {
+		Usage();
+	}
+}
+
+$mode = "uninitialized";
+
+while ($str = <>) {
+	$str =~ s(//.*$)();	# remove comment
+	$str =~ s(/\*.*?\*/)()g;	# remove comment
+	$str =~ s(^\s*(.*)\s*$)(\1);	# remove white space
+
+	if (($mode eq "uninitialized") && ($str =~ /^\s*(-?0[Xx][\da-fA-F]+|-?[\d\.]+),?\s*$/)) {	# only numeric
+		$mode = "build_table";
+		push @buf, $1;
+
+		my $tmpstr = $1;
+		if ($option eq "x") { $tmpstr = sprintf("0x%x", $1); }
+		elsif ($option eq "d") { $tmpstr = sprintf("%d", $1); }
+		$maxlength = length($tmpstr);
+		next;
+	}
+	if ($mode eq "build_table") {
+		$str =~ s/^\s*(.+?),?\s*$/$1/;	# trim & remove comma
+		push @buf, $str;
+
+		my $tmpstr = $str;
+		if ($option eq "x") { $tmpstr = sprintf("0x%x", $str); }
+		elsif ($option eq "d") { $tmpstr = sprintf("%d", $str); }
+		if ($maxlength < length($tmpstr)) { $maxlength = length($tmpstr); }
+		next;
+	}
+	if ($str =~ /.+,.+,/) {
+		$mode = "break_table";
+		@valStrArray = split(/,/, $str);
+		for ($i = 0; $i <= $#valStrArray; $i++) {
+			my $valStr = $valStrArray[$i];
+
+			if (($i == $#valStrArray) && ($valStr =~ /^\s*$/)) {
+				last;
+			}
+
+			$valStr =~ s(^\s*(.*)\s*$)(\1);	# remove white space
+			if ($option eq "o") {
+				print $valStr;
+			} else {
+				$hexVal = eval($valStr);
+				$hexByte = length($valStr);
+				if ($option eq "f") { print hex2float($hexVal, $hexByte); }
+				elsif ($option eq "x") { printf "0x%02x", $hexVal; }
+				elsif ($option eq "d") { printf "%d", $hexVal; }
+				else { }
+			}
+			print "\n";
+		}
+	} else {
+		print $str;
+	}
+}
+
+if ($mode eq "build_table") {
+	if ($maxlength * 8 <= 48) { $elem_of_line = 8; }
+	elsif ($maxlength * 4 <= 40) { $elem_of_line = 4; }
+	else { $elem_of_line = 2; }
+
+	$cur_elem = 0;
+	foreach $str (@buf) {
+		if ($cur_elem % $elem_of_line == 0) { print "\t"; }
+
+		my $tmpstr = $str;
+		if ($option eq "x") { $tmpstr = sprintf("0x%0*x", $maxlength -2, $str); }
+		elsif ($option eq "d") { $tmpstr = sprintf("%d", $str); }
+		if ($maxlength < length($tmpstr)) { $maxlength = length($tmpstr); }
+
+		print $tmpstr . ",";
+		if ($option eq "o") {
+			for ($i = length($tmpstr); $i <= $maxlength; $i++) { print " "; }
+		} else {
+			print " ";
+		}
+		$cur_elem++;
+		if ($cur_elem % $elem_of_line == 0) { print "\n"; }
+	}
+	print "\n";
+}

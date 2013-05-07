@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- binary to hex converter --\n";
+	print "usage: $cmd inFile(*.bin)\n";
+	print "\n";
+}
+
+if ($#ARGV != 0) {
+	usage();
+	exit 1;
+}
+
+
+$infile = shift;
+
+open(IN, "$infile") or die "cannot open $infile!\n";
+
+
+$size = read IN, $buf, 16;	# size of fmt
+$adrs = 0;
+
+while($size) {
+	@val = unpack "C$size", $buf;
+	print "\t";
+	for ($i = 0; $i < $size; $i++) {
+		printf "0x%02x,", $val[$i];
+	}
+	printf "/* 0x%04x */\n", $adrs;
+
+	$size = read IN, $buf, 16;	# size of fmt
+	$adrs += 16;
+}
+
+close(IN);

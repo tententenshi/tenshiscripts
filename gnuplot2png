@@ -1,0 +1,64 @@
+#! /usr/local/bin/perl
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- gnuplot setting file to png --\n";
+	print "usage: $cmd [--small] inFile(*.gnu) [outFilename]\n";
+	print "\n";
+}
+
+if ($ARGV[0] =~ /^--(.+)/) {
+	$mode = $1;
+	shift;
+}
+
+if (($#ARGV != 0) && ($#ARGV != 1)) {
+	usage();
+	exit 1;
+}
+
+$infile = shift;
+if (!($outfile = shift)) {
+	$outfile = $infile;
+	$outfile =~ s/\.gnu/\.png/;
+}
+
+$tmpFile = $infile . "gnuplot2png_tmp";
+
+open(IN, "$infile") or die "cannot open $infile!\n";
+open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
+
+print OUT "set terminal png\n";
+print OUT "set output \"$outfile\"\n";
+print OUT "set style data lines\n";
+print OUT "set grid\n";
+if ($mode eq "small") {
+	$size_set_str = sprintf "set size 1, 1\n";
+} else {
+	$size_set_str = sprintf "set size 2, 2\n";
+}
+
+while ($str = <IN>) {
+	if ($str =~ /set\s+terminal/) {
+		next;
+	}
+	if ($str =~ /set\s+output/) {
+		next;
+	}
+	if ($str =~ /set\s+size\s+(.+)/) {
+		if ($1 =~ /(ratio|square)/) {
+		} else {
+			next;
+		}
+	}
+
+	if ($str =~ /plot/) {
+		print OUT $size_set_str;
+	}
+	print OUT $str;
+}
+
+system '/usr/bin/gnuplot', "$tmpFile";
+
+unlink $tmpFile;

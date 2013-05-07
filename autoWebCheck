@@ -1,0 +1,34 @@
+# auto web check 
+# 前日更新されたweb をさがす。
+
+WEBCHECK_HOME=/home/rjack/tnisimu
+
+WEB_PATH=/usr/roland/web
+OMIT_PATH="
+	$WEB_PATH/*/mailbox
+	$WEB_PATH/*/pukiwiki
+	$WEB_PATH/*/pukiwiki.pub
+	$WEB_PATH/*/*/pukiwiki
+	$WEB_PATH/*/*/*/pukiwiki
+	$WEB_PATH/rjack-cgi
+	$WEB_PATH/hardwiki
+	$WEB_PATH/piano/GREEN/HP2006/SOFT
+	$WEB_PATH/usr/makotom
+	$WEB_PATH/piano/circuit_team/php_test
+	$WEB_PATH/piano/circuit_team/bkup/php_test_bckup
+"
+
+OMIT_PATH_EXPR=
+for i in $OMIT_PATH; 
+do
+	if [ "$OMIT_PATH_EXPR" != "" ]; then
+		OMIT_PATH_EXPR="$OMIT_PATH_EXPR -or"
+	fi
+	OMIT_PATH_EXPR="$OMIT_PATH_EXPR -path $i -prune";
+done
+
+find $WEB_PATH -follow \( $OMIT_PATH_EXPR \) -o \( -mtime 0 -type f \) -print > $WEBCHECK_HOME/temp_autoWebCheck.txt 2> /dev/null
+
+sed 's/\/usr\/roland\/web/http:\/\/web.ck.miyakoda.roland.co.jp/g' $WEBCHECK_HOME/temp_autoWebCheck.txt
+
+rm $WEBCHECK_HOME/temp_autoWebCheck.txt

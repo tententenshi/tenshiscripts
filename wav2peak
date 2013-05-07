@@ -1,0 +1,142 @@
+#! /usr/local/bin/perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+require $FindBin::Bin . "/wav_util.pm";
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- wav to dat converter --\n";
+	print "usage: $cmd inFile(*.wav) outFile(*.dat)\n";
+	print "\n";
+}
+
+if ($#ARGV != 1) {
+	usage();
+	exit 1;
+}
+
+
+my $ATT_CURVE_COEF = 0x7fe0 / 0x8000;
+my @ENV_POS;
+my @ENV_NEG;
+my @DATA_BUF;
+
+my @PEAK_POS_FORWARD;
+my @PEAK_NEG_FORWARD;
+my @PEAK_POS_REVERSE;
+my @PEAK_NEG_REVERSE;
+
+sub ProcessForward {
+	my ($fhOut, $pos, $data, $ch, $data_1_0) = @_;
+
+	if (($data >= 0) && ($ENV_POS[$ch] <= $data)) {
+		$ENV_POS[$ch] = $data;
+#		printf($fhOut "$ch:POS $pos, $data\n");
+#		printf($fhOut "$pos, $data\n");
+		$PEAK_POS_FORWARD[$ch]->{ $pos } = $data;
+	} else {
+		$ENV_POS[$ch] *= $ATT_CURVE_COEF;
+	}
+
+	if (($data <= 0) && ($ENV_NEG[$ch] >= $data)) {
+		$ENV_NEG[$ch] = $data;
+#		printf($fhOut "$ch:NEG $pos, $data\n");
+		$PEAK_NEG_FORWARD[$ch]->{ $pos } = $data;
+	} else {
+		$ENV_NEG[$ch] *= $ATT_CURVE_COEF;
+	}
+}
+
+sub ProcessReverse {
+	my ($fhOut, $pos, $data, $ch, $data_1_0) = @_;
+
+	if (($data >= 0) && ($ENV_POS[$ch] <= $data)) {
+		$ENV_POS[$ch] = $data;
+#		printf($fhOut "$ch:POS $pos, $data\n");
+#		printf($fhOut "$pos, $data\n");
+		$PEAK_POS_REVERSE[$ch]->{ $pos } = $data;
+	} else {
+		$ENV_POS[$ch] *= $ATT_CURVE_COEF;
+	}
+
+	if (($data <= 0) && ($ENV_NEG[$ch] >= $data)) {
+		$ENV_NEG[$ch] = $data;
+#		printf($fhOut "$ch:NEG $pos, $data\n");
+		$PEAK_NEG_REVERSE[$ch]->{ $pos } = $data;
+	} else {
+		$ENV_NEG[$ch] *= $ATT_CURVE_COEF;
+	}
+}
+
+
+
+#
+# main
+#
+{
+	my $infile = shift;
+	my $outfile = shift;
+
+	my $fhIn, my $fhOut;
+	open($fhIn, "$infile") or die "cannot open $infile!\n";
+	open($fhOut, "> $outfile") or die "cannot open $outfile!\n";
+	binmode $fhIn;
+
+	my %infoHash;
+	my @preChunkBuf, my @postChunkBuf;
+	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
+
+	my $data_1_0 = 1.0;
+	if ($infoHash{ "FORMAT_ID" } == 1) {
+		if ($infoHash{ "BIT_LENGTH" } == 16) {
+			$data_1_0 = 0x8000;
+		} elsif ($infoHash{ "BIT_LENGTH" } == 24) {
+			$data_1_0 = 0x8000 * 0x100;
+		} elsif ($infoHash{ "BIT_LENGTH" } == 32) {
+			$data_1_0 = 0x8000 * 0x10000;
+		}
+	}
+
+	my $remain = $dataSize;
+	my $pos = 0;
+	while ($remain > 0) {
+		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
+
+		for (my $i = 0; $i <= $#dataArray; $i++) {
+			ProcessForward($fhOut, $pos, $dataArray[$i], $i, $data_1_0);
+		}
+
+		$remain -= $infoHash{ "BLOCK_SIZE" };
+		$pos++;
+		push @DATA_BUF, \@dataArray;
+	}
+
+	$pos--;
+	while (my $dataRef = pop @DATA_BUF) {
+		for (my $i = 0; $i <= $#$dataRef; $i++) {
+			ProcessReverse($fhOut, $pos, $$dataRef[$i], $i, $data_1_0);
+		}
+		$pos--;
+	}
+
+	for (my $ch = 0; $ch < $infoHash{ "NUM_OF_CH" }; $ch++) {
+		foreach my $pos (sort {$a <=> $b} (keys(%{ $PEAK_POS_FORWARD[$ch] }))) {
+			if (defined($PEAK_POS_REVERSE[$ch]->{ $pos })) {
+#				printf($fhOut "$pos,  %g\n", $PEAK_POS_FORWARD[$ch]->{ $pos });
+			}
+		}
+		foreach my $pos (sort {$a <=> $b} (keys(%{ $PEAK_NEG_FORWARD[$ch] }))) {
+			if (defined($PEAK_NEG_REVERSE[$ch]->{ $pos })) {
+				printf($fhOut "$pos,  %g\n", $PEAK_NEG_FORWARD[$ch]->{ $pos });
+			}
+		}
+	}
+
+	close ($fhIn);
+	close ($fhOut);
+}

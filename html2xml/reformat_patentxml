@@ -1,0 +1,137 @@
+#! /usr/bin/perl
+
+use strict;
+use Encode;
+use Encode::Guess qw/ shiftjis euc-jp 7bit-jis /;
+
+my @tag_array = ();
+
+sub parse_date {
+	my ($text) = @_;
+#	my $len = length($text);
+#	print "len: $len\n";
+	if (length($text) == 6) {
+		$text += 19250000;
+	} elsif (length($text) == 7) {
+		$text += 18880000;
+	}
+	$text =~ /(.+)(..)(..)$/;
+	$text = $1 . "-" . $2 . "-" . $3;
+	return $text;
+}
+
+sub parse_id {
+	my ($text) = @_;
+	if ($text =~ /(.+)\.(.+)/) {
+		my ($former, $latter) = ($1, $2);
+		if (length($former) == 2) {
+			$text = "S" . $former . "-" . $latter;
+		} elsif (length($former) == 3) {
+			if ($former < 110) {
+				$text = "H0" . ($former - 100) . "-" . $latter;
+			} else {
+				$text = "H" . ($former - 100) . "-" . $latter;
+			}
+		} else {
+			$text = $former . "-" . $latter;
+		}
+	}
+	return $text;
+}
+
+sub parse_keyw {
+	my ($text) = @_;
+	$text =~ s#、$##;	# 行末のコンマを取る
+	$text =~ s#,$##;
+	$text =~ s#、#</keyw><keyw>#g;
+	$text =~ s#,#</keyw><keyw>#g;
+	return $text;
+}
+
+sub getStatus {
+	foreach my $tag (@tag_array) {
+		my $tagname = $tag->[0];
+		my $text = $tag->[1];
+		if (($tagname eq "登録番号") && ($text ne "")) {
+			return "登録";
+		} elsif ($tagname eq "経過") {
+			if ($text =~ /拒絶/) {
+				return "拒絶";
+			} elsif ($text =~ /取下げ/) {
+				return "取下げ";
+			}
+		}
+	}
+	return "";
+}
+
+sub IsMajor {
+	foreach my $tag (@tag_array) {
+		my $tagname = $tag->[0];
+		my $text = $tag->[1];
+		if (($tagname eq "重要") && ($text ne "")) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+sub reformat_xml {
+	my $isRegisteredStr = getStatus();
+	my $isMajorStr = (IsMajor()) ? "重要" : "";
+
+	print "<特許 status=\"$isRegisteredStr\" notice=\"$isMajorStr\">\n";
+	foreach my $tag (@tag_array) {
+		my $tagname = $tag->[0];
+		my $text = $tag->[1];
+		if ($tagname =~ m#日$#) {
+			$text = parse_date($text);
+		} elsif ($tagname =~ m#番号$#) {
+			$text = parse_id($text);
+		} elsif ($tagname eq "keyw") {
+			$text = parse_keyw($text);
+		}
+		print "<$tagname>$text</$tagname>\n";
+	}
+	print "</特許>\n\n";
+}
+
+sub xml_header {
+	print "<?xml version=\"1.0\" encoding=\"euc-jp\"?>\n";
+	print "<?xml-stylesheet href=\"patent_list.xsl\" type=\"text/xsl\"?>\n\n";
+}
+
+while (my $str = <>) {
+	$str = encode('euc-jp', decode('shiftjis', $str));
+#	print "$str\n";
+#        Encode::from_to( $$txtref, $from, $to, Encode::XMLCREF() );
+	if ($str =~ m#<特許情報>#) {
+		xml_header();
+		print $str;
+	} elsif ($str =~ m#</特許情報>#) {
+		print $str;
+	} elsif ($str =~ m#<特許>#) {
+	} elsif ($str =~ m#</特許>#) {
+		reformat_xml();
+		@tag_array = ();
+	} elsif ($str =~ m#^<(\S+?)>(.+)$#) {
+		my $tagname = $1;
+#		print "before: $str";
+		$str = $2;
+#		print "after: <$tagname> + $str\n";
+		my $text = '';
+		if (!($str =~ m#^(.*)</$tagname>#)) {
+			print "$str not matched\n";
+		}
+#		while (!($str =~ m#^(.*)</$tagname>#)) {
+#			$text .= $str;
+#			$str = <>;
+#			print "after: <$tagname> + $str\n";
+#		}
+		$text .= $1;
+		push @tag_array, [$tagname, $text];
+#		print "$tagname: $text\n";
+	} else {
+#		print $str;
+	}
+}

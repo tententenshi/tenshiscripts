@@ -1,0 +1,30 @@
+todofile=$HOME/todo.dat
+tempfile=$HOME/temp.todo
+donefile=$HOME/todo.done
+today=`date +%Y"年"%m"月"%d"日("%a")" | awk '{print $1}'`
+
+###################################################
+_add () {
+	emacs -nw $tempfile
+	cat $tempfile | awk 'NF>0 {print "'$today' " $0}' >> $todofile
+	rm -f $tempfile
+}
+
+###################################################
+_done () {
+	cat $todofile | awk $response'!=NR {print $0}' > $tempfile
+	cat $todofile | awk $response'== NR {print "'$today' " $0}' >> $donefile
+	[ -s $tempfile ] && mv -f $tempfile $todofile
+}
+
+###################################################
+less -E $todofile | awk '{print NR "	"  $0}'
+echo "項目の追加？・移動？(a for add, q for quit)"
+read response
+
+case $response in
+q)	exit 1;;
+a)	_add;;
+[1-9]*)	_done $*;;
+*)	exit 1;;
+esac

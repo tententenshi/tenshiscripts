@@ -1,0 +1,68 @@
+#! /usr/bin/perl
+
+$sum = 0;
+
+while (<>) {
+	$str .= $_;
+}
+
+@tmplist = split(/[\t\s]+/, $str);
+
+{
+	$StateExcHead = 1;	# f0
+	$StateMaker = 2;
+	$StateDevID = 3;
+	$StateModelID = 4;
+	$StateCommand = 5;
+	$StateData = 6;
+	$StateSum = 7;
+	$StateExcTail = 8;
+}
+$curState = $StateData;
+$lastVal = 0;
+foreach $hexval (@tmplist) {
+	if ($hexval =~ /f0/i) {
+		$curState = $StateExcHead;
+#		print "stateHead\n";
+		next;
+	}
+	if ($hexval =~ /f7/i) {
+		$curState = $StateExcTail;
+		$sum -= $lastVal;	#subtract sum
+#		print "stateTail\n";
+		last;
+	}
+
+	if ($curState == $StateExcHead) {
+		$curState = $StateMaker;
+#		print "stateMaker\n";
+		next;
+	} elsif ($curState == $StateMaker) {
+		$curState = $StateDevID;
+#		print "stateDevID\n";
+		next;
+	} elsif ($curState == $StateDevID) {
+		if (!($hexval =~ /00/)) {
+			$curState = $StateModelID;
+#			print "stateModelID\n";
+		}
+		next;
+	} elsif ($curState == $StateModelID) {
+		$curState = $StateCommand;
+#		print "stateCommand\n";
+		next;
+	} elsif ($curState == $StateCommand) {
+		$curState = $StateData;
+#		print "stateData\n";
+	}
+		
+	$hexval = "0x".$hexval;
+	$hexval = eval($hexval);
+	$sum += $hexval;
+	$lastVal = $hexval;
+#	printf "sum -> 0x%08x\n", $sum;
+}
+
+$chksum = 0x7f & (-$sum);
+
+printf "checksum -> 0x%02x\n", $chksum;

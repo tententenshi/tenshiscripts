@@ -1,0 +1,121 @@
+#! /usr/bin/perl
+
+use strict;
+
+
+sub transform {
+	my ($str) = @_;
+	$str =~ s/\|/\\\|/g;
+	$str =~ s/\^/\\\^/g;
+	return $str;
+}
+
+sub encode {
+	my ($str) = @_;
+	$str =~ s/&amp;/&/g;
+	$str =~ s/&/&amp;/g;
+	return $str;
+}
+
+sub encodeurl {
+	my ($str) = @_;
+	$str =~ s/&amp;/&/g;
+	$str =~ s/&/&amp;/g;
+	if (!($str =~ /^http/)) {
+		$str = "http://web.patrol.hosoe.roland.co.jp/poJP/" . $str;
+	}
+	return $str;
+}
+
+
+if ($#ARGV != 1) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd template_file html2txt_outputfile\n";
+	exit 1;
+}
+
+my $templatefile = shift;
+my $patentfile = shift;
+
+open (TEMPLATE, "$templatefile") or die "cannot open $templatefile\n";
+
+
+my $start_condition = '';
+my $end_condition = '';
+my @template = ();
+my $isStarted = 0;
+
+while (my $str = <TEMPLATE>) {
+	if ($str =~ /^(.+?)\s*<start>/) {
+		$start_condition = $1;
+		$isStarted = 1;
+	} elsif ($isStarted) {
+		if ($str =~ /^(.+?)\s*<end>/) {
+			$end_condition = $1;
+		} elsif ($str =~ /^(.+?)\s*:\s*$/) {
+			push @template, [$1, '', ''];
+		} elsif ($str =~ /^(.+?)\s*:\s*\((.+?)\)$/) {
+			push @template, [$1, '', $2];
+		} elsif ($str =~ /^(.+?)\s*:\s*(.+?)\s*\((.+?)\)$/) {
+			push @template, [$1, $2, $3];
+		} elsif ($str =~ /^(.+?)\s*:\s*(.+?)\s*$/) {
+			push @template, [$1, $2, ''];
+		}
+	}
+}
+
+close (TEMPLATE);
+
+open (PATENT, "$patentfile") or die "cannot open $patentfile\n";
+
+my $isIn = 0;
+my $cur_index = 0;
+
+print "<?xml version=\"1.0\" encoding=\"Shift_JIS\"?>\n";
+print "<?xml-stylesheet href=\"patent_list.xsl\" type=\"text/xsl\"?>\n\n";
+print "<“Á‹–î•ñ>\n";
+while (my $str = <PATENT>) {
+#	print $str;
+	my $my_start_condition = transform($start_condition);
+#	print "my_start: $my_start_condition\n";
+	if ($str =~ /$my_start_condition/) {
+		$isIn = 1;
+		$cur_index = 0;
+		print "<“Á‹–>\n";
+		next;
+	}
+	my $my_end_condition = transform($end_condition);
+#	print "my_end: $my_end_condition\n";
+	if ($str =~ /$my_end_condition/) {
+		$isIn = 0;
+		print "</“Á‹–>\n\n";
+		next;
+	}
+
+	if (!$isIn) {
+		next;
+	}
+
+	my $my_cur_condition = transform($template[$cur_index]->[0]);
+#	print "my_cur($cur_index): $my_cur_condition-->\n";
+	if ($str =~ /$my_cur_condition\s*:\s*(.*?)\s*\\\((.*?)\\\)/) {
+		my ($text, $url) = ($1, $2);
+#		print "condition matched\n";
+		my $my_cur_tag = $template[$cur_index]->[1];
+		my $my_cur_urltag = $template[$cur_index]->[2];
+		if ($my_cur_tag ne '') {
+			$text = encode($text);
+			print "<$my_cur_tag>$text</$my_cur_tag>\n";
+		}
+		if (($my_cur_urltag ne '') && ($text ne '')) {
+			$url = encodeurl($url);
+			print "<$my_cur_urltag>$url</$my_cur_urltag>\n";
+		}
+		$cur_index++;
+	} elsif ($str =~ /$my_cur_condition$/) {
+		$cur_index++;
+	}
+}
+print "</“Á‹–î•ñ>\n";
+
