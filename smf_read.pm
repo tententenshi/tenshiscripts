@@ -23,7 +23,7 @@ sub ProcessHeader
 
 	read $fh, $buf, $size - 6;	# skip remaining
 
-	print "format: ". $$infoHashRef{"format"} . " num_of_track: " . $$infoHashRef{"num_of_track"} . " TPQN: ". $$infoHashRef{"TPQN"} . "  \n";
+#	print "format: ". $$infoHashRef{"format"} . " num_of_track: " . $$infoHashRef{"num_of_track"} . " TPQN: ". $$infoHashRef{"TPQN"} . "  \n";
 }
 
 sub ParseDeltaTime
