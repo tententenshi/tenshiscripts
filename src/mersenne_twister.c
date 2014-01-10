@@ -178,6 +178,7 @@ double genrand_res53(void)
 } 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
+#if 0
 int main(void)
 {
     int i;
@@ -195,3 +196,4 @@ int main(void)
     }
     return 0;
 }
+#endif
