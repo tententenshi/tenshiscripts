@@ -1,0 +1,26 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $input_str = shift;
+
+my $val = eval($input_str);
+
+if ($input_str =~ /^0x/) {
+#hex2float
+    my $packedval = pack("V", $val);
+    my $fVal = unpack("f", $packedval);
+
+    my $intfVal = $fVal * (2 << 13);
+    my $intfVal_int = int($intfVal);
+    my $intfVal_frac = int(($intfVal - $intfVal_int) * (2 << 19));
+
+    printf("%15.12f as internal integer: 0x%x.%05xp0\n", $fVal, $intfVal_int, $intfVal_frac);
+
+} else {
+#float2hex
+    my $packedval = pack("f", $val);
+    my $hVal = unpack("V", $packedval);
+
+    printf("0x%08x\n", $hVal);
+}
