@@ -184,10 +184,12 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 #		print "mag_pkg --> $mag_pkg, q_d --> $q_d\n";
 		if (abs($mag_pkg) < 1) {
 			$q_d = $q_d / abs($mag_pkg);
+			$q_a = $q_a / abs($mag_pkg);
 		}
 
 		printf "	freq         --> %9.2f (Hz) ($freq_d)\n", $freq_d;
 		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
+		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
 		printf "	gain_pass    --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
 		printf "	gain as pkg  --> %9.2f (dB) ($gain_pkg)\n", $gain_pkg;
 
