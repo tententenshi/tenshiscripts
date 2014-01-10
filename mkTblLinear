@@ -98,8 +98,8 @@ while ($str = <>) {
 }
 
 if ($mode eq "build_table") {
-	if ($maxlength * 8 <= 48) { $elem_of_line = 8; }
-	elsif ($maxlength * 4 <= 40) { $elem_of_line = 4; }
+	if ($maxlength * 8 <= 104) { $elem_of_line = 8; }
+	elsif ($maxlength * 4 <= 104) { $elem_of_line = 4; }
 	else { $elem_of_line = 2; }
 
 	$cur_elem = 0;
