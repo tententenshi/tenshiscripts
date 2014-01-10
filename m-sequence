@@ -1,0 +1,189 @@
+#! /usr/bin/perl
+
+
+use strict;
+
+my $MAX_DATA_SIZE = 44100 * 10;
+
+
+my $isLeftShiftMode = 1;
+my $isGaloisMode = 1;
+if ($ARGV[0] =~ /(leftf|rightf)/i) {
+    $isGaloisMode = 0;	# Fibonacci mode
+    if ($ARGV[0] =~ /rightf/) {
+	$isLeftShiftMode = 0;
+    }
+    shift;
+} elsif ($ARGV[0] =~ /(left|right)/i) {
+    if ($ARGV[0] =~ /right/) {
+	$isLeftShiftMode = 0;
+    }
+    shift;
+}
+
+
+my @bit_list = @ARGV;
+
+if ($#bit_list < 0) {
+    exit 1;
+}
+
+my $mpyer = 0;
+my $mpyer_length;
+
+if ($#bit_list == 0) {
+    my $string_mpyer = shift;
+
+    if ($string_mpyer =~ /^0x/) {
+	$mpyer = eval $string_mpyer;
+	$mpyer_length = 0;
+	while (((1 << $mpyer_length) <= $mpyer) && ($mpyer_length < 32)) { $mpyer_length++ }
+    } else {
+	$mpyer_length = length($string_mpyer);
+
+	my $target_bit = $mpyer_length - 1;
+
+	foreach my $ch (split //, $string_mpyer) {
+	    if ($ch ne "0") {
+		$mpyer += (1 << $target_bit);
+	    }
+	    $target_bit--;
+	}
+    }
+} else {
+    foreach my $bit (@bit_list) {
+	if ($mpyer_length < $bit + 1) {
+	    $mpyer_length = $bit + 1;
+	}
+	$mpyer |= (1 << $bit);
+    }
+}
+
+my $max_bit = 1 << ($mpyer_length - 1);
+my $count = 0;
+
+if ($isGaloisMode) {		# Galois mode
+    if ($isLeftShiftMode) {	# rotate left sequence
+	print "Galois rotate left sequence\n";
+
+	my $init_val = $max_bit; # as inisital value
+
+	my $val = $init_val;
+
+	while (1) {
+	    my $isMSB = $val & $max_bit;
+	    if ($isMSB) {
+		$val = $val ^ $mpyer;
+	    }
+
+	    printf "0x%0*x\n", ($mpyer_length + 2) / 4, $val;
+
+	    $val = $val << 1;
+	    $val &= ($max_bit * 2 - 1);
+
+	    $count++;
+
+	    if (($val == $init_val) || ($count > $MAX_DATA_SIZE)) {
+		last;
+	    }
+	}
+    } else {			# rotate right sequence
+	print "Galois rotate right sequence\n";
+
+	my $init_val = 1;
+
+	my $val = $init_val;
+
+	while (1) {
+	    my $isLSB = $val & 1;
+	    if ($isLSB) {
+		$val = $val ^ $mpyer;
+	    }
+	    $val = $val >> 1;
+
+	    printf "0x%0*x\n", ($mpyer_length + 2) / 4, $val;
+
+	    $count++;
+
+	    if (($val == $init_val) || ($count > $MAX_DATA_SIZE)) {
+		last;
+	    }
+	}
+    }
+} else {
+    if ($isLeftShiftMode) {	# rotate left sequence
+	print "Fibonacci rotate left sequence\n";
+
+	my $init_val = $max_bit;	# as inisital value
+	my $val = $init_val;
+
+	my @bit_list;
+	for (my $bit = 0; $bit < $mpyer_length; $bit++) {
+	    if ($mpyer & (1 << $bit)) {
+		push @bit_list, $bit;
+	    }
+	}
+
+	while (1) {
+	    my $isLSB = 0;
+	    foreach my $bit (@bit_list) {
+		if ($bit != 0) {
+		    if ($val & (1 << $bit)) {
+			$isLSB ^= 1;
+		    }
+		}
+	    }
+	    if ($isLSB & 1) {
+		$val |= 1;
+	    }
+	    $val &= ($max_bit - 1);
+	    printf "0x%0*x, isLSB:$isLSB\n", ($mpyer_length + 2) / 4, $val;
+	    $count++;
+
+	    $val <<= 1;
+
+	    if (($val == $init_val) || ($count > $MAX_DATA_SIZE)) {
+		last;
+	    }
+	}
+    } else {			# rotate right sequence
+	print "Fibonacci rotate right sequence\n";
+
+	my $init_val = 1;	# as inisital value
+	my $val = $init_val;
+
+	my @bit_list;
+	for (my $bit = 0; $bit < $mpyer_length; $bit++) {
+	    if ($mpyer & (1 << $bit)) {
+		push @bit_list, $bit;
+	    }
+	}
+
+	while (1) {
+#	    my $isMSB = 1;	# as bmc implement
+	    my $isMSB = 0;
+	    foreach my $bit (@bit_list) {
+		if ($bit != ($mpyer_length - 1)) {
+		    if ($val & (1 << $bit)) {
+			$isMSB ^= 1;
+		    }
+		}
+	    }
+	    $val = $val >> 1;
+	    if ($isMSB & 1) {
+		$val |= ($max_bit / 2);
+	    }
+
+	    printf "0x%0*x, isMSB:$isMSB\n", ($mpyer_length + 2) / 4, $val;
+
+	    $count++;
+
+	    if (($val == $init_val) || ($count > $MAX_DATA_SIZE)) {
+		last;
+	    }
+	}
+    }
+}
+
+printf "mpyer is 0x%x\n", $mpyer;
+printf "total legnth 0x%x\n", $count;

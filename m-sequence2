@@ -1,0 +1,82 @@
+#! /usr/bin/perl
+
+
+use strict;
+
+
+my @bit_list = @ARGV;
+
+my $mpyer = 0;
+my $mpyer_length;
+
+if ($#bit_list == 0) {
+    my $string_mpyer = shift;
+    $mpyer_length = length($string_mpyer);
+
+    my $target_bit = $mpyer_length - 1;
+
+    foreach my $ch (split //, $string_mpyer) {
+	if ($ch ne "0") {
+	    $mpyer += (1 << $target_bit);
+	}
+	$target_bit--;
+    }
+} else {
+    foreach my $bit (@bit_list) {
+	if ($mpyer_length < $bit + 1) {
+	    $mpyer_length = $bit + 1;
+	}
+	$mpyer |= (1 << $bit);
+    }
+}
+
+
+my $max_bit = 1 << ($mpyer_length - 1);
+#my $init_val = $max_bit; # as inisital value
+my $init_val = 1;
+
+my $val = $init_val;
+my $count = 0;
+
+print "kusax's calculation\n";
+
+while (1) {
+    my $isLSB = $val & 1;
+    if ($isLSB) {
+        $val = $val ^ $mpyer;
+    }
+    $val = $val >> 1;
+
+#    my $isMSB = $val & $max_bit;
+#    if ($isMSB) {
+#        $val = $val ^ $mpyer;
+#    }
+
+#    printf "0x%08x\n", $val;
+
+#    $val = $val << 1;
+#    $val &= ($max_bit * 2 - 1);
+
+    $count++;
+
+    if ($val == $init_val) {
+        last;
+    }
+}
+
+
+$val = 0;
+$count = 0;
+do{
+    $val ^= $mpyer * 2;
+    while(($val & 0x1) == 0){
+	$val >>= 1;
+	$count++;
+	printf "0x%08x\n", $val;
+    }
+    $val--;
+} while ($val != 0);
+
+
+printf "mpyer is 0x%x\n", $mpyer;
+printf "total legnth 0x%x\n", $count;
