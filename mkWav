@@ -137,6 +137,8 @@ sub Round {
 					die "data format is not matched! (1ch fixed point)\n";
 				}
 #				print "mono decimal val $1\n";
+			} else {
+				next;
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 		}
