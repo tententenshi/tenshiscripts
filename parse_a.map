@@ -1,0 +1,89 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $memory_configuration = 0;
+my $memory_map_head_entered = 0;
+my $memory_map_entered = 0;
+my @block_list;
+my %block_detail;
+my %object_list;
+
+while (my $str = <>) {
+	if (!$memory_configuration) {
+		if ($str =~/Memory Configuration/) {
+			$memory_configuration = 1;
+			$memory_map_head_entered = 0;
+			$memory_map_entered = 0;
+		}
+	}
+	if (!$memory_map_head_entered) {
+		if ($str =~ /Linker script and memory map/) {
+			$memory_configuration = 0;
+			$memory_map_head_entered = 1;
+			$memory_map_entered = 0;
+		}
+	}
+	{
+		if ($str =~ /^\.text/) {
+			$memory_configuration = 0;
+			$memory_map_head_entered = 0;
+			$memory_map_entered = 1;
+		} elsif ($str =~ /^\.comment/) {
+			$memory_configuration = 0;
+			$memory_map_head_entered = 0;
+			$memory_map_entered = 0;
+		}
+	}
+
+	if ($memory_map_entered) {
+		# top of memory block
+		if ($str =~ /(\..+)\s+(0x.+)\s+(0x.+)/) {
+			my ($block_name, $start, $size) = ($1, $2, $3);
+			push @block_list, [$block_name, $start, $size];
+
+			my $detail_name;
+			my $file;
+			my $start;
+			my $size;
+			while (my $str = <>) {
+				if ($str =~ /^\s*$/) { last; }
+
+				if ($str =~ /^ (\.\S+)\s+(0x\S+)\s+(0x\S+)\s+(.+)/) {
+					($detail_name, $start, $size, $file) = ($1, eval($2), eval($3), $4);
+#					print "$size, $block_name, $detail_name, $file stacked1\n";
+					$block_detail{ $start } = [$size, $block_name, $detail_name, $file];
+				} elsif ($str =~ /^\s+(0x\S+)\s+(0x\S+)\s+(.+)/) {
+					($start, $size, $file) = (eval($1), eval($2), $3);
+#					print "$size, $block_name, $detail_name, $file stacked2\n";
+					$block_detail{ $start } = [$size, $block_name, $detail_name, $file];
+				} elsif ($str =~ /^\s+(0x\S+)\s+(.+)$/) {
+					($start, my $object) = (eval($1), $2);
+#					print "$start, $object, $block_name, $detail_name, $file stacked\n";
+					$object_list{ $start } = [$block_name, $detail_name, $file, $object];
+				} elsif ($str =~ /^ (\.\S+)$/) {
+					$detail_name = $1;
+				} else {
+#					print $str;
+				}
+			}
+		}
+	}
+
+#	if ($memory_configuration || $memory_map_head_entered || $memory_map_entered) {
+	if ($memory_configuration || $memory_map_head_entered) {
+		print $str;
+	}
+}
+
+foreach my $key (sort keys(%block_detail)) {
+	my ($size, $block_name, $detail_name, $file) = @{ $block_detail{ $key } };
+#	printf "0x%08x (0x%08x) $block_name, $detail_name, $file\n", $key, $size;
+}
+#print "\n\n";
+
+foreach my $key (sort keys(%object_list)) {
+	my ($block_name, $detail_name, $file, $object) = @{ $object_list{ $key } };
+	printf "0x%08x $block_name, $file, $object\n", $key;
+}
+print "\n\n";
