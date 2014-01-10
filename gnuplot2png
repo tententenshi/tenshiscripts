@@ -4,7 +4,7 @@ sub usage {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "-- gnuplot setting file to png --\n";
-	print "usage: $cmd [--small] inFile(*.gnu) [outFilename]\n";
+	print "usage: $cmd [--small] inFile(*.gnu) [-o outFilename]\n";
 	print "\n";
 }
 
@@ -13,21 +13,43 @@ if ($ARGV[0] =~ /^--(.+)/) {
 	shift;
 }
 
-if (($#ARGV != 0) && ($#ARGV != 1)) {
+if ($#ARGV < 0) {
 	usage();
 	exit 1;
 }
 
 $infile = shift;
-if (!($outfile = shift)) {
+@infileList = ();
+$outfile = "";
+
+while ($str = shift) {
+	if ($str =~ /^-o(.*)/) {
+		if ($1 ne "") {
+			$outfile = $1;
+		} else {
+			$outfile = shift;
+		}
+	} else {
+		push @infileList, $str;
+	}
+}
+
+if ($outfile eq "") {
 	$outfile = $infile;
-	$outfile =~ s/\.gnu/\.png/;
+	$outfile =~ s/\.(\w+)$/\.png/;
 }
 
 $tmpFile = $infile . "gnuplot2png_tmp";
 
 open(IN, "$infile") or die "cannot open $infile!\n";
 open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
+
+$isRawData = ($infile =~ /.+\.gnu/) ? 0 : 1;
+if ($isRawData) {
+	print "input file is raw data\n";
+} else {
+	print "input file is gnuplot script\n";
+}
 
 print OUT "set terminal png\n";
 print OUT "set output \"$outfile\"\n";
@@ -39,24 +61,33 @@ if ($mode eq "small") {
 	$size_set_str = sprintf "set size 2, 2\n";
 }
 
-while ($str = <IN>) {
-	if ($str =~ /set\s+terminal/) {
-		next;
+if ($isRawData) {
+	print OUT $size_set_str;
+	print OUT "plot \"$infile\"";
+	while (my $tmpinfile = shift @infileList) {
+		print OUT ", \"$tmpinfile\"";
 	}
-	if ($str =~ /set\s+output/) {
-		next;
-	}
-	if ($str =~ /set\s+size\s+(.+)/) {
-		if ($1 =~ /(ratio|square)/) {
-		} else {
+	print "\n";
+} else {
+	while ($str = <IN>) {
+		if ($str =~ /set\s+terminal/) {
 			next;
 		}
-	}
+		if ($str =~ /set\s+output/) {
+			next;
+		}
+		if ($str =~ /set\s+size\s+(.+)/) {
+			if ($1 =~ /(ratio|square)/) {
+			} else {
+				next;
+			}
+		}
 
-	if ($str =~ /plot/) {
-		print OUT $size_set_str;
+		if ($str =~ /plot/) {
+			print OUT $size_set_str;
+		}
+		print OUT $str;
 	}
-	print OUT $str;
 }
 
 system '/usr/bin/gnuplot', "$tmpFile";
