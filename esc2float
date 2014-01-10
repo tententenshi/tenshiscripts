@@ -2,26 +2,62 @@
 
 use strict;
 
-my $val = eval(shift);
+my $input_str = shift;
 
-my $sign = $val >> 31;
-my $exp = ($val & 0x60000000) >> 29;
-my $frac = ($val & 0x1fffffff);
+my $val = eval($input_str);
 
-my $fVal;
+if ($input_str =~ /^0x/) {
+#hex2float
+    my $sign = $val >> 31;
+    my $exp = ($val & 0x60000000) >> 29;
+    my $frac = ($val & 0x1fffffff);
 
-if ($exp == 0) {
+    my $fVal;
+
+    if ($exp == 0) {
 	$fVal = $frac / 0x80000000 / 2;
-} elsif ($exp == 1) {
+    } elsif ($exp == 1) {
 	$fVal = $frac / 0x10000000;
-} elsif ($exp == 2) {
+    } elsif ($exp == 2) {
 	$fVal = $frac / 0x01000000;
-} elsif ($exp == 3) {
+    } elsif ($exp == 3) {
 	$fVal = $frac / 0x00100000;
-}
+    }
 
-if ($sign) {
+    if ($sign) {
 	$fVal = -$fVal;
-}
+    }
 
-printf("%g\n", $fVal);
+    my $intfVal = $fVal * (2 << 13);
+    my $intfVal_int = int($intfVal);
+    my $intfVal_frac = int(($intfVal - $intfVal_int) * (2 << 19));
+
+    printf("%15.12f as internal integer: 0x%x.%05xp0\n", $fVal, $intfVal_int, $intfVal_frac);
+
+} else {
+#float2hex
+    my $sign = 0;
+    if ($val < 0) {
+	$sign = 1;
+	$val = -$val;
+    }
+
+    my $exp = 0;
+    if ($val >= 512.0) {
+	printf "%val is too large\n";
+    } elsif ($val >= 32.0) {
+	$exp = 3;
+	$val *= 0x00100000;
+    } elsif ($val >= 2.0) {
+	$exp = 2;
+	$val *= 0x01000000;
+    } elsif ($val >= 0.125) {
+	$exp = 1;
+	$val *= 0x10000000;
+    } else {
+	$val *= 2;
+	$val *= 0x80000000;
+    }
+
+    printf("0x%08x\n", ($sign << 31) | ($exp << 29) | ($val));
+}
