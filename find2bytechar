@@ -1,8 +1,17 @@
 #! /usr/bin/env perl
 
-while ($str = <>) {
-	if ($str =~ /([^\s\w\!\"#$%&\'\(\)\^~\\\|\[\]\{\}:;\*\+_\?\/\.\,\>\<\-\=\%\`])/) {
-		print $str;
-		print "matched $1\n";
+use strict;
+
+while (my $file = shift) {
+	open (IN, "$file") or die "cannot open $file\n";
+	my $line = 0;
+	while (my $str = <IN>) {
+		$line++;
+		if ($str =~ /([^\s\w\!\"#\$%&@\'\(\)\^~\\\|\[\]\{\}:;\*\+_\?\/\.\,\>\<\-\=\%\`])/) {
+			my $matched = $1;
+#			print "$file: $line: $str\n";
+			print "$file: $line: $matched\n";
+		}
 	}
+	close IN;
 }
