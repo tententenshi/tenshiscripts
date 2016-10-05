@@ -23,4 +23,13 @@ if ($input_str =~ /^0x/) {
     my $hVal = unpack("V", $packedval);
 
     printf("0x%08x\n", $hVal);
+
+	my $sign = ($hVal & 0x80000000) != 0;
+	my $exp = (($hVal & (0xff << 23)) >> 23) - 127;
+	my $frac = (($hVal & 0x7fffff) | 0x800000) / 0x800000;
+	if ($sign) {
+		$frac = -$frac;
+	}
+
+	printf("$frac * 2^$exp = " . $frac * 2**$exp . "\n");
 }
