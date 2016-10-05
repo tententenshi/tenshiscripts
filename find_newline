@@ -1,0 +1,43 @@
+#! /usr/bin/env perl
+
+use strict;
+
+my $mode = "consistency";
+
+if ($ARGV[0] =~ /^-(.*)/) {
+	$mode = $1;
+	shift;
+}
+
+print "running in $mode mode...\n";
+
+while (my $file = shift) {
+	open (IN, "$file") or die "cannot open $file\n";
+
+	my $line = 0;
+	my $standard_new_line_char;
+
+	if ($mode eq "consistency") {
+		my $str = <IN>;
+		$line++;
+		if ($str =~ /[^\r\n]*([\r\n]+)/s) {
+			$standard_new_line_char = $1;
+		}
+	} elsif ($mode eq "unix") {
+		$standard_new_line_char = "\n";
+	} elsif ($mode eq "win") {
+		$standard_new_line_char = "\r\n";
+	}
+
+	while (my $str = <IN>) {
+		$line++;
+		if ($str =~ /[^\r\n]*([\r\n]+)/s) {
+			my $cur_new_line_char = $1;
+			if ($cur_new_line_char ne $standard_new_line_char) {
+				print "$file: $line: $str\n";
+				last;
+			}
+		}
+	}
+	close IN;
+}
