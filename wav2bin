@@ -25,9 +25,7 @@ my $infile = shift;
 my $outfile = shift;
 
 open(IN, "$infile") or die "cannot open $infile!\n";
-open(OUT, "> $outfile") or die "cannot open $outfile!\n";
 binmode IN;
-binmode OUT;
 
 my $buf;
 read IN, $buf, 4;	# RIFF
@@ -38,11 +36,27 @@ read IN, $buf, 4;	# size of fmt
 my $size = unpack "V", $buf;
 read IN, $buf, 2;	# type (PCM)
 read IN, $buf, 2;	# num of channel
+my $NUM_OF_CH = unpack "v", $buf;
 read IN, $buf, 4;	# sample rate
 read IN, $buf, 4;	# bit rate (= sample_rate * num_of_channel * bit_length / 8)
 read IN, $buf, 2;	# block size (= bit_length / 8 * num_of_channel)
 read IN, $buf, 2;	# bit_length
 my $BIT_LENGTH = unpack "v", $buf;
+
+if ($NUM_OF_CH == 1) {
+	open(OUT, "> $outfile") or die "cannot open $outfile!\n";
+	binmode OUT;
+} elsif ($NUM_OF_CH == 2) {
+	my $outfile_l = $outfile;
+	$outfile_l =~ s/\.([^.]+)$/_l\.$1/;
+	my $outfile_r = $outfile;
+	$outfile_r =~ s/\.([^.]+)$/_r\.$1/;
+	open(OUT_L, "> $outfile_l") or die "cannot open $outfile_l!\n";
+	open(OUT_R, "> $outfile_r") or die "cannot open $outfile_r!\n";
+	binmode OUT_L;
+	binmode OUT_R;
+}
+
 
 read IN, $buf, ($size - 16);	# skip remaining fmt
 
@@ -62,24 +76,45 @@ my $size = unpack "V", $buf;
 
 while($size > 0) {
 	if ($BIT_LENGTH == 16) {
-		my $buf;
-		read IN, $buf, 2;	# wav body
-		if ($option eq "convert-endian") {
-			my $data = unpack "v", $buf;
-			$buf = pack "n", ($data);
+		for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+			my $buf;
+			read IN, $buf, 2;	# wav body
+			if ($option eq "convert-endian") {
+				my $data = unpack "v", $buf;
+				$buf = pack "n", ($data);
+			}
+			if ($NUM_OF_CH == 1) {
+				print (OUT $buf);
+			} elsif (($NUM_OF_CH == 2) && ($ch == 0)) {
+				print (OUT_L $buf);
+			} else {
+				print (OUT_R $buf);
+			}
 		}
-		print (OUT $buf);
 	} elsif ($BIT_LENGTH == 32) {
-		my $buf;
-		read IN, $buf, 4;	# wav body
-		if ($option eq "convert-endian") {
-			my $data = unpack "V", $buf;
-			$buf = pack "N", ($data);
+		for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+			my $buf;
+			read IN, $buf, 4;	# wav body
+			if ($option eq "convert-endian") {
+				my $data = unpack "V", $buf;
+				$buf = pack "N", ($data);
+			}
+			if ($NUM_OF_CH == 1) {
+				print (OUT $buf);
+			} elsif (($NUM_OF_CH == 2) && ($ch == 0)) {
+				print (OUT_L $buf);
+			} else {
+				print (OUT_R $buf);
+			}
 		}
-		print (OUT $buf);
 	}
-	$size -= $BIT_LENGTH / 8;
+	$size -= $BIT_LENGTH / 8 * $NUM_OF_CH;
 }
 
 close(IN);
-close(OUT);
+if ($NUM_OF_CH == 1) {
+	close(OUT);
+} else {
+	close(OUT_L);
+	close(OUT_R);
+}

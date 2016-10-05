@@ -151,6 +151,7 @@ sub WriteWavHeader {
 		my $cur_pos = tell($fh);
 		my $optimized_data_start = (($cur_pos + ($WAV_ALIGN_SIZE - 1)) & (~($WAV_ALIGN_SIZE - 1))) - 8;
 		my $pad_size = $optimized_data_start - $cur_pos - 8;
+		if ($pad_size < 0) { $pad_size += $WAV_ALIGN_SIZE; }
 		print($fh "pad ");
 		$out = pack "V", ($pad_size); # long by little endian
 		print($fh $out);
@@ -176,6 +177,7 @@ sub WriteWavTrailer {
 		my $cur_pos = tell($fh);
 		my $optimized_file_end = (($cur_pos + ($WAV_ALIGN_SIZE - 1)) & (~($WAV_ALIGN_SIZE - 1))) - 8;
 		my $pad_size = $optimized_file_end - $cur_pos;
+		if ($pad_size < 0) { $pad_size += $WAV_ALIGN_SIZE; }
 		print($fh "pad ");
 		my $out = pack "V", ($pad_size); # long by little endian
 		print($fh $out);
@@ -237,6 +239,30 @@ sub MaintainWavHeader {
 	close($fh);
 }
 
+
+sub GetUnityVal {
+	my ($infoHashRef) = @_;
+
+	my $format = $$infoHashRef{ "FORMAT_ID" };
+	my $bitLength = $$infoHashRef{ "BIT_LENGTH" };
+	if ($format == 1) {
+		if ($bitLength == 16) {
+			return 1 << 15;
+		} elsif ($bitLength == 24) {
+			return 0x8000 * 0x10000;
+		} elsif ($bitLength == 32) {
+			return 0x8000 * 0x10000;
+		}
+	} elsif ($format == 3) {
+		if ($bitLength == 32) {
+			return 1.0;
+		} elsif ($bitLength == 64) {
+			return 1.0;
+		}
+	} else {
+		return 0;
+	}
+}
 
 sub ReadWavData {
 	my ($fh, $infoHashRef) = @_;
