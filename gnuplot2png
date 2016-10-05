@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 
 sub usage {
 	my $cmd = `basename $0`;
@@ -43,6 +43,8 @@ $tmpFile = $infile . "gnuplot2png_tmp";
 
 open(IN, "$infile") or die "cannot open $infile!\n";
 open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
+
+print "opened $tmpFile\n";
 
 $isRawData = ($infile =~ /.+\.gnu/) ? 0 : 1;
 if ($isRawData) {
@@ -92,4 +94,4 @@ if ($isRawData) {
 
 system '/usr/bin/gnuplot', "$tmpFile";
 
-unlink $tmpFile;
+#unlink $tmpFile;

@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 
 use FindBin;
 
@@ -91,6 +91,6 @@ print "a0:$a0, a1:$a1, fr0:$fr0, q:$q, fr1:$fr1, g:$g\n";
 	my $mm0 = 1.0;
 	my $mm1 = $g;
 
-	system ($FindBin::Bin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
 }
 

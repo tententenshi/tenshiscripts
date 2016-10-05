@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 
 use FindBin;
 
@@ -86,16 +86,16 @@ $b1_lpf = 1 - $a0;
 
 
 print "as HSV ...\n";
-system ($FindBin::Bin . "/ceqFAanalyze $a0_hsv $a1_hsv $b1_hsv $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_hsv $a1_hsv $b1_hsv $Fs");
 print "\n";
 
 print "as LSV ...\n";
-system ($FindBin::Bin . "/ceqFAanalyze $a0_lsv $a1_lsv $b1_lsv $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_lsv $a1_lsv $b1_lsv $Fs");
 print "\n";
 
 print "as HPF ...\n";
-system ($FindBin::Bin . "/ceqFAanalyze $a0_hpf $a1_hpf $b1_hpf $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_hpf $a1_hpf $b1_hpf $Fs");
 print "\n";
 
 print "as LPF ...\n";
-system ($FindBin::Bin . "/ceqFAanalyze $a0_lpf $a1_lpf $b1_lpf $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_lpf $a1_lpf $b1_lpf $Fs");

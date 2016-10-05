@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 # replace: replace str1 in files with str2, in place
 
 case $# in

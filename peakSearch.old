@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#! /usr/bin/env perl
 
 $PI = 4 * atan2(1,1);
 $FS = 44100;

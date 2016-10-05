@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 # overwrite:	copy standard input to output after EOF
 # final version
 

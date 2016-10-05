@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 
 sub Usage {
 	print "Usage: $0 -[dfx] file1\n";

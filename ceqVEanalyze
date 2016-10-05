@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 
 use FindBin;
 
@@ -100,7 +100,7 @@ $g   = ($g =~ /0[Xx]/)   ? hex2dec($g)   : eval($g);
 	print "a2 as EA --> $ma2\n";
 	print "b1 as EA --> $mb1\n";
 	print "b2 as EA --> $mb2\n";
-	system ($FindBin::Bin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
 	print "\n";
 }
 
@@ -119,7 +119,7 @@ $g   = ($g =~ /0[Xx]/)   ? hex2dec($g)   : eval($g);
 	print "a2 as EA --> $ma2\n";
 	print "b1 as EA --> $mb1\n";
 	print "b2 as EA --> $mb2\n";
-	system ($FindBin::Bin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
 	print "\n";
 }
 
@@ -142,6 +142,6 @@ $g   = ($g =~ /0[Xx]/)   ? hex2dec($g)   : eval($g);
 	print "m0 as EA --> $mm0\n";
 	print "m1 as EA --> $mm1\n";
 	print "\n";
-	system ($FindBin::Bin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
 }
 

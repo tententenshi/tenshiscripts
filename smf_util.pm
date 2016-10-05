@@ -4,8 +4,8 @@ use POSIX 'ceil';
 
 package smf_util;
 
-require $FindBin::Bin . "/smf_read.pm";
-require $FindBin::Bin . "/smf_write.pm";
+require $FindBin::RealBin . "/smf_read.pm";
+require $FindBin::RealBin . "/smf_write.pm";
 
 
 my $TPQN;

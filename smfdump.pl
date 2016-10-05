@@ -1,9 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use FindBin;
 use strict;
 
-require $FindBin::Bin . "/smf_util.pm";
+require $FindBin::RealBin . "/smf_util.pm";
 
 my $file = shift;
 my %info;

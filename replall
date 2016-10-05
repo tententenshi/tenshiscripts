@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 # replall: Replace All matched files
 
 case $# in

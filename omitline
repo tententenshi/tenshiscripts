@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 # omitline: omit lines which contains str in files
 
 case $# in
