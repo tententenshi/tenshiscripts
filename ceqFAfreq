@@ -1,13 +1,16 @@
 #! /usr/bin/env perl
 
-sub round {
-	my($val) = @_;
-	if ($val >= 0) { $val += 0.5; }
-	else { $val -= 0.5; }
-	return int($val);
-}
+use strict;
+use FindBin;
+use POSIX;
+use Math::Complex;
 
-if ($#ARGV != 1) {
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+
+my @argument = ParseArgument(\@ARGV);
+
+
+if ($#argument != 1) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd coef_as_b1 Fs\n";
@@ -18,25 +21,22 @@ if ($#ARGV != 1) {
 	exit 1;
 }
 
-$coef = shift;
-if ($coef =~ /0[Xx]/) { $coef = eval($coef) / 0x8000; }
-else { $coef = eval($coef); }
-$Fs = eval(shift);
+my $coef = shift @argument;
+my $Fs = shift @argument;
 
-$pi = 4 * atan2(1, 1);
-$freq = $Fs / $pi * atan2((1-$coef), (1+$coef));
+my $freq = $Fs / pi() * atan2((1-$coef), (1+$coef));
 
 print "freq --> $freq\n\n";
 
 ## as LPF
 
-$coef_a = (1 - $coef) / 2;
-$coef_b = $coef_a;
+my $coef_a = (1 - $coef) / 2;
+my $coef_b = $coef_a;
 
-$coef_as = int(log(abs($coef_a))/log(2));
+my $coef_as = int(log(abs($coef_a))/log(2));
 if ($coef_as < 0) { $coef_as = 0; }
 if ($coef_as == 3) { $coef_as = 2; }
-$coef_bs = int(log(abs($coef_b))/log(2));
+my $coef_bs = int(log(abs($coef_b))/log(2));
 if ($coef_bs < 0) { $coef_bs = 0; }
 if ($coef_bs == 3) { $coef_bs = 2; }
 
@@ -51,13 +51,13 @@ printf "coef_b = %12.9f	%12.9f(<<%d)  (w/o shift)=0x%08x  (w/ shift)=0x%04x (<<%
 
 ## as HPF
 
-$coef_a = (1 + $coef) / 2;
-$coef_b = -$coef_a;
+my $coef_a = (1 + $coef) / 2;
+my $coef_b = -$coef_a;
 
-$coef_as = int(log(abs($coef_a))/log(2));
+my $coef_as = int(log(abs($coef_a))/log(2));
 if ($coef_as < 0) { $coef_as = 0; }
 if ($coef_as == 3) { $coef_as = 2; }
-$coef_bs = int(log(abs($coef_b))/log(2));
+my $coef_bs = int(log(abs($coef_b))/log(2));
 if ($coef_bs < 0) { $coef_bs = 0; }
 if ($coef_bs == 3) { $coef_bs = 2; }
 

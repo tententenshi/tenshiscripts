@@ -1,42 +1,16 @@
 #! /usr/bin/env perl
 
+use strict;
 use FindBin;
+use POSIX;
+use Math::Complex;
 
-sub round {
-	my($val) = @_;
-	if ($val >= 0) { $val += 0.5; }
-	else { $val -= 0.5; }
-	return int($val);
-}
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
-sub hex2dec {
-	my ($val) = @_;
 
-	while ($val =~ /^(.*)(0[Xx][\da-fA-F]+)(.*)$/) {
-		my ($pre, $hex, $post) = ($1, $2, $3);
-		if ($hex =~ /0[Xx][\da-fA-F]{6}/) {			# CoefData
-			$VAL1_0 = 0x00800000;
-			$VAL_POS_MAX = 0x80000000;
-		} else {
-			$VAL1_0 = 0x8000;
-			$VAL_POS_MAX = 0x8000;
-		}
-		my $dec;
-		if (eval($hex) >= $VAL_POS_MAX) {
-			$dec = (eval($hex) - $VAL_POS_MAX * 2) / $VAL1_0;
-		} else {
-			$dec = eval($hex) / $VAL1_0;
-		}
-		$val = $pre . $dec . $post;
-	}
-	$val =~ s/<</*2**/g;
-	$val =~ s/>>/*2**-/g;
-	return eval($val);
-}
+my @argument = ParseArgument(\@ARGV);
 
-sub tan { sin($_[0]) / cos($_[0]); }
-
-if ($#ARGV != 6) {
+if ($#argument != 6) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd a0 a1 fr0 q fr1 g Fs\n";
@@ -52,23 +26,29 @@ if ($#ARGV != 6) {
 	print "        a1           \\      q                                |\n";
 	print "                      +-----------------------<|-------------+\n";
 	print "                                             -1.0\n";
+
+	print "\nfor VF type filter...\n";
+	print "    +--------------------------------------------------+\n";
+	print "    |                                             g     \\\n";
+	print "    |                                       +-----|>----(+)-------------------->\n";
+	print "    |   a0(0.5)        q          fr        |\n";
+	print "  --+---|>-----( + )---|>---(+)----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+	print "    |           / \\           \\           \\        |  fr      \\     |   |\n";
+	print "   [ ]         /   \\           \\           +-------+           \\   [ ]  |\n";
+	print "    |         /     \\           \\                  |            \\   |   |\n";
+	print "    +---|>---+       +-----<|----------------------+             +--+   |\n";
+	print "        a1(0.5)           -1.0    \\                                     |\n";
+	print "                                   +---------------------<|-------------+\n";
+	print "                                                        -1.0\n";
+
+	print "\nto convert VE coef --> VF coef,\n";
+	print "g = g * q\n";
+
 	exit 1;
 }
 
-$a0 = shift;
-$a1 = shift;
-$fr0 = shift;
-$q = shift;
-$fr1 = shift;
-$g = shift;
-$Fs = eval(shift);
+my ($a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
 
-$a0  = ($a0 =~ /0[Xx]/)  ? hex2dec($a0)  : eval($a0);
-$a1  = ($a1 =~ /0[Xx]/)  ? hex2dec($a1)  : eval($a1);
-$fr0 = ($fr0 =~ /0[Xx]/) ? hex2dec($fr0) : eval($fr0);
-$q   = ($q =~ /0[Xx]/)   ? hex2dec($q)   : eval($q);
-$fr1 = ($fr1 =~ /0[Xx]/) ? hex2dec($fr1) : eval($fr1);
-$g   = ($g =~ /0[Xx]/)   ? hex2dec($g)   : eval($g);
 
 # Transfer Function as LPF
 #                   (a0 + a1 * z**-1) * (fr0 * fr1 * z**-1)

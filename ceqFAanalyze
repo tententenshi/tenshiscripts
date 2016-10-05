@@ -1,43 +1,17 @@
 #! /usr/bin/env perl
 
+use strict;
+use FindBin;
 use POSIX;
+use Math::Complex;
 
-sub round {
-	my($val) = @_;
-	if ($val >= 0) { $val += 0.5; }
-	else { $val -= 0.5; }
-	return int($val);
-}
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
-sub hex2dec {
-	my ($val) = @_;
 
-	while ($val =~ /^(.*)(0[Xx][\da-fA-F]+)(.*)$/) {
-		my ($pre, $hex, $post) = ($1, $2, $3);
-		if ($hex =~ /0[Xx][\da-fA-F]{6}/) {			# CoefData
-			$VAL1_0 = 0x00800000;
-			$VAL_POS_MAX = 0x80000000;
-		} else {
-			$VAL1_0 = 0x8000;
-			$VAL_POS_MAX = 0x8000;
-		}
-		my $dec;
-		if (eval($hex) >= $VAL_POS_MAX) {
-			$dec = (eval($hex) - $VAL_POS_MAX * 2) / $VAL1_0;
-		} else {
-			$dec = eval($hex) / $VAL1_0;
-		}
-		$val = $pre . $dec . $post;
-	}
-	$val =~ s/<</*2**/g;
-	$val =~ s/>>/*2**-/g;
-	return eval($val);
-}
 
-sub tan { sin($_[0]) / cos($_[0]); }
-sub acos { POSIX::acos($_[0]); }
+my @argument = ParseArgument(\@ARGV);
 
-if ($#ARGV != 3) {
+if ($#argument != 3) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd a0 a1 b1 Fs\n";
@@ -48,27 +22,23 @@ if ($#ARGV != 3) {
 	exit 1;
 }
 
-$a0 = shift;
-$a1 = shift;
-$b1 = shift;
-$Fs = eval(shift);
+my ($a0, $a1, $b1, $Fs) = @argument;
 
-$a0 = ($a0 =~ /0[Xx]/) ? hex2dec($a0) : eval($a0);
-$a1 = ($a1 =~ /0[Xx]/) ? hex2dec($a1) : eval($a1);
-$b1 = ($b1 =~ /0[Xx]/) ? hex2dec($b1) : eval($b1);
 
 print "a0 as float --> $a0\n";
 print "a1 as float --> $a1\n";
 print "b1 as float --> $b1\n";
 
-$pi = 4 * atan2(1, 1);
 
-$zero_z = -$a1 / $a0;
-$pole_z = $b1;
+my $zero_z = -$a1 / $a0;
+my $pole_z = $b1;
 
 if (abs($pole_z) >= 1) {
 	print "pole is outof stable area!\n";
 }
+
+my $gain_dc;
+my $gain_nyquist;
 
 if ($a0 == -$a1) {
 	$gain_dc      = "-infinite";
@@ -86,8 +56,8 @@ if (abs($zero_z) > 1.0) {
 	$zero_z = 1 / $zero_z;
 }
 
-$freq_zero = $Fs / $pi * atan2((1-$zero_z), (1+$zero_z));
-$freq_pole = $Fs / $pi * atan2((1-$pole_z), (1+$pole_z));
+my $freq_zero = $Fs / pi() * atan2((1-$zero_z), (1+$zero_z));
+my $freq_pole = $Fs / pi() * atan2((1-$pole_z), (1+$pole_z));
 
 print "freq_zero (bilinear) --> $freq_zero (Hz)\n";
 print "freq_pole (bilinear) --> $freq_pole (Hz)\n";
@@ -135,7 +105,7 @@ if ($gain_dc eq "-infinite") {
 	if (($a0 == 0) || ($a1 == 0)) {
 		if ($b1 >= 3 - 2 * sqrt(2)) {
 			# reverse calculation from b1 = 2 - cos - sqrt((2 - cos)**2 - 1)
-			$freq_HD = acos(-(1 + $b1**2 - 4 * $b1) / (2 * $b1)) * $Fs / (2 * $pi);
+			my $freq_HD = acos(-(1 + $b1**2 - 4 * $b1) / (2 * $b1)) * $Fs / (2 * pi());
 			print "\nfreq_pole (Z-plane direct) --> $freq_HD (Hz)\n";
 		}
 	}

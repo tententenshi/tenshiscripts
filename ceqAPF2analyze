@@ -1,0 +1,46 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Math::Complex;
+
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+
+my $ERROR_BITDEPTH = (1 << 19);
+my $ERROR_BITDEPTH2 = (1 << 16);
+
+
+my @argument = ParseArgument(\@ARGV);
+
+if ($#argument != 1) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd r Fs\n";
+	print " --+-|>---(+)------+--\n";
+	print "   | a0  // \\\\     |  \n";
+	print "   +-|>-+/   \\+-<|-+  \n";
+	print "   | a1 /     \\ b1 |  \n";
+	print "   +-|>+       +<|-+  \n";
+	print "     a2         b2    \n";
+	exit 1;
+}
+
+my $r = shift @argument;
+my $a0 = 1 + 6 / (3 + $r) - 12 / (4 + $r);
+my $a1 = -2 + 6 / (3 + $r);
+my $a2 = 1.0;
+my $b1 = -$a1;
+my $b2 = -$a0;
+my $Fs = shift @argument;
+
+{
+	print "a0 as EA --> $a0\n";
+	print "a1 as EA --> $a1\n";
+	print "a2 as EA --> $a2\n";
+	print "b1 as EA --> $b1\n";
+	print "b2 as EA --> $b2\n";
+}
+
+exec ("ceqEAanalyze $a0 $a1 $a2 $b1 $b2 $Fs");
+
