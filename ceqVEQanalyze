@@ -9,8 +9,28 @@ sub round {
 	return int($val);
 }
 
+sub my_hex_float {
+	my ($str)=@_;
+	if ($str =~ /([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?[pP]([+-]?\d+)/) {
+		my ($int_val, $frac_val, $shift) = ($1, $2, $3);
+		$frac_val =~ s/\.//;
+		my $frac_digit = length($frac_val);
+		$shift -= $frac_digit * 4;
+		my $shift_val = 2**$shift;
+		my $val = eval($int_val . $frac_val) * $shift_val;
+		return $val;
+	} else {
+		return 0;
+	}
+}
+
 sub hex2dec {
 	my ($val) = @_;
+
+	while ($val =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?([pP][+-]?\d+)(.*)/) {
+		my ($pre, $hex_float_val, $post) = ($1, $2 . $3 . $4, $5);
+		$val = $pre . my_hex_float($hex_float_val) . $post;
+	}
 
 	while ($val =~ /^(.*)(0[Xx][\da-fA-F]+)(.*)$/) {
 		my ($pre, $hex, $post) = ($1, $2, $3);
@@ -41,17 +61,17 @@ if ($#ARGV != 4) {
 	chomp $cmd;
 	print "usage: $cmd PE0 PE1 PE2 PE3 PE4\n";
 	print "    +---------------------------------------+\n";
-	print "    |                                  g     \\\n";
+	print "    |                                 PE4    \\\n";
 	print "    |                            +-----|>----(+)-------------------->\n";
-	print "    |   a0             fr0       |\n";
+	print "    |   PE0            PE1       |\n";
 	print "  --+---|>-----( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
-	print "    |           /\\ \\           \\        |  fr1     \\     |   |\n";
+	print "    |           /\\ \\           \\        |  PE1     \\     |   |\n";
 	print "   [ ]         /  \\ \\           +-------+           \\   [ ]  |\n";
 	print "    |         /    \\ \\                  |            \\   |   |\n";
 	print "    +---|>---+      \\ +-----<|----------+             +--+   |\n";
-	print "        a1           \\      q                                |\n";
+	print "        PE0          \\     -PE2                              |\n";
 	print "                      +-----------------------<|-------------+\n";
-	print "                                             -1.0\n";
+	print "                                             -PE3\n";
 	exit 1;
 }
 
