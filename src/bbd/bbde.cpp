@@ -16,14 +16,13 @@ static double MaxBBDClock = 400000;		// Hz
 enum { NUM_OF_MAX_CH = 2, };
 //enum { BBD_LENGTH = 0x10000, };		// same as MN-3007
 enum { BBD_LENGTH = 0x400, };		// same as MN-3007
-double	buf_441[NUM_OF_MAX_CH][16], buf_bbd[NUM_OF_MAX_CH][BBD_LENGTH];		// delay buf
+double	buf_bbd[NUM_OF_MAX_CH][BBD_LENGTH * 2];		// delay buf
+static double	buf_441[NUM_OF_MAX_CH][4];
 
 void	init(void);
 double	proc(int ch, double val, const SFormatChunk& formatChunk);
-void	write_bbd(int ch, int bp_441, double pha4, int bp_bbd);
-double	read_bbd(int ch, int bp_bbd, double phaf_bbd);
-void	write_441(int ch, double val, int bp_441);
-double	lerp(double, double, double);
+double	interpolated_read(const double*, double);
+void	proceed_sample(int ch);
 static void CopyFile(FILE* fpSrc, FILE* fpDst, long copySize);
 
 
@@ -114,10 +113,12 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 
 	double inv_inc = 1.0 / inc_bbd;
 
-	static volatile double	phaf_bbd = 0.0;					// float phase
-	static volatile int		bp_441 = 0, bp_bbd = 0;				// base ptr ( dec by sample(441) / dec by write(bbd) )
+	static volatile double	phaf_bbd = 0.0;			// float phase
+	static volatile int		bp_bbd = 0;				// base ptr ( dec by sample(441) / dec by write(bbd) )
+	buf_441[ch][0] = val;
 
-	double rd = read_bbd(ch, bp_bbd, phaf_bbd);												// SRC bbd -> 441
+	int rp = bp_bbd + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
+	double rd = interpolated_read(&buf_bbd[ch][rp], phaf_bbd);
 //	printf("     read_bbd   inc: %9.6lf,  bp_441: %d,  phaf: %g,  bp_bbd: %d,  mxo: %g\n",
 //		   inc_bbd,        bp_441,     phaf_bbd,       bp_bbd,   rd);
 
@@ -127,8 +128,9 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	static double	buf_inc_bbd[BBD_LENGTH];	// for debug "inc_bbd" modulation
 
 	for (int i = 0; i < phai_bbd; i++) {
-		double tmp_441 = 1.0 - (i + (1.0 - phaf_bbd)) * inv_inc;	// assuming fixed inc_bbd while one 441kHz sampling period, interpolate inc_bbd as needed
-		write_bbd(ch, bp_441, tmp_441, bp_bbd);
+		double adrs_441_frac = (i + (1.0 - phaf_bbd)) * inv_inc;	// assuming fixed inc_bbd while one 441kHz sampling period, interpolate inc_bbd as needed
+		double wd = interpolated_read(buf_441[ch], adrs_441_frac);
+		buf_bbd[ch][bp_bbd + BBD_LENGTH] = buf_bbd[ch][bp_bbd] = wd;
 //		printf("     write_bbd  inc: %g,  bp_441: %d,  tmp_441: %g, phaf: %g, bbd_index_temp: %g, i: %d,  bp_bbd: %d,  buf_bbd: %g\n",
 //			   inc_bbd,        bp_441,     tmp_441, phaf_bbd, bbd_index_temp, i, bp_bbd,       buf_bbd[ch][bp_bbd]);
 		buf_inc_bbd[bp_bbd] = inc_bbd;	// for debug "inc_bbd" modulation
@@ -144,10 +146,9 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 //		printf("ChorusLFO: %g, TargetBBDClock: %g, inc_bbd_wr: %g, inc_bbd: %g, ratio: %g, phai_bbd: %d, phaf_bbd: %g, bp_bbd: %d\n", ChorusLFO, TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, phai_bbd, phaf_bbd, bp_bbd);
 	}
 
-	write_441(ch, val, bp_441);
+	proceed_sample(ch);
 //	printf("---- write_441  inc: %9.6lf  bp_441: %01x  phab: %9.6lf  bp_bbd: %03x  buf_441\[%01x]=%9.6lf\n",
 //								 inc_bbd,        bp_441,     phaf_bbd,       bp_bbd,        bp_441, dat_flg ? mxi : 0.0);
-	bp_441 = --bp_441 & 0xf;
 	return rd;
 }
 
@@ -155,41 +156,34 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 void init(void)
 {
 	for (int ch = 0; ch < NUM_OF_MAX_CH; ch++) {
-		for (int i=0; i<0x10; i++) {
-			buf_441[ch][i] = 0.0;
-		}
 		for (int i=0; i<BBD_LENGTH; i++) {
 			buf_bbd[ch][i] = 0.0;
 		}
 	}
 }
-// --------------------------------------------------------------------
-void write_bbd(int ch, int bp_441, double pha4, int bp_bbd)
-{
-	int bp = bp_441 + 2;												// 2: offset for interpolation
-	double wd = lerp(buf_441[ch][(bp - 1) & 0xf], buf_441[ch][bp & 0xf], pha4);
-	buf_bbd[ch][bp_bbd] = wd;
-}
 
 // --------------------------------------------------------------------
-double lerp(double d0, double d1, double k)
+double interpolated_read(const double* data, double k)
 {
-	return d0 * (1.0 - k) + d1 * k;
+	return data[1] * (1.0 - k) + data[0] * k;	// linear interpolation
 }
 
 // --------------------------------------------------------------------
 double read_bbd(int ch, int bp_bbd, double phaf_bbd)
 {
 	int bp = bp_bbd + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
-	double rd = lerp(buf_bbd[ch][(bp - 1) & (BBD_LENGTH - 1)], buf_bbd[ch][bp & (BBD_LENGTH - 1)], (1.0 - phaf_bbd));
+	double rd = interpolated_read(&buf_bbd[ch][bp], phaf_bbd);
 //	aaf((inc_bbd > 1.0) ? 1 / inc_bbd : 1.0);							// anti arias filter
 	return rd;
 }
+
 // --------------------------------------------------------------------
-void write_441(int ch, double val, int bp_441)
+void proceed_sample(int ch)
 {
-//	aaf((inc_bbd < 1.0) ? inc_bbd : 1.0);							// anti arias flter
-	buf_441[ch][bp_441] = val;
+	buf_441[ch][3] = buf_441[ch][2];
+	buf_441[ch][2] = buf_441[ch][1];
+	buf_441[ch][1] = buf_441[ch][0];
+	buf_441[ch][0] = 0;
 }
 
 // --------------------------------------------------------------------
