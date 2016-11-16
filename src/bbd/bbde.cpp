@@ -122,10 +122,15 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 //	printf("     read_bbd   inc: %9.6lf,  bp_441: %d,  phaf: %g,  bp_bbd: %d,  mxo: %g\n",
 //		   inc_bbd,        bp_441,     phaf_bbd,       bp_bbd,   rd);
 
+	static double	buf_inc_bbd[BBD_LENGTH * 2];	// for debug "inc_bbd" modulation
+	{
+		// for debug "inc_bbd" modulation
+		double inc_bbd_on_wr = buf_inc_bbd[rp];	// for debug
+//		printf("ChorusLFO: %g, TargetBBDClock: %g, inc_bbd_wr: %g, inc_bbd: %g, ratio: %g, phai_bbd: %d, phaf_bbd: %g, bp_bbd: %d\n", ChorusLFO, TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, phai_bbd, phaf_bbd, bp_bbd);
+	}
+
 	double bbd_index_temp = phaf_bbd + inc_bbd;							// post proc / update for next sample period
 	int phai_bbd = (int)bbd_index_temp;						// integer part of phase
-
-	static double	buf_inc_bbd[BBD_LENGTH];	// for debug "inc_bbd" modulation
 
 	for (int i = 0; i < phai_bbd; i++) {
 		double adrs_441_frac = (i + (1.0 - phaf_bbd)) * inv_inc;	// assuming fixed inc_bbd while one 441kHz sampling period, interpolate inc_bbd as needed
@@ -133,18 +138,10 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 		buf_bbd[ch][bp_bbd + BBD_LENGTH] = buf_bbd[ch][bp_bbd] = wd;
 //		printf("     write_bbd  inc: %g,  bp_441: %d,  tmp_441: %g, phaf: %g, bbd_index_temp: %g, i: %d,  bp_bbd: %d,  buf_bbd: %g\n",
 //			   inc_bbd,        bp_441,     tmp_441, phaf_bbd, bbd_index_temp, i, bp_bbd,       buf_bbd[ch][bp_bbd]);
-		buf_inc_bbd[bp_bbd] = inc_bbd;	// for debug "inc_bbd" modulation
-		bp_bbd = --bp_bbd & (BBD_LENGTH - 1);
+		buf_inc_bbd[bp_bbd + BBD_LENGTH] = buf_inc_bbd[bp_bbd] = inc_bbd;	// for debug "inc_bbd" modulation
+		bp_bbd = (bp_bbd <= 0) ? (BBD_LENGTH - 1) : (bp_bbd - 1);
 	}
 	phaf_bbd = bbd_index_temp - phai_bbd;
-
-	{
-		// for debug "inc_bbd" modulation
-		int bp_read = bp_bbd + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
-		double inc_bbd_on_wr = buf_inc_bbd[bp_read & (BBD_LENGTH - 1)];	// for debug
-		if (inc_bbd_on_wr == 0) { inc_bbd_on_wr = 1.0; }
-//		printf("ChorusLFO: %g, TargetBBDClock: %g, inc_bbd_wr: %g, inc_bbd: %g, ratio: %g, phai_bbd: %d, phaf_bbd: %g, bp_bbd: %d\n", ChorusLFO, TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, phai_bbd, phaf_bbd, bp_bbd);
-	}
 
 	proceed_sample(ch);
 //	printf("---- write_441  inc: %9.6lf  bp_441: %01x  phab: %9.6lf  bp_bbd: %03x  buf_441\[%01x]=%9.6lf\n",
@@ -166,15 +163,6 @@ void init(void)
 double interpolated_read(const double* data, double k)
 {
 	return data[1] * (1.0 - k) + data[0] * k;	// linear interpolation
-}
-
-// --------------------------------------------------------------------
-double read_bbd(int ch, int bp_bbd, double phaf_bbd)
-{
-	int bp = bp_bbd + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
-	double rd = interpolated_read(&buf_bbd[ch][bp], phaf_bbd);
-//	aaf((inc_bbd > 1.0) ? 1 / inc_bbd : 1.0);							// anti arias filter
-	return rd;
 }
 
 // --------------------------------------------------------------------
