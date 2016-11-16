@@ -97,14 +97,14 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 {
 	double	inc_bbd = 1.0;					// bbd phase inc ( 1.0: 44.1k system sample rate )
 
-	static double ChorusLFO = 0;
+	static double ChorusLFO[NUM_OF_MAX_CH] = {0};
 #if 1
 	int FSAMP = formatChunk.fsamp;
-	static double aPeriod = 1 / MaxBBDClock * (MaxBBDClock / MinBBDClock - 1.0) / (pow(ChorusFreqRatio, 1.0 / BBD_LENGTH) - 1.0);
-	ChorusLFO += 1.0 / (aPeriod * FSAMP);
-	if (ChorusLFO > 1.0) { ChorusLFO -= 2.0; }
+	static const double aPeriod = 1 / MaxBBDClock * (MaxBBDClock / MinBBDClock - 1.0) / (pow(ChorusFreqRatio, 1.0 / BBD_LENGTH) - 1.0);
+	ChorusLFO[ch] += 1.0 / (aPeriod * FSAMP);
+	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
 
-	double aCurPoint = fabs(ChorusLFO);
+	double aCurPoint = fabs(ChorusLFO[ch]);
 	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);
 	inc_bbd = TargetBBDClock / FSAMP;
 #else
@@ -113,39 +113,37 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 
 	double inv_inc = 1.0 / inc_bbd;
 
-	static volatile double	phaf_bbd = 0.0;			// float phase
-	static volatile int		bp_bbd = 0;				// base ptr ( dec by sample(441) / dec by write(bbd) )
+	static volatile double	phaf_bbd[NUM_OF_MAX_CH] = {0.0};			// float phase
+	static volatile int		bp_bbd[NUM_OF_MAX_CH] = {0};				// base ptr ( dec by sample(441) / dec by write(bbd) )
 	buf_441[ch][0] = val;
 
-	int rp = bp_bbd + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
-	double rd = interpolated_read(&buf_bbd[ch][rp], phaf_bbd);
-//	printf("     read_bbd   inc: %9.6lf,  bp_441: %d,  phaf: %g,  bp_bbd: %d,  mxo: %g\n",
-//		   inc_bbd,        bp_441,     phaf_bbd,       bp_bbd,   rd);
+	int rp = bp_bbd[ch] + (BBD_LENGTH - 4);											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
+	double rd = interpolated_read(&buf_bbd[ch][rp], phaf_bbd[ch]);
+//	printf(" READ_bbd inc: %g, rp: %d, phaf: %g, bbd_val[0]: %g, bbd_val[1]: %g, rd: %g\n",
+//		inc_bbd, rp, phaf_bbd[ch], buf_bbd[ch][rp+0], buf_bbd[ch][rp+1], rd);
 
-	static double	buf_inc_bbd[BBD_LENGTH * 2];	// for debug "inc_bbd" modulation
+	static double	buf_inc_bbd[NUM_OF_MAX_CH][BBD_LENGTH * 2];	// for debug "inc_bbd" modulation
 	{
 		// for debug "inc_bbd" modulation
-		double inc_bbd_on_wr = buf_inc_bbd[rp];	// for debug
-//		printf("ChorusLFO: %g, TargetBBDClock: %g, inc_bbd_wr: %g, inc_bbd: %g, ratio: %g, phai_bbd: %d, phaf_bbd: %g, bp_bbd: %d\n", ChorusLFO, TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, phai_bbd, phaf_bbd, bp_bbd);
+		double inc_bbd_on_wr = buf_inc_bbd[ch][rp];	// for debug
+//		printf("ChorusLFO: %g, TargetBBDClock: %g, inc_bbd_wr: %g, inc_bbd: %g, ratio: %g, phai_bbd: %d, phaf_bbd: %g, bp_bbd: %d\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, phai_bbd, phaf_bbd[ch], bp_bbd[ch]);
 	}
 
-	double bbd_index_temp = phaf_bbd + inc_bbd;							// post proc / update for next sample period
+	double bbd_index_temp = phaf_bbd[ch] + inc_bbd;							// post proc / update for next sample period
 	int phai_bbd = (int)bbd_index_temp;						// integer part of phase
 
 	for (int i = 0; i < phai_bbd; i++) {
-		double adrs_441_frac = (i + (1.0 - phaf_bbd)) * inv_inc;	// assuming fixed inc_bbd while one 441kHz sampling period, interpolate inc_bbd as needed
+		double adrs_441_frac = (i + (1.0 - phaf_bbd[ch])) * inv_inc;	// assuming fixed inc_bbd while one 441kHz sampling period, interpolate inc_bbd as needed
 		double wd = interpolated_read(buf_441[ch], adrs_441_frac);
-		buf_bbd[ch][bp_bbd + BBD_LENGTH] = buf_bbd[ch][bp_bbd] = wd;
-//		printf("     write_bbd  inc: %g,  bp_441: %d,  tmp_441: %g, phaf: %g, bbd_index_temp: %g, i: %d,  bp_bbd: %d,  buf_bbd: %g\n",
-//			   inc_bbd,        bp_441,     tmp_441, phaf_bbd, bbd_index_temp, i, bp_bbd,       buf_bbd[ch][bp_bbd]);
-		buf_inc_bbd[bp_bbd + BBD_LENGTH] = buf_inc_bbd[bp_bbd] = inc_bbd;	// for debug "inc_bbd" modulation
-		bp_bbd = (bp_bbd <= 0) ? (BBD_LENGTH - 1) : (bp_bbd - 1);
+		buf_bbd[ch][bp_bbd[ch] + BBD_LENGTH] = buf_bbd[ch][bp_bbd[ch]] = wd;
+//		printf(" write_bbd inc: %g,  val[0]: %g, val[1]: %g, adrs_441_frac: %g, phaf: %g, bbd_index_temp: %g, i: %d,  bp_bbd: %d,  buf_bbd: %g\n",
+//			inc_bbd, buf_441[ch][0], buf_441[ch][1], adrs_441_frac, phaf_bbd[ch], bbd_index_temp, i, bp_bbd[ch], buf_bbd[ch][bp_bbd[ch]]);
+		buf_inc_bbd[ch][bp_bbd[ch] + BBD_LENGTH] = buf_inc_bbd[ch][bp_bbd[ch]] = inc_bbd;	// for debug "inc_bbd" modulation
+		bp_bbd[ch] = (bp_bbd[ch] <= 0) ? (BBD_LENGTH - 1) : (bp_bbd[ch] - 1);
 	}
-	phaf_bbd = bbd_index_temp - phai_bbd;
+	phaf_bbd[ch] = bbd_index_temp - phai_bbd;
 
 	proceed_sample(ch);
-//	printf("---- write_441  inc: %9.6lf  bp_441: %01x  phab: %9.6lf  bp_bbd: %03x  buf_441\[%01x]=%9.6lf\n",
-//								 inc_bbd,        bp_441,     phaf_bbd,       bp_bbd,        bp_441, dat_flg ? mxi : 0.0);
 	return rd;
 }
 
@@ -162,7 +160,19 @@ void init(void)
 // --------------------------------------------------------------------
 double interpolated_read(const double* data, double k)
 {
+#if 1
 	return data[1] * (1.0 - k) + data[0] * k;	// linear interpolation
+#else
+	double val = 0;
+	for (int i = 0; i < 4; i++) {
+		double x = -2 + i + k;
+		double window = 0.4668 + 0.4832 * cos(M_PI * x / 2) + 0.05 * cos(M_PI * x);
+		double sinc = (x != 0) ? (sin(M_PI * x / 2) / (M_PI * x / 2)) : 1;
+		val += data[i] * 0.6533 * window * sinc;
+//		printf("i: %d, k: %g, window: %g, sinc: %g, val: %g\n", i, k, window, sinc, val);
+	}
+	return val;
+#endif
 }
 
 // --------------------------------------------------------------------
