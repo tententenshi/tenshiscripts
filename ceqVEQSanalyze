@@ -1,0 +1,95 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Math::Complex;
+
+
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+
+
+my @input;
+foreach my $str (@ARGV) {
+	my @tmp_array = split(/,/, $str);
+	push @input, @tmp_array;
+}
+
+if ($#input != 2) {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd fr hpf(or lpf) FS\n";
+	print "                               hpf\n";
+	print "            +------------------|>--------(+)---\n";
+	print "           /  fr                         /\n";
+	print "  ---(+)--+---|>---(+)-----+            /\n";
+	print "       \\             \\     |           /\n";
+	print "        \\             \\   [ ]         /\n";
+	print "         \\             \\   |   lpf   /\n";
+	print "          +------<|-----+--+---|>---+\n";
+	print "               -1.0\n";
+	print "\n";
+	print "          hpf + (fr * lpf - hpf)*Z^-1\n";
+	print "  H(Z) = ----------------------------\n";
+	print "              1 - (1 - fr)*Z^-1\n";
+	print "\n";
+
+	print "   // <for reference> registers as SSC\n";
+	print "   //           |   address     |               |   remarks    \n";
+	print "   // LE0 (fr)  | 0x07000-071ff | d0    d-1:-15 | 0x8000 = 1.0 \n";
+	print "   // LE1 (lpf) | 0x07200-073ff | d2:0  d-1:-13 | 0x2000 = 1.0 \n";
+	print "   // HE0 (fr)  | 0x07400-075ff | d0    d-1:-15 | 0x8000 = 1.0 \n";
+	print "   // HE1 (hpf) | 0x07600-077ff | d2:0  d-1:-13 | 0x2000 = 1.0 \n";
+	exit 1;
+}
+
+my $isHexOnly = 1;
+for (my $i = 0; $i < 2; $i++) {
+	my $str = $input[$i];
+	$isHexOnly &= ($str =~ /^0[Xx][0-9a-fA-F]+$/);
+}
+
+my ($fr, $g, $Fs);
+
+if ($isHexOnly) {
+	print "deal input data as SSC register\n";
+	$fr = eval($input[0]) / 0x8000;
+	$g  = eval($input[1]) / 0x2000;
+	$Fs = eval($input[2]);
+} else {
+	my @result;
+	foreach my $str (@input) {
+		my $val = ($str =~ /0[Xx]/) ? hex2dec($str) : eval($str);
+		push @result, $val;
+	}
+	($fr, $g, $Fs) = @result;
+}
+
+{	# LSV
+	my $hpf = 1.0;
+	my $lpf = $g;
+
+	my $a0 = $hpf;
+	my $a1 = $fr * $lpf - $hpf;
+	my $b1 = 1 - $fr;
+
+	print "as LSV\n";
+	print "a0:$a0, a1:$a1, b1:$b1\n";
+	system ($FindBin::RealBin . "/ceqFAanalyze $a0 $a1 $b1 $Fs");
+}
+
+print "\n\n";
+
+{	# HSV
+	my $hpf = $g;
+	my $lpf = 1.0;
+
+	my $a0 = $hpf;
+	my $a1 = $fr * $lpf - $hpf;
+	my $b1 = 1 - $fr;
+
+	print "as HSV\n";
+	print "a0:$a0, a1:$a1, b1:$b1\n";
+	system ($FindBin::RealBin . "/ceqFAanalyze $a0 $a1 $b1 $Fs");
+}
+

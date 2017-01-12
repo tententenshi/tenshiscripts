@@ -1,65 +1,24 @@
 #! /usr/bin/env perl
 
+use strict;
 use FindBin;
+use POSIX;
+use Math::Complex;
 
-sub round {
-	my($val) = @_;
-	if ($val >= 0) { $val += 0.5; }
-	else { $val -= 0.5; }
-	return int($val);
+
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+
+
+my @input;
+foreach my $str (@ARGV) {
+	my @tmp_array = split(/,/, $str);
+	push @input, @tmp_array;
 }
 
-sub my_hex_float {
-	my ($str)=@_;
-	if ($str =~ /([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?[pP]([+-]?\d+)/) {
-		my ($int_val, $frac_val, $shift) = ($1, $2, $3);
-		$frac_val =~ s/\.//;
-		my $frac_digit = length($frac_val);
-		$shift -= $frac_digit * 4;
-		my $shift_val = 2**$shift;
-		my $val = eval($int_val . $frac_val) * $shift_val;
-		return $val;
-	} else {
-		return 0;
-	}
-}
-
-sub hex2dec {
-	my ($val) = @_;
-
-	while ($val =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?([pP][+-]?\d+)(.*)/) {
-		my ($pre, $hex_float_val, $post) = ($1, $2 . $3 . $4, $5);
-		$val = $pre . my_hex_float($hex_float_val) . $post;
-	}
-
-	while ($val =~ /^(.*)(0[Xx][\da-fA-F]+)(.*)$/) {
-		my ($pre, $hex, $post) = ($1, $2, $3);
-		if ($hex =~ /0[Xx][\da-fA-F]{6}/) {			# CoefData
-			$VAL1_0 = 0x00800000;
-			$VAL_POS_MAX = 0x80000000;
-		} else {
-			$VAL1_0 = 0x8000;
-			$VAL_POS_MAX = 0x8000;
-		}
-		my $dec;
-		if (eval($hex) >= $VAL_POS_MAX) {
-			$dec = (eval($hex) - $VAL_POS_MAX * 2) / $VAL1_0;
-		} else {
-			$dec = eval($hex) / $VAL1_0;
-		}
-		$val = $pre . $dec . $post;
-	}
-	$val =~ s/<</*2**/g;
-	$val =~ s/>>/*2**-/g;
-	return eval($val);
-}
-
-sub tan { sin($_[0]) / cos($_[0]); }
-
-if ($#ARGV != 4) {
+if ($#input != 5) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
-	print "usage: $cmd PE0 PE1 PE2 PE3 PE4\n";
+	print "usage: $cmd PE0 PE1 PE2 PE3 PE4 FS (all positive value, except for PE4)\n";
 	print "    +---------------------------------------+\n";
 	print "    |                                 PE4    \\\n";
 	print "    |                            +-----|>----(+)-------------------->\n";
@@ -72,26 +31,55 @@ if ($#ARGV != 4) {
 	print "        PE0          \\     -PE2                              |\n";
 	print "                      +-----------------------<|-------------+\n";
 	print "                                             -PE3\n";
+	print "\n";
+	print "\n";
+	print "   // <for reference> registers as SSC\n";
+	print "   //     |   address     |                       |   remarks    \n";
+	print "   // PE0 | 0x07800-079ff | d0    d-1:-13   --    | 0x8000 = 1.0 \n";
+	print "   // PE1 | 0x07a00-07bff | d0    d-1:-13   --    | 0x8000 = 1.0 \n";
+	print "   // PE2 | 0x07c00-07dff | d3:0  d-1:-10   --    | 0x1000 = 1.0 \n";
+	print "   // PE3 | 0x07e00-07fff |    d-1:-14      --    | 0x8000 = 0.5 \n";
+	print "   // PE4 | 0x08000-081ff | d1:0  d-1:-12  --  bc | 0x4000 = 1.0 \n";
 	exit 1;
 }
 
-$PE0 = shift;
-$PE1 = shift;
-$PE2 = shift;
-$PE3 = shift;
-$PE4 = shift;
 
-$a0 = eval($PE0) / 0x8000;
-$a1 = eval($PE0) / 0x8000;
-$fr0 = eval($PE1) / 0x8000;
-$q = -eval($PE2) / 0x8000 * 8;
-$fr1 = $fr0 * eval($PE3) / 0x10000;
-if (eval($PE4) & 0x0001) {
-	$g = -(eval($PE4) & 0xfffe) / 0x8000 * 2;
-} else {
-	$g = (eval($PE4) & 0xfffe) / 0x8000 * 2;
+my $isHexOnly = 1;
+for (my $i = 0; $i < 5; $i++) {
+	my $str = $input[$i];
+	$isHexOnly &= ($str =~ /^0[Xx][0-9a-fA-F]+$/);
 }
-$Fs = 44100;
+
+my ($PE0, $PE1, $PE2, $PE3, $PE4, $Fs);
+
+if ($isHexOnly) {
+	print "input is Hex Only, deal input data as SSC register\n";
+	$PE0 = eval($input[0]) / 0x8000;
+	$PE1 = eval($input[1]) / 0x8000;
+	$PE2 = eval($input[2]) / 0x1000;
+	$PE3 = eval($input[3]) / 0x10000;
+	if (($input[4] & 0x0001) == 0) {
+		$PE4 = (eval($input[4]) & 0xfffe) / 0x4000;
+	} else {
+		$PE4 = -(eval($input[4]) & 0xfffe) / 0x4000;
+	}
+	$Fs = $input[5];
+} else {
+	my @result;
+	foreach my $str (@input) {
+		my $val = ($str =~ /0[Xx]/) ? hex2dec($str) : eval($str);
+		push @result, $val;
+	}
+	($PE0, $PE1, $PE2, $PE3, $PE4, $Fs) = @result;
+}
+
+
+my $a0 = $PE0;
+my $a1 = $PE0;
+my $fr0 = $PE1;
+my $q = -$PE2;
+my $fr1 = $PE1 * $PE3;
+my $g = $PE4;
 
 print "a0:$a0, a1:$a1, fr0:$fr0, q:$q, fr1:$fr1, g:$g\n";
 
