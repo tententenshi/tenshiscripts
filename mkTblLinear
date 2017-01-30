@@ -80,9 +80,10 @@ while (my $str = <>) {
 		$str_for_eval = $pre . my_hex_float($hex_float_val) . $post;
 #		print "pre:$pre, hex_float_val:$hex_float_val, post:$post, str_for_eval:$str_for_eval\n";
 	}
-	if ($str_for_eval =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(.*)/) {
+	while ($str_for_eval =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(.*)/) {
 		my ($pre, $hex_float_val, $post) = ($1, $2, $3);
 		$str_for_eval = $pre . hex2float($hex_float_val, length($hex_float_val)) . $post;
+#		print "pre:$pre, hex_float_val:$hex_float_val, post:$post, str_for_eval:$str_for_eval\n";
 	}
 
 	if ($mode eq "uninitialized") {
@@ -103,7 +104,8 @@ while (my $str = <>) {
 
 		push @buf, $str;
 	} elsif ($mode eq "break_table") {
-		if (($option eq "x") || ($option eq "d") || ($option eq "f")) {
+#		if (($option eq "x") || ($option eq "d") || ($option eq "f")) {
+		if (($option eq "f")) {
 			push @buf, $str_for_eval;
 		} else {
 			push @buf, $str;
