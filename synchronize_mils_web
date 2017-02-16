@@ -10,6 +10,7 @@ TARGET="
 	$WEB_PATH/piano/software/dsp/tools/ceqHD
 	$WEB_PATH/piano/software/dsp/tools/ceqVEQPanalyze
 	$WEB_PATH/piano/software/dsp/tools/ceqVEanalyze
+	$WEB_PATH/piano/software/dsp/tools/ceqAnalyzeCommon.pm
 	$WEB_PATH/piano/software/dsp/tools/esc2float
 	$WEB_PATH/piano/software/dsp/tools/gnuplot2png
 	$WEB_PATH/piano/software/dsp/tools/mkTblLinear
