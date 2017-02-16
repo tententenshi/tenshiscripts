@@ -102,7 +102,10 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
 
 	double aCurPoint = fabs(ChorusLFO[ch]);
-	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);
+	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
+//	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
+//	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * aCurPoint);	// exponential
+//	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * aCurPoint * aCurPoint;	// square
 	double inc_bbd = TargetBBDClock / FSAMP;	// phase increment
 #else
 	double inc_bbd = 0.2;	// phase increment
