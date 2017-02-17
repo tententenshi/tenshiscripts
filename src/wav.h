@@ -200,7 +200,7 @@ long CreateWavHeader(FILE* fp, const SFormatChunk* formatChunk)
 	return ftell(fp);	// return data start position
 }
 
-void MaintainWavHeader(FILE* fp, const SFormatChunk* formatChunk, int dataSize, long dataStartPos)
+void MaintainWavHeader(FILE* fp, int dataSize, long dataStartPos)
 {
 	struct stat stbuf;
 	int file_size;
