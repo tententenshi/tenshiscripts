@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 				WriteWaveData(fpDebug1, &formatChunkDebug, sCurReadSpead / 10.0);
 				WriteWaveData(fpDebug1, &formatChunkDebug, sCurWriteSpead / 10.0);
 				WriteWaveData(fpDebug2, &formatChunkDebug, (sCurPitch - 1.0) * 40);
-				WriteWaveData(fpDebug2, &formatChunkDebug, sCurWriteAdrs / 1024);
+				WriteWaveData(fpDebug2, &formatChunkDebug, sCurWriteAdrs / BBD_LENGTH);
 
 			}
 		}
@@ -163,11 +163,11 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	{
 		// for debug "inc_bbd" modulation
 		double inc_bbd_on_wr = interpolated_read(buf_inc_bbd[ch], rp);	// for debug
-//		printf("ChorusLFO: %lf, TargetBBDClock: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, bp_bbd: %lf\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, bp_bbd[ch] - 1024);
+//		printf("ChorusLFO: %lf, TargetBBDClock: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, bp_bbd: %lf\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, bp_bbd[ch] - BBD_LENGTH);
 		sCurReadSpead = inc_bbd;
 		sCurWriteSpead = inc_bbd_on_wr;
 		sCurPitch = inc_bbd / inc_bbd_on_wr;
-		sCurWriteAdrs = bp_bbd[ch] - 1024;
+		sCurWriteAdrs = bp_bbd[ch] - BBD_LENGTH;
 	}
 
 	double bp_new = bp_bbd[ch] + inc_bbd;							// post proc / update for next sample period
