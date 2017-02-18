@@ -1,0 +1,68 @@
+#! /usr/bin/perl
+
+$base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+sub codetovalue {
+	my ($c) = @_;
+	my $i = 0;
+
+	for ($i = 0; $i < 64; $i++) {
+		if ($c eq substr($base64, $i, 1)) { last; }
+	}
+	return $i;
+}
+
+sub decode_str {
+	my($org) = @_;
+	my $tmp = 0;
+	my @result;
+
+	for ($i = 0; $i < 4; $i++) {
+		$tmp = $tmp << 6;
+		$tmp |= codetovalue(substr($org, $i, 1));
+#		printf "org %s --> %02x\n", substr($org, $i, 1), codetovalue(substr($org, $i, 1));
+	}
+
+	$result[0] = ($tmp & 0x00ff0000) >> 16;
+	$result[1] = ($tmp & 0x0000ff00) >>  8;
+	$result[2] = ($tmp & 0x000000ff) >>  0;
+
+	return @result;
+}
+
+sub decode {
+	my($src) = @_;
+
+	$src =~ s/[^A-Za-z0-9\/+=]//g;
+
+	$srclen = length($src);
+#	print "src = $src, srclen = $srclen\n";
+	if ($srclen % 4 != 0) { die "source string $src is not multiple of 4!\n"; }
+
+#	printf("srclen = %d, srclen % 4 = %d\n", $srclen, $rclen % 4);
+
+	my $cursor = 0;
+	while($cursor < $srclen) {
+#		print "srclen = $srclen cursor = $cursor\n";
+		my $org, @result;
+		$org = substr($src, $cursor, 4);
+		@result = decode_str($org);
+#		printf("src = %s, org = %s, result = 0x%02x%02x%02x\n", $src, $org, $result[0], $result[1], $result[2]);
+		if ($org =~ /==/) { printf "%c", $result[0]; }
+		elsif ($org =~ /=/) { printf "%c%c", $result[0], $result[1]; }
+		else { printf "%c%c%c", $result[0], $result[1], $result[2]; }
+
+		$cursor += 4;
+	}
+}
+
+#main()
+{
+	$infile = shift;
+
+	open (INFILE, $infile) or die "cannot open $infile!\n";
+
+	while (<INFILE>) {
+		decode($_);
+	}
+}
