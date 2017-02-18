@@ -1,0 +1,171 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $file = shift;
+
+
+#
+# ParseFileHeader
+#
+sub ParseFileHeader
+{
+	my $buf;
+	read IN, $buf, 4;		# long by little endian
+	my $fileSize = unpack "V", $buf;
+	read IN, $buf, 2;		# reserved
+	read IN, $buf, 2;		# reserved
+	read IN, $buf, 4;
+	my $ofsetBytes = unpack "V", $buf;
+
+	print "fileSize: $fileSize, ofsetBytes: $ofsetBytes\n";
+	return ($fileSize, $ofsetBytes);
+}
+
+sub ParseWindowsHeader
+{
+	my $buf;
+	read IN, $buf, 4;	# width
+	my $width = unpack "V", $buf;
+	read IN, $buf, 4;	# height
+	my $height = unpack "V", $buf;
+	read IN, $buf, 2;	# plane
+	my $plane = unpack "v", $buf;
+	read IN, $buf, 2;	# bitCount
+	my $bitCount = unpack "v", $buf;
+	read IN, $buf, 4;	# compression
+	my $compression = unpack "V", $buf;
+	read IN, $buf, 4;	# sizeImage
+	my $sizeImage = unpack "V", $buf;
+	read IN, $buf, 4;	# pixPerMeterX
+	my $pixPerMeterX = unpack "V", $buf;
+	read IN, $buf, 4;	# pixPerMeterY
+	my $pixPerMeterY = unpack "V", $buf;
+	read IN, $buf, 4;	# colorUsed
+	my $colorUsed = unpack "V", $buf;
+	read IN, $buf, 4;	# colorImportant
+	my $colorImportant = unpack "V", $buf;
+
+	print "width: $width, height: $height, plane: $plane, bitCount: $bitCount, compression: $compression, sizeImage: $sizeImage, pixPerMeterX: $pixPerMeterX, pixPerMeterY: $pixPerMeterY, colorUser: $colorUsed, colorImportant: $colorImportant\n";
+
+	return ($width, $height, $plane, $bitCount, $compression, $sizeImage, $pixPerMeterX, $pixPerMeterY, $colorUsed, $colorImportant);
+}
+
+	
+
+#
+# main
+#
+{
+	open (IN, "$file") or die "cannot open $file\n";
+
+	my $buf;
+
+	read IN, $buf, 2;	# RIFF
+	my $str = unpack "a2", $buf;
+	if ($str ne "BM") {
+		die "not proper format (BM not found)\n";
+	}
+
+	my ($fileSize, $ofsetBytes) = ParseFileHeader();
+
+	read IN, $buf, 4;		# long by little endian
+	my $infoSize = unpack "V", $buf;
+	my ($width, $height, $plane, $bitCount, $compression, $sizeImage, $pixPerMeterX, $pixPerMeterY, $colorUsed, $colorImportant);
+
+	if ($infoSize == 12) {
+		ParseOS2Header();
+	} elsif ($infoSize == 40) {
+		($width, $height, $plane, $bitCount, $compression, $sizeImage, $pixPerMeterX, $pixPerMeterY, $colorUsed, $colorImportant) = 
+		ParseWindowsHeader();
+	} else {
+		print "infoSize: $infoSize\n";
+	}
+
+	my $remainSize = $ofsetBytes - 14 - $infoSize;
+	read IN, $buf, $remainSize;	# skip padding
+
+	my $totalPixel = $width * $height;
+	my @pixels;
+	if ($bitCount == 24) {
+		my $curPixel = 0;
+		while ($totalPixel > $curPixel) {
+			read IN, $buf, 3;
+			my ($B, $G, $R) = unpack("C" x 3, $buf);
+			$R = int($R * 0xf8 / 0xff + 0.5);
+			$G = int($G * 0xf8 / 0xff + 0.5);
+			$B = int($B * 0xf8 / 0xff + 0.5);
+			push @pixels, [$R, $G, $B];
+			$curPixel++;
+		}
+	} elsif ($bitCount == 16) {
+		my $curPixel = 0;
+		while ($totalPixel > $curPixel) {
+			read IN, $buf, 2;
+			my $val = unpack("v", $buf);
+			my ($R, $G, $B) = ((($val >> 7) & 0xf8), (($val >> 2) & 0xf8), (($val <<3) & 0xf8));
+			push @pixels, [$R, $G, $B];
+			$curPixel++;
+		}
+	}
+
+
+	open (OUT, "> temp_test.bmp") or die "cannot open temp_test.bmp\n";
+
+	my $buf;
+	$buf = pack "a2", "BM";
+	print OUT $buf;
+	$buf = pack "V", $ofsetBytes + $totalPixel * 2;
+	print OUT $buf;
+	$buf = pack "v", 0;
+	print OUT $buf;
+	print OUT $buf;
+	$buf = pack "V", $ofsetBytes;
+	print OUT $buf;
+
+	$buf = pack "V", $infoSize;
+	print OUT $buf;
+	$buf = pack "V", $width;
+	print OUT $buf;
+	$buf = pack "V", $height;
+	print OUT $buf;
+	$buf = pack "v", $plane;
+	print OUT $buf;
+	$buf = pack "v", 16;	# bitCount = 16
+	print OUT $buf;
+	$buf = pack "V", 0;		# compression = 0
+	print OUT $buf;
+	$buf = pack "V", 0;		# sizeImage
+	print OUT $buf;
+	$buf = pack "V", $pixPerMeterX;
+	print OUT $buf;
+	$buf = pack "V", $pixPerMeterY;
+	print OUT $buf;
+	$buf = pack "V", $colorUsed;
+	print OUT $buf;
+	$buf = pack "V", $colorImportant;
+	print OUT $buf;
+	
+	for (my $i = 14 + $infoSize; $i < $ofsetBytes; $i++) {
+		$buf = pack "c", 0;
+		print OUT $buf;
+	}
+
+	foreach my $pixel (@pixels) {
+		my ($R, $G, $B) = @$pixel;
+		my ($orgR, $orgG, $orgB) = @$pixel;
+#		$R = ($R >= 0xf8) ? 0xf8 : ($R + 0x04);
+#		$G = ($G >= 0xf8) ? 0xf8 : ($G + 0x04);
+#		$B = ($B >= 0xf8) ? 0xf8 : ($B + 0x04);
+		$R = ($R >= 0xf8) ? 0xf8 : ($R + int(rand(0x08))) & 0xf8;
+		$G = ($G >= 0xf8) ? 0xf8 : ($G + int(rand(0x08))) & 0xf8;
+		$B = ($B >= 0xf8) ? 0xf8 : ($B + int(rand(0x08))) & 0xf8;
+		my $val = (($R & 0xf8) << 7) | (($G & 0xf8) << 2) | (($B & 0xf8) >> 3);
+		$buf = pack "v", $val;
+		print OUT $buf;
+
+#		printf "R: 0x%02x->0x%02x G: 0x%02x->0x%02x B: 0x%02x->0x%02x\n", $orgR, $R, $orgG, $G, $orgB, $B;
+	}
+
+	close OUT;
+}

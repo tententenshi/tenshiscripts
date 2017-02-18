@@ -1,0 +1,3 @@
+gcc -c *.cpp
+ld -r *.o -o rel2.a
+g++ rel2.a -o vtbltest

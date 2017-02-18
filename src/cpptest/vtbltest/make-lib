@@ -1,0 +1,3 @@
+gcc -c *.cpp
+ar crs lib.a *.o
+g++ lib.a -o vtbltest

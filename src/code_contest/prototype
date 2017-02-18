@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+
+
+use strict;
+
+
+sub combination_sum_sub {
+    my ($items_ref, $max_index, $target, $cur_sum, $max_sum) = @_;
+
+    for (my $i = $max_index; $i >= 0; $i--) {
+	my $tmp_sum = $cur_sum + $$items_ref[$i];
+	if ($tmp_sum > $target) { next; }
+
+	print "(nest) trying $cur_sum + $$items_ref[$i] ...\n";
+	if ($tmp_sum == $target) { $max_sum = $tmp_sum; last; }
+
+	my $sum = $tmp_sum;
+	if ($i > 0) {
+	    my $sum = combination_sum_sub($items_ref, $i - 1, $target, $tmp_sum, $max_sum);
+	}
+
+	print "(nest) subroutine return val is $sum\n";
+
+	if ($sum == $target) { $max_sum = $sum; last; }
+	if ($sum > $max_sum) { $max_sum = $sum; }
+    }
+    print "max_sum: $max_sum\n";
+    return $max_sum;
+}
+
+sub combination_sum {
+    my ($items_ref, $target) = @_;
+
+    my $max_sum = 0;
+
+    for (my $i = $#{ $items_ref }; $i >= 0; $i--) {
+	my $tmp_sum = $$items_ref[$i];
+	if ($tmp_sum > $target) { next; }
+
+	print "trying $tmp_sum (i: $i) ...\n";
+	if ($tmp_sum == $target) { $max_sum = $tmp_sum; last; }
+	my $sum = combination_sum_sub($items_ref, $i - 1, $target, $tmp_sum, $max_sum);
+
+	if ($sum == $target) { $max_sum = $sum; last; }
+	if ($sum > $max_sum) { $max_sum = $sum; }
+    }
+
+    return $max_sum;
+}
+
+
+my ($item_num, $campain_num) = split(" ", <>);
+#print "item_num: $item_num, campain_num: $campain_num\n";
+
+my @items_unsorted;
+for (my $i = 0; $i < $item_num; $i++) {
+    push @items_unsorted, eval(<>);
+}
+
+my @items = sort {$a <=> $b} @items_unsorted;
+#print "@items\n";
+
+
+for (my $i = 0; $i < $campain_num; $i++) {
+    my $target = eval <>;
+
+#    print "trying to search combination target $target\n";
+    my $max_sum = combination_sum(\@items, $target);
+#    print "last max_sum of target $target: $max_sum\n";
+    print "$max_sum\n";
+}
