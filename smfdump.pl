@@ -10,4 +10,4 @@ my %info;
 my @track;
 
 &smf_util::ReadAndParse($file, \%info, \@track);
-&smf_util::ShowAllEvent(\%info, \@track);
+&smf_util::ShowAllEvent(\%info, \@track, 1);

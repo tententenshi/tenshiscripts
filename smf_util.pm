@@ -152,22 +152,27 @@ sub Tick2RealElapseTime
 ##########################################################################
 
 
-sub PrintEventTime
+sub PrintEventTick
 {
 	my ($tickTime) = @_;
 
 	my ($meas, $beat, $tick) = @{ Tick2MeasBeatTick($tickTime) };
+	return sprintf("%8d (%3d:%3d:%03d)", $tickTime, $meas, $beat, $tick);
+}
+
+sub PrintEventTime
+{
+	my ($tickTime) = @_;
+
 	my $usec = Tick2RealElapseTime($tickTime);
 	my $seconds = $usec % 60000000;
 	my $miliseconds = $usec % 1000000;
-	printf("%8d (%3d:%3d:%03d) (%3d'%02d\"%03d): ", $tickTime, $meas, $beat, $tick, int($usec / 60000000), int($seconds / 1000000), $miliseconds / 1000);
+	return sprintf("(%3d'%02d\"%03d)", int($usec / 60000000), int($seconds / 1000000), $miliseconds / 1000);
 }
 
 sub ParseMetaEvent
 {
 	my ($tickTime, @data) = @_;
-
-	PrintEventTime($tickTime);
 
 	my $metaEvent = $data[1];
 	my @dataBody = @data;
@@ -176,74 +181,74 @@ sub ParseMetaEvent
 		if (!($val & 0x80)) { last; }
 	}
 	if      ($metaEvent == 0x00) {	# sequence number
-		printf("sequence number\n");
+		return sprintf("sequence number\n");
 	} elsif ($metaEvent == 0x01) {	# text
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("text: %s\n", $str);
+		return sprintf("text: %s\n", $str);
 	} elsif ($metaEvent == 0x02) {	# copyright
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("copyright: %s\n", $str);
+		return sprintf("copyright: %s\n", $str);
 	} elsif ($metaEvent == 0x03) {	# sequence title
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("sequence title: %s\n", $str);
+		return sprintf("sequence title: %s\n", $str);
 	} elsif ($metaEvent == 0x04) {	# instrument
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("instrument: %s\n", $str);
+		return sprintf("instrument: %s\n", $str);
 	} elsif ($metaEvent == 0x05) {	# lyric
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("lyric: %s\n", $str);
+		return sprintf("lyric: %s\n", $str);
 	} elsif ($metaEvent == 0x06) {	# marker
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("marker: %s\n", $str);
+		return sprintf("marker: %s\n", $str);
 	} elsif ($metaEvent == 0x07) {	# que point
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("que point: %s\n", $str);
+		return sprintf("que point: %s\n", $str);
 	} elsif ($metaEvent == 0x08) {	# program
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("program: %s\n", $str);
+		return sprintf("program: %s\n", $str);
 	} elsif ($metaEvent == 0x09) {	# device
 		my $val = pack("C*", @dataBody);
 		my $str = unpack("a*", $val);
-		printf("device: %s\n", $str);
+		return sprintf("device: %s\n", $str);
 	} elsif ($metaEvent == 0x20) {	# MIDI channel prefix
-		printf("MIDI channel prefix (%d)\n", $dataBody[0]);
+		return sprintf("MIDI channel prefix (%d)\n", $dataBody[0]);
 	} elsif ($metaEvent == 0x21) {	# output port
-		printf("output port (%d)\n", $dataBody[0]);
+		return sprintf("output port (%d)\n", $dataBody[0]);
 	} elsif ($metaEvent == 0x2f) {	# track end
-		printf("track end\n");
+		return sprintf("track end\n");
 	} elsif ($metaEvent == 0x51) {	# tempo
 		my $tempo = ($dataBody[0] << 16) | ($dataBody[1] << 8) | $dataBody[2];
-		printf("tempo (%d usec / BPM%g)\n", $tempo, 60*1000000/$tempo);
+		return sprintf("tempo (%d usec / BPM%g)\n", $tempo, 60*1000000/$tempo);
 	} elsif ($metaEvent == 0x54) {	# smpte offset
-		printf("SMPTE offset\n");
+		return sprintf("SMPTE offset\n");
 	} elsif ($metaEvent == 0x58) {	# beat
 		my $beat_num = $dataBody[0];
 		my $beat_den = $dataBody[1];
-		printf("beat %d/%d\n", $beat_num, (1<<$beat_den));
+		return sprintf("beat %d/%d\n", $beat_num, (1<<$beat_den));
 	} elsif ($metaEvent == 0x59) {	# key signature
 		my $key = ($dataBody[0] >= 128) ? ($dataBody[0] - 256) : $dataBody[0];
 		my $isMinor = $dataBody[1];
 		my @key_str = ("C", "G", "D", "A", "Fes", "Ces", "Ges", "Des", "As", "Es", "B", "F", "C", "G", "D", "A", "E", "H", "Fis", "Cis", "Gis", "Dis", "Ais", "Eis",);
-		printf("key signature %s %s\n", $key_str[$key + 12], ($isMinor) ? "mol" : "dur");
+		return sprintf("key signature %s %s\n", $key_str[$key + 12], ($isMinor) ? "mol" : "dur");
 	} elsif ($metaEvent == 0x7f) {	# sequencer meta
-		printf("sequencer meta\n");
+		return sprintf("sequencer meta\n");
 	} else {
-		printf("unknown meta event %d\n", $metaEvent);
+		return sprintf("unknown meta event %d\n", $metaEvent);
 	}
 }
 
 
 sub ShowAllEvent
 {
-	my ($infoHashRef, $trackArrayRef) = @_;
+	my ($infoHashRef, $trackArrayRef, $isIndicateTime) = @_;
 
 	Update($infoHashRef, $trackArrayRef);
 
@@ -253,16 +258,17 @@ sub ShowAllEvent
 		foreach my $event (@$track) {
 			my ($tickTime, $isRunningStatus, @data) = @{ $event };
 
+			my $str = PrintEventTick($tickTime) . (($isIndicateTime) ? (" " . PrintEventTime($tickTime)) : "") . ": ";
 			if ($data[0] == 0xff) {
-				ParseMetaEvent($tickTime, @data);
+				$str .= ParseMetaEvent($tickTime, @data);
 			} else {
-				PrintEventTime($tickTime);
-				printf "%s", ($isRunningStatus) ? "!" : " ";
+				$str .= ($isRunningStatus) ? "!" : " ";
 				foreach my $val (@data) {
-					printf("%02x ", $val);
+					$str .= sprintf("%02x ", $val);
 				}
-				print "\n";
+				$str .= "\n";
 			}
+			print $str;
 		}
 		$cur_track++;
 	}
