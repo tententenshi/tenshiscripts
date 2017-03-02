@@ -26,6 +26,10 @@ alias c=clear
 
 alias du='du --max-depth=1'
 
+function jhd {
+	 hexdump -C $* | less
+}
+
 function psg () {
 	ps ax | grep $* | grep -v grep
 }
@@ -122,7 +126,7 @@ function replace() {
 
 		for i
 		do
-			overwrite $i sed "s@$left@$right@g" $i
+			overwrite $i sed -b "s@$left@$right@g" $i
 		done
 	esac
 }
