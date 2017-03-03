@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "filters.h"
+#include "../filters.h"
 #include "../wav.h"
 
 
@@ -15,7 +15,7 @@ void Usage(const char* command)
 	fprintf(stderr, "           :\n\n");
 	fprintf(stderr, "\tkind of types\n");
 	fprintf(stderr, "\t\tATT       -- Input Gain\n");
-	fprintf(stderr, "\t\tDELAY     -- delay\n");
+	fprintf(stderr, "\t\tDELAY     -- delay[sec]\n");
 	fprintf(stderr, "\t\tSINE      -- sine modulator\n");
 }
 
@@ -90,7 +90,7 @@ EType ParseEType(const char* str)
 	return NONE;
 }
 
-#include "list.h"
+#include "../list.h"
 static CList<CFilterBase*>* spList;
 void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 {

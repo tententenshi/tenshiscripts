@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "filters.h"
+#include "../filters.h"
 #include "../wav.h"
 
 
@@ -15,6 +15,7 @@ void Usage(const char* command)
 	fprintf(stderr, "         :\n\n");
 	fprintf(stderr, "\tkind of types\n");
 	fprintf(stderr, "\t\tATT       -- Input Gain\n");
+	fprintf(stderr, "\t\tDELAY     -- Delay[sec]\n");
 	fprintf(stderr, "\t\tHPF1      -- 1st order high pass filter\n");
 	fprintf(stderr, "\t\tLPF1      -- 1st order low pass filter\n");
 	fprintf(stderr, "\t\tHSV1_Trad -- 1st order high shelving filter (traditional operation)\n");
@@ -84,6 +85,7 @@ int main(int argc, char* argv[])
 
 enum EType {
 	ATT,
+	DELAY,
 	HPF1,
 	LPF1,
 	HSV1_Trad,
@@ -102,6 +104,8 @@ EType ParseEType(const char* str)
 {
 	if (strcmp(str, "ATT") == 0) {
 		return ATT;
+	} else if (strcmp(str, "DELAY") == 0) {
+		return DELAY;
 	} else if (strcmp(str, "HPF1") == 0) {
 		return HPF1;
 	} else if (strcmp(str, "LPF1") == 0) {
@@ -128,7 +132,7 @@ EType ParseEType(const char* str)
 	return NONE;
 }
 
-#include "list.h"
+#include "../list.h"
 static CList<CFilterBase*>* spList;
 void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 {
@@ -165,6 +169,9 @@ void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 						((CATT*)aIns)->SetProperty(gain);
 					}
 				}
+				break;
+			case DELAY:
+				{ CFilterBase* aIns = new CDELAY(FSAMP);     spList[ch].push_back(aIns); ((CDELAY*)aIns)->SetProperty(freq); }
 				break;
 			case HPF1:
 				{ CFilterBase* aIns = new CHPF1(FSAMP);      spList[ch].push_back(aIns); ((CHPF1*)aIns)->SetProperty(freq); }
@@ -248,7 +255,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 
 	for (int i = 0; i < wavSamples; i++) {
 		for (int ch = 0; ch < num_ch; ch++) {
-			double val = ReadWaveData(theWavFile, formatChunk);
+			double val = ReadWaveData(theWavFile, &formatChunk);
 		
 			for (CList<CFilterBase*>::Iterator iter = spList[ch].begin(); iter != spList[ch].end(); iter++) {
 				if (iter != 0) {
@@ -256,7 +263,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 				}
 			}
 
-			WriteWaveData(fp, formatChunk, val);
+			WriteWaveData(fp, &formatChunk, val);
 		}
 	}
 }
