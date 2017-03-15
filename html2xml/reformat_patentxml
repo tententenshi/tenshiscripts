@@ -48,6 +48,13 @@ sub parse_keyw {
 	return $text;
 }
 
+sub parse_inventor {
+	my ($text) = @_;
+	$text =~ s#、$##;	# 行末のコンマを取る
+	$text =~ s#、#</発明者><発明者>#g;
+	return $text;
+}
+
 sub getStatus {
 	foreach my $tag (@tag_array) {
 		my $tagname = $tag->[0];
@@ -81,15 +88,39 @@ sub reformat_xml {
 	my $isMajorStr = (IsMajor()) ? "重要" : "";
 
 	print "<特許 status=\"$isRegisteredStr\" notice=\"$isMajorStr\">\n";
+	my $isURL_Exist = 0;
+	foreach my $tag (@tag_array) {
+		my $tagname = $tag->[0];
+		if ($tagname eq "URL") {
+			$isURL_Exist = 1;
+		}
+	}
+
 	foreach my $tag (@tag_array) {
 		my $tagname = $tag->[0];
 		my $text = $tag->[1];
 		if ($tagname =~ m#日$#) {
 			$text = parse_date($text);
 		} elsif ($tagname =~ m#番号$#) {
+			if (($tagname eq "出願番号") && (!$isURL_Exist)) {
+				my $URL = "http://web.patrol.ime.roland.co.jp/poJP/FMPro?-db=poJP.fmj&amp;-lay=JP&amp;-op=eq&amp;ganno=" . $text . "&amp;-Format=record_detail_out.htm&amp;-Script=era_all&amp;-Script=HD&amp;-Find";
+				print "<URL>$URL</URL>\n";
+			}
 			$text = parse_id($text);
 		} elsif ($tagname eq "keyw") {
 			$text = parse_keyw($text);
+		} elsif ($tagname eq "発明者") {
+			$text = parse_inventor($text);
+		} elsif ($tagname eq "経過") {
+			next;
+		} elsif ($tagname eq "重要") {
+			next;
+		} elsif ($tagname eq "概要") {
+			if ($text =~ /^名称：(.+?)<br\/>(.*)$/) {
+				my ($title, $abstruct) = ($1, $2);
+				print "<名称>$title</名称>\n";
+				$text = $abstruct;
+			}
 		}
 		print "<$tagname>$text</$tagname>\n";
 	}

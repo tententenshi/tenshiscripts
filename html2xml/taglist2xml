@@ -22,7 +22,7 @@ sub encodeurl {
 	$str =~ s/&amp;/&/g;
 	$str =~ s/&/&amp;/g;
 	if (!($str =~ /^http/)) {
-		$str = "http://web.patrol.hosoe.roland.co.jp/poJP/" . $str;
+		$str = "http://web.patrol.ime.roland.co.jp/poJP/" . $str;
 	}
 	return $str;
 }
@@ -51,7 +51,7 @@ while (my $str = <TEMPLATE>) {
 		$start_condition = $1;
 		$isStarted = 1;
 	} elsif ($isStarted) {
-		if ($str =~ /^(.+?)\s*<end>/) {
+		if ($str =~ /^(.*?)\s*<end>/) {
 			$end_condition = $1;
 		} elsif ($str =~ /^(.+?)\s*:\s*$/) {
 			push @template, [$1, '', ''];
@@ -71,23 +71,23 @@ open (PATENT, "$patentfile") or die "cannot open $patentfile\n";
 
 my $isIn = 0;
 my $cur_index = 0;
+my $my_start_condition = transform($start_condition);
+my $my_end_condition = transform($end_condition);
 
 print "<?xml version=\"1.0\" encoding=\"Shift_JIS\"?>\n";
 print "<?xml-stylesheet href=\"patent_list.xsl\" type=\"text/xsl\"?>\n\n";
 print "<“Á‹–î•ñ>\n";
 while (my $str = <PATENT>) {
 #	print $str;
-	my $my_start_condition = transform($start_condition);
-#	print "my_start: $my_start_condition\n";
-	if ($str =~ /$my_start_condition/) {
+	if (!$isIn && ($str =~ /^$my_start_condition$/)) {
+#		print "my_start: $my_start_condition\n";
 		$isIn = 1;
 		$cur_index = 0;
 		print "<“Á‹–>\n";
 		next;
 	}
-	my $my_end_condition = transform($end_condition);
-#	print "my_end: $my_end_condition\n";
-	if ($str =~ /$my_end_condition/) {
+	if ($isIn && ($str =~ /^$my_end_condition$/)) {
+#		print "my_end: $my_end_condition\n";
 		$isIn = 0;
 		print "</“Á‹–>\n\n";
 		next;
@@ -116,6 +116,10 @@ while (my $str = <PATENT>) {
 	} elsif ($str =~ /$my_cur_condition$/) {
 		$cur_index++;
 	}
+}
+
+if ($isIn) {
+	print "</“Á‹–>\n\n";
 }
 print "</“Á‹–î•ñ>\n";
 

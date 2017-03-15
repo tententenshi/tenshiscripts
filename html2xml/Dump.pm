@@ -31,7 +31,9 @@ my @nest_line = ();
 my @text_output = ();
 my $tag_nest = '';
 my $text_sum = '';
+my $text_a_sum = '';
 my $cur_href = '';
+my $last_href = '';
 
 sub Print {
     my @Buf = @_;
@@ -63,7 +65,6 @@ sub IsUnaryTag {
     if (($tag eq "meta") ||
 	($tag eq "hr") ||
 	($tag eq "basefont") ||
-	($tag eq "option") ||
 	($tag eq "img")) {
 	return 1;
     } else {
@@ -85,16 +86,17 @@ sub checkHierarchy {
     my @hierarchy = (
 		     ["td", "tr"],
 		     ["tr", "table"],
+		     ["option", "select"],
 		     );
     foreach my $tmp (@hierarchy) {
 	if ($cur_tag eq $tmp->[0]) {
-	    my $parent = $tmp->[1];
-	    while (!($tag_nest =~ /$parent$/)) {
-#		print "tag is irregular $tag_nest($cur_tag)\n";
-		$tag_nest =~ /( \| )(\S+?)$/;
-		my $last_tag = $2;
-		$self->end($last_tag);
-	    }
+		my $parent = $tmp->[1];
+		while (!($tag_nest =~ /$parent$/)) {
+#			print "tag is irregular $tag_nest($cur_tag)\n";
+			$tag_nest =~ /( \| )(\S+?)$/;
+			my $last_tag = $2;
+			$self->end($last_tag);
+		}
 	}
     }
 }
@@ -103,7 +105,7 @@ sub start {
     my ($self,$tagname,$attr,$attrseq,$text) = @_;
     my ($k,$i);
 
-    if (IgnoreTag($tagname) || IsUnaryTag($tagname)) {
+	if (IgnoreTag($tagname) || IsUnaryTag($tagname)) {
 	return;
     }
     if (IsBRTag($tagname)) {
@@ -125,16 +127,19 @@ sub start {
 	$text_output[$cur_line] = "$tag_nest: ";
 	$nest_line[$nest] = $cur_line;
 	$text_sum = '';
-	$cur_href = '';
+	$last_href = '';
 	$cur_line++;
     }
     if (($tagname eq 'table') || ($tagname eq 'tr')) {
 	$text_output[$cur_line] = "$tag_nest ^\n";
 	$cur_line++;
     }
-    if ($tagname eq 'a') {
-	$cur_href = $$attr{ 'href' };
+	if ($tagname eq 'a') {
+		$cur_href = $$attr{ 'href' };
     }
+	if (($tagname eq 'option') && ($$attr{ 'value' } ne "")) {
+		$text_sum .= $$attr{ 'value' };
+	}
 
     foreach $k ( keys %$attr ){
 	Print "-attr:$k = $$attr{$k}\n";
@@ -152,11 +157,29 @@ sub end {
     }
 
     if ($tagname eq 'td') {
-#	print "$tag_nest: $text_sum ($cur_href)\n";
-	$text_output[$nest_line[$nest]] .= "$text_sum \\($cur_href\\)\n";
+#	print "$tag_nest: $text_sum ($last_href)\n";
+	$text_output[$nest_line[$nest]] .= "$text_sum \\($last_href\\)\n";
 	$text_sum = '';
-	$cur_href = '';
+	$last_href = '';
     }
+	if ($tagname eq 'a') {
+		if ($text_a_sum ne "") {
+			print "<a> has text " . $text_a_sum . " with link " . $cur_href . "\n";
+			$last_href = $cur_href;
+			$text_sum .= $text_a_sum;
+		} else {
+			print "<a> has not text so ignore link " . $cur_href . "\n";
+		}
+		$text_a_sum = '';
+	}
+	if ($tagname eq 'select') {
+		while (!($tag_nest =~ /$tagname$/)) {
+#		    print "tag is irregular $tag_nest($cur_tag)\n";
+		    $tag_nest =~ /( \| )(\S+?)$/;
+		    my $last_tag = $2;
+		    $self->end($last_tag);
+		}
+	}
     if (($tagname eq 'table') || ($tagname eq 'tr')) {
 	while (!($tag_nest =~ /$tagname$/)) {
 #	    print "tag is irregular $tag_nest($cur_tag)\n";
@@ -188,8 +211,15 @@ sub text {
     } else {
 	Print "[text] $text\n";
 	Print " is_cdata:TRUE\n" if ($is_cdata);
+		$tag_nest =~ /( \| )(\S+?)$/;
+		my $last_tag = $2;
 
-	$text_sum .= $text;
+		if ($last_tag eq "option") {
+		} elsif ($last_tag eq "a") {
+			$text_a_sum .= $text;
+		} else {
+			$text_sum .= $text;
+		}
     }
 }
 

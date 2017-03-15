@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="Shift_JIS"?>
+<?xml version="1.0" encoding="euc-jp"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <!-- 1î‘ñ⁄ÇÃ keyw Ç™ Åc ÇæÇ¡ÇΩÇÁï\é¶ -->
+  <!-- 1»÷Ã‹§Œ keyw §¨ °ƒ §¿§√§ø§È…Ωº® -->
   <xsl:param name="Expire" />
   <xsl:param name="Category" />
   <xsl:param name="SearchQuery" />
@@ -10,13 +10,13 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="ì¡ãñèÓïÒ">
+  <xsl:template match="∆√µˆæ Û">
 <!--
     <html><body>
 -->
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
-          <xsl:apply-templates select="ì¡ãñ" />
+          <xsl:apply-templates select="∆√µˆ" />
         </tbody>
       </table>
 <!--
@@ -24,15 +24,15 @@
 -->
   </xsl:template>
 
-  <xsl:template match="ì¡ãñ">
-<!-- 1î‘ñ⁄ÇÃ keyw Ç™ Åc ÇæÇ¡ÇΩÇÁï\é¶ -->
+  <xsl:template match="∆√µˆ">
+<!-- 1»÷Ã‹§Œ keyw §¨ °ƒ §¿§√§ø§È…Ωº® -->
   <xsl:if test="(($Category='')and($SearchQuery='')) or
                 (($SearchQuery!='')and((keyw=$SearchQuery))) or
                 (keyw[1]=$Category)">
 
-    <xsl:if test="translate(./èoäËì˙, '-', '')&lt;$Expire">
+    <xsl:if test="translate(./Ω–¥Í∆¸, '-', '')&lt;$Expire">
       <tr style="background-color: #40846A;"><td>
-      <div style="color: rgb(255, 255, 255); font-weight: bold; margin: 0.5em;">ä˙ä‘ñûóπ</div>
+      <div style="color: rgb(255, 255, 255); font-weight: bold; margin: 0.5em;">¥¸¥÷À˛Œª</div>
       </td></tr>
     </xsl:if>
 
@@ -45,7 +45,7 @@
             <xsl:choose>
               <xsl:when test="@notice!=''">
                 <xsl:choose>
-                <xsl:when test="translate(./èoäËì˙, '-', '')&lt;$Expire">
+                <xsl:when test="translate(./Ω–¥Í∆¸, '-', '')&lt;$Expire">
                   <xsl:attribute name="style">background-color: #B74545;</xsl:attribute>
                 </xsl:when>
                 <xsl:otherwise>
@@ -54,17 +54,17 @@
                 </xsl:choose>
               </xsl:when>
             <xsl:otherwise>
-              <xsl:if test="translate(./èoäËì˙, '-', '')&lt;$Expire">
+              <xsl:if test="translate(./Ω–¥Í∆¸, '-', '')&lt;$Expire">
                 <xsl:attribute name="style">background-color: #99CCB8;</xsl:attribute>
               </xsl:if>
             </xsl:otherwise>
             </xsl:choose>
 
             <td width="7%"></td>
-            <td width="15%"><center><small>èoäË</small></center></td>
-            <td width="15%"><center><small>åˆäJ</small></center></td>
-            <td width="15%"><center><small>åˆçê</small></center></td>
-            <td width="15%"><center><small>ìoò^</small></center></td>
+            <td width="15%"><center><small>Ω–¥Í</small></center></td>
+            <td width="15%"><center><small>∏¯≥´</small></center></td>
+            <td width="15%"><center><small>∏¯π</small></center></td>
+            <td width="15%"><center><small>≈–œø</small></center></td>
             <td></td>
           </tr>
 
@@ -77,41 +77,41 @@
                 <xsl:attribute name="href">
                   <xsl:value-of select="./URL" />
                 </xsl:attribute>
-                <xsl:value-of select="./èoäËî‘çÜ"/>
+                <xsl:value-of select="./Ω–¥Í»÷πÊ"/>
                 </a>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="./èoäËî‘çÜ"/>
+                <xsl:value-of select="./Ω–¥Í»÷πÊ"/>
               </xsl:otherwise>
             </xsl:choose>
             </center></td>
             <td><center>
               <xsl:choose>
-              <xsl:when test="./åˆäJURL!=''">
+              <xsl:when test="./∏¯≥´URL!=''">
                 <a>
                 <xsl:attribute name="href">
-                  <xsl:value-of select="./åˆäJURL" />
+                  <xsl:value-of select="./∏¯≥´URL" />
                 </xsl:attribute>
-                <xsl:value-of select="./åˆäJî‘çÜ"/>
+                <xsl:value-of select="./∏¯≥´»÷πÊ"/>
                 </a>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="./åˆäJî‘çÜ"/>
+                <xsl:value-of select="./∏¯≥´»÷πÊ"/>
               </xsl:otherwise>
             </xsl:choose>
             </center></td>
             <td><center>
               <xsl:choose>
-              <xsl:when test="./åˆçêURL!=''">
+              <xsl:when test="./∏¯πURL!=''">
                 <a>
                 <xsl:attribute name="href">
-                  <xsl:value-of select="./åˆçêURL" />
+                  <xsl:value-of select="./∏¯πURL" />
                 </xsl:attribute>
-                <xsl:value-of select="./åˆçêî‘çÜ"/>
+                <xsl:value-of select="./∏¯π»÷πÊ"/>
                 </a>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="./åˆçêî‘çÜ"/>
+                <xsl:value-of select="./∏¯π»÷πÊ"/>
               </xsl:otherwise>
             </xsl:choose>
             </center></td>
@@ -120,53 +120,53 @@
                 <xsl:when test="./@status=''">
                   <xsl:attribute name="style">background-color: #BCD6CB;</xsl:attribute>
                     <xsl:choose>
-                    <xsl:when test="./ìoò^URL!=''">
+                    <xsl:when test="./≈–œøURL!=''">
                       <a>
                       <xsl:attribute name="href">
-                        <xsl:value-of select="./ìoò^URL" />
+                        <xsl:value-of select="./≈–œøURL" />
                       </xsl:attribute>
-                      <xsl:value-of select="./ìoò^î‘çÜ"/>
+                      <xsl:value-of select="./≈–œø»÷πÊ"/>
                       </a>
                     </xsl:when>
                     <xsl:otherwise>
-                      <xsl:value-of select="./ìoò^î‘çÜ"/>
+                      <xsl:value-of select="./≈–œø»÷πÊ"/>
                     </xsl:otherwise>
                     </xsl:choose>
                   <xsl:text>pending</xsl:text>
                 </xsl:when>
-                <xsl:when test="./@status='éÊâ∫Ç∞'">
+                <xsl:when test="./@status='ºË≤º§≤'">
                   <xsl:attribute name="style">background-color: #40846A;</xsl:attribute>
-                  <span style="color: rgb(255, 255, 255); font-weight: bold;">éÊâ∫Ç∞</span>
+                  <span style="color: rgb(255, 255, 255); font-weight: bold;">ºË≤º§≤</span>
                 </xsl:when>
-                <xsl:when test="./@status='ãëê‚'">
+                <xsl:when test="./@status='µÒ¿‰'">
                   <xsl:attribute name="style">background-color: #40846A;</xsl:attribute>
-                  <span style="color: rgb(255, 255, 255); font-weight: bold;">ãëê‚</span>
+                  <span style="color: rgb(255, 255, 255); font-weight: bold;">µÒ¿‰</span>
                 </xsl:when>
                 <xsl:otherwise>
                   <xsl:choose>
-                    <xsl:when test="./@status='îNã‡ïsî['">
+                    <xsl:when test="./@status='«Ø∂‚…‘«º'">
                       <xsl:attribute name="style">background-color: #40846A;</xsl:attribute>
                     </xsl:when>
                   </xsl:choose>
                   <span>
                     <xsl:choose>
-                      <xsl:when test="./@status='îNã‡ïsî['">
+                      <xsl:when test="./@status='«Ø∂‚…‘«º'">
                         <span style="color: rgb(255, 255, 255); font-weight: bold;">
-                          îNã‡ïsî[ - 
+                          «Ø∂‚…‘«º - 
                         </span>
                       </xsl:when>
                     </xsl:choose>
                     <xsl:choose>
-                    <xsl:when test="./ìoò^URL!=''">
+                    <xsl:when test="./≈–œøURL!=''">
                       <a>
                       <xsl:attribute name="href">
-                        <xsl:value-of select="./ìoò^URL" />
+                        <xsl:value-of select="./≈–œøURL" />
                       </xsl:attribute>
-                      <xsl:value-of select="./ìoò^î‘çÜ"/>
+                      <xsl:value-of select="./≈–œø»÷πÊ"/>
                       </a>
                     </xsl:when>
                     <xsl:otherwise>
-                      <xsl:value-of select="./ìoò^î‘çÜ"/>
+                      <xsl:value-of select="./≈–œø»÷πÊ"/>
                     </xsl:otherwise>
                     </xsl:choose>
                   </span>
@@ -176,11 +176,11 @@
             <td></td>
           </tr>
           <tr bgcolor="#ececdd">
-            <td><center>êºóÔ</center></td>
-            <td><center><xsl:value-of select="./èoäËì˙"/></center></td>
-            <td><center><xsl:value-of select="./åˆäJì˙"/></center></td>
-            <td><center><xsl:value-of select="./åˆçêì˙"/></center></td>
-            <td><center><xsl:value-of select="./ìoò^ì˙"/></center></td>
+            <td><center>¿æŒÒ</center></td>
+            <td><center><xsl:value-of select="./Ω–¥Í∆¸"/></center></td>
+            <td><center><xsl:value-of select="./∏¯≥´∆¸"/></center></td>
+            <td><center><xsl:value-of select="./∏¯π∆¸"/></center></td>
+            <td><center><xsl:value-of select="./≈–œø∆¸"/></center></td>
             <td></td>
           </tr>
 
@@ -192,17 +192,17 @@
             <tr>
               <td width="44%" valign="top" style="border: 1px solid seagreen;">
                 <table width="100%"><tbody>
-                  <tr><td style="width: 2.5em;"><small>èoäËêl</small></td>
-                  <td bgcolor="#efffe1"><div style="font-weight:bold;"><xsl:value-of select="èoäËêl"/></div></td></tr>
+                  <tr><td style="width: 2.5em;"><small>Ω–¥ÍøÕ</small></td>
+                  <td bgcolor="#efffe1"><div style="font-weight:bold;"><xsl:value-of select="Ω–¥ÍøÕ"/></div></td></tr>
                 </tbody></table>
               </td>
               <td valign="top" style="border: 1px solid seagreen;">
                 <table width="100%"><tbody>
-                  <tr><td style="width: 2.5em;"><small>î≠ñæé“</small></td>
+                  <tr><td style="width: 2.5em;"><small>»ØÃ¿º‘</small></td>
                   <td bgcolor="#efffe1"><div>
-                    <xsl:for-each select="î≠ñæé“">
+                    <xsl:for-each select="»ØÃ¿º‘">
                       <xsl:value-of select="." />
-                      <xsl:if test="position()!=last()">ÅA</xsl:if>
+                      <xsl:if test="position()!=last()">°¢</xsl:if>
                     </xsl:for-each>
                   </div></td></tr>
                 </tbody></table>
@@ -213,20 +213,31 @@
             </td>
           </tr>
           <tr bgcolor="#ffffc6">
-            <td><center>äTóv</center></td>
-            <td colspan="5"><xsl:copy-of select="äTóv/*|äTóv/text()"/></td>
+            <td><center>≥µÕ◊</center></td>
+            <td colspan="5">
+              <xsl:choose>
+                <xsl:when test="./ÃææŒ!=''">
+                  <span style="font-style:italic">
+                    ÃææŒ°ß
+                    <span style="font-weight:bold;"><xsl:copy-of select="ÃææŒ/*|ÃææŒ/text()"/></span>
+                    <br/>
+                  </span>
+                </xsl:when>
+              </xsl:choose>
+              <xsl:copy-of select="≥µÕ◊/*|≥µÕ◊/text()"/>
+            </td>
           </tr>
           <tr bgcolor="#ededed">
             <td><center>keyw</center></td>
             <td colspan="5">
               <xsl:for-each select="keyw">
                 <xsl:value-of select="." />
-                <xsl:if test="position()!=last()">ÅA</xsl:if>
+                <xsl:if test="position()!=last()">°¢</xsl:if>
               </xsl:for-each>
             </td>
           </tr>
 
-          <xsl:apply-templates select="ÉRÉÅÉìÉg"/>
+          <xsl:apply-templates select="•≥•·•Û•»"/>
 
         </tbody>
       </table>
@@ -238,9 +249,9 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="ÉRÉÅÉìÉg">
+  <xsl:template match="•≥•·•Û•»">
     <tr style="background-color: #FCE5FC;">
-      <td><center>ÉRÉÅÉìÉg</center></td>
+      <td><center>•≥•·•Û•»</center></td>
       <td colspan="5"><span style="color: rgb(204, 51, 204);"><xsl:copy-of select="*|text()"/></span></td>
     </tr>
   </xsl:template>
