@@ -1,0 +1,44 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd 0x012345 (to 7bit nibble)\n";
+	print "       $cmd 04 46 45 (from 7bit nibble)\n";
+	print "\n";
+}
+
+if ($#ARGV < 0) {
+	usage();
+	exit 1;
+}
+
+if ($#ARGV == 0) {
+	my $inputVal = eval(shift);
+
+	for (my $shiftVal = 28; $shiftVal >= 0; $shiftVal -= 7) {
+		printf "0x%02x ", ($inputVal >> $shiftVal) & 0x7f;
+	}
+	print "\n";
+} else {
+	my $shiftVal = 0;
+	my $aPackedVal = 0;
+	while (my $aVal = pop) {
+		if ($aVal =~ /0x/) {
+		} else {
+			$aVal = "0x" . $aVal;
+		}
+
+		$aVal = eval($aVal);
+		$aPackedVal |= ($aVal << $shiftVal);
+
+		$shiftVal += 7;
+	}
+
+	printf "0x%x\n", $aPackedVal;
+}
