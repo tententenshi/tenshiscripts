@@ -113,31 +113,24 @@ sub Round {
 		}
 	} elsif ($data_file_mode == 1) {
 		while (my $dat = <IN>) {
-			if ($dat =~ /(-?\d*\.[-\de]*)\s*[, ]\s*(-?\d*\.[-\de]*)/) {	#stereo float
+			if      (($infoHash{ "NUM_OF_CH" } == 2) && ($infoHash{ "FORMAT_ID" } == 3)) {	#stereo float
+				$dat =~ /(-?\d*\.?[-\de]*)\s*?[,\s]\s*?(-?\d*\.?[-\de]*)/;
 				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
-				if (($infoHash{ "NUM_OF_CH" } != 2) || ($infoHash{ "FORMAT_ID" } != 3)) {
-					die "data format is not matched! (2ch float)\n";
-				}
 #				print "stereo float val $1/$2\n";
-			} elsif ($dat =~ /(-?\d*\.[-\de]*)/) { #mono float
+			} elsif (($infoHash{ "NUM_OF_CH" } == 1) && ($infoHash{ "FORMAT_ID" } == 3)) {	#mono float
+				$dat =~ /(-?\d*\.?[-\de]*)/;
 				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
-				if (($infoHash{ "NUM_OF_CH" } != 1) || ($infoHash{ "FORMAT_ID" } != 3)) {
-					die "data format is not matched! (1ch float)\n";
-				}
 #				print "mono float val $1\n";
-			} elsif ($dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*[, ]\s*(-?0x[0-9a-f]+|-?\d+)/i) {	#stereo
+			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {	#stereo
+				$dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*?[,\s]\s*(-?0x[0-9a-f]+|-?\d+)/i;
 				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
-				if ($infoHash{ "NUM_OF_CH" } != 2) {
-					die "data format is not matched! (2ch fixed point)\n";
-				}
 #				print "stereo decimal val $1/$2\n";
-			} elsif ($dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i) { #mono
+			} elsif ($infoHash{ "NUM_OF_CH" } == 1) {	#mono
+				$dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i;
 				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
-				if ($infoHash{ "NUM_OF_CH" } != 1) {
-					die "data format is not matched! (1ch fixed point)\n";
-				}
 #				print "mono decimal val $1\n";
 			} else {
+				print "skipped $dat";
 				next;
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
