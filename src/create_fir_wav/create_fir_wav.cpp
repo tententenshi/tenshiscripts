@@ -38,7 +38,7 @@ void Usage(const char* command)
 void ParseFIRFileAsWav(FILE *fp, double** pFIR_Data, int* pSize, int* pFFTSize);
 void ParseFIRFileAsTxt(FILE *fp, double** pFIR_Data, int* pSize, int* pFFTSize);
 void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, const double* pFIR_Data, int theFIR_Size, int theFIR_FFTSize);
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long copySize);
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
 
 int main(int argc, char* argv[])
 {
@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
 	}
 
 	SFormatChunk formatChunkBuf;
-	long dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
-	long dataStartPos = ftell(fpWav);
+	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
+	int32_t dataStartPos = ftell(fpWav);
 	rewind(fpWav);
 
 	if (dataSize > 0) {
@@ -92,13 +92,13 @@ int main(int argc, char* argv[])
 	fclose(fp2);
 }
 
-static void PutLongVal(unsigned long val_l, FILE* fp)
+static void PutLongVal(uint32_t val_l, FILE* fp)
 {
 	for (int i = 0; i < 4; i++, (val_l >>= 8)) {
 		fputc(val_l & 0xff, fp);
 	}
 }
-static void PutShortVal(unsigned short val_s, FILE* fp)
+static void PutShortVal(uint16_t val_s, FILE* fp)
 {
 	for (int i = 0; i < 2; i++, (val_s >>= 8)) {
 		fputc(val_s & 0xff, fp);
@@ -109,7 +109,7 @@ static void PutShortVal(unsigned short val_s, FILE* fp)
 void ParseFIRFileAsWav(FILE *fp, double** pFIR_Data, int* pSize, int* pFFTSize)
 {
 	SFormatChunk formatChunk;
-	long dataSize = ParseWaveHeader(fp, &formatChunk);
+	int32_t dataSize = ParseWaveHeader(fp, &formatChunk);
 
 	int num_ch = formatChunk.channel;
 	if (num_ch != 1) {
@@ -311,7 +311,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 			gsl_fft_complex_radix2_inverse (outfft[ch], 1, 2*theFFTSize);
 
 			/* add to reproduced signal */
-			for (int i = 0; i < 2*theFFTSize; i++) outdata[ch][mm+i] += (short)REAL(outfft[ch],i);
+			for (int i = 0; i < 2*theFFTSize; i++) outdata[ch][mm+i] += (int16_t)REAL(outfft[ch],i);
 		}
 	}
 
@@ -339,7 +339,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 enum { BUF_SIZE = 0x100000, };
 static unsigned char buf[BUF_SIZE];
 
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long theSize)
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t theSize)
 {
 	size_t remainSize = theSize;
 	size_t copySize = BUF_SIZE;

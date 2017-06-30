@@ -11,9 +11,9 @@ void Usage(const char* command)
 	fprintf(stderr, "%s input_wav_file output filename.wav\n\n", command);
 }
 
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long copySize);
-static void CopyWavHeader(FILE* fpWav, FILE* fp, long copySize, long offset);
-static void MakePad(FILE* fp, long offset);
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
+static void CopyWavHeader(FILE* fpWav, FILE* fp, int32_t copySize, int32_t offset);
+static void MakePad(FILE* fp, int32_t offset);
 
 
 int main(int argc, char* argv[])
@@ -39,17 +39,17 @@ int main(int argc, char* argv[])
 	}
 
 	SFormatChunk formatChunkBuf;
-	long dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
-	long dataTopPos = ftell(fpWav);
-	long dataChunkTopPos = dataTopPos - 8;	// "data" + datasize
-	long aligned_data_top = (dataTopPos + (0x1000 - 1)) & (~(0x1000 - 1));
-	long offset = aligned_data_top - dataTopPos;
+	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
+	int32_t dataTopPos = ftell(fpWav);
+	int32_t dataChunkTopPos = dataTopPos - 8;	// "data" + datasize
+	int32_t aligned_data_top = (dataTopPos + (0x1000 - 1)) & (~(0x1000 - 1));
+	int32_t offset = aligned_data_top - dataTopPos;
 
 	struct stat st;
 	fstat(fileno(fpWav),&st);
-	long endPos = aligned_data_top + st.st_size - dataTopPos;
-	long aligned_endPos = (endPos + (0x1000 - 1)) & (~(0x1000 - 1));
-	long endPadSize = aligned_endPos - endPos;
+	int32_t endPos = aligned_data_top + st.st_size - dataTopPos;
+	int32_t aligned_endPos = (endPos + (0x1000 - 1)) & (~(0x1000 - 1));
+	int32_t endPadSize = aligned_endPos - endPos;
 	if ((endPadSize > 0) && (endPadSize < 8)) {
 		aligned_endPos += 0x1000;
 		endPadSize += 0x1000;
@@ -68,13 +68,13 @@ int main(int argc, char* argv[])
 }
 
 
-static void PutLongVal(unsigned long val_l, FILE* fp)
+static void PutLongVal(uint32_t val_l, FILE* fp)
 {
 	for (int i = 0; i < 4; i++, (val_l >>= 8)) {
 		fputc(val_l & 0xff, fp);
 	}
 }
-static void PutShortVal(unsigned short val_s, FILE* fp)
+static void PutShortVal(uint16_t val_s, FILE* fp)
 {
 	for (int i = 0; i < 2; i++, (val_s >>= 8)) {
 		fputc(val_s & 0xff, fp);
@@ -85,7 +85,7 @@ static void PutShortVal(unsigned short val_s, FILE* fp)
 enum { BUF_SIZE = 0x100000, };
 static unsigned char buf[BUF_SIZE];
 
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long theSize)
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t theSize)
 {
 	size_t remainSize = theSize;
 	size_t copySize = BUF_SIZE;
@@ -102,23 +102,23 @@ static void CopyFile(FILE* fpSrc, FILE* fpDst, long theSize)
 	}
 }
 
-void CopyWavHeader(FILE* fpWav, FILE* fp, long copySize, long offset)
+void CopyWavHeader(FILE* fpWav, FILE* fp, int32_t copySize, int32_t offset)
 {
 	rewind(fpWav);
 	CopyFile(fpWav, fp, copySize);
 
 	fseek(fpWav, 4, SEEK_SET);
-	long totalSize;
-	fread(&totalSize, sizeof(long), 1, fpWav);
+	int32_t totalSize;
+	fread(&totalSize, sizeof(int32_t), 1, fpWav);
 
 	totalSize += offset;
 
 	fseek(fp, 4, SEEK_SET);
-	fwrite(&totalSize, sizeof(long), 1, fp);
+	fwrite(&totalSize, sizeof(int32_t), 1, fp);
 	fseek(fp, 0, SEEK_END);
 }
 
-void MakePad(FILE* fp, long offset)
+void MakePad(FILE* fp, int32_t offset)
 {
 	if (offset < 8) { return; }
 

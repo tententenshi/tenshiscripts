@@ -22,7 +22,7 @@ void Usage(const char* command)
 static void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk);
 static void Destruct(const SFormatChunk& formatChunk);
 static void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize);
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long copySize);
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
 
 int main(int argc, char* argv[])
 {
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 	}
 
 	SFormatChunk formatChunkBuf;
-	long dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
-	long dataStartPos = ftell(fpWav);
+	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
+	int32_t dataStartPos = ftell(fpWav);
 	rewind(fpWav);
 
 	if (dataSize > 0) {
@@ -188,7 +188,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 enum { BUF_SIZE = 0x100000, };
 static unsigned char buf[BUF_SIZE];
 
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long theSize)
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t theSize)
 {
 	size_t remainSize = theSize;
 	size_t copySize = BUF_SIZE;

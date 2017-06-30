@@ -23,7 +23,7 @@ void	init(void);
 double	proc(int ch, double val, const SFormatChunk& formatChunk);
 double	interpolated_read(const double*, double);
 void	proceed_sample(int ch);
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long copySize);
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
 
 static double sCurReadSpead;
 static double sCurWriteSpead;
@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
 	}
 
 	SFormatChunk formatChunkBuf;
-	long dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
-	long dataStartPos = ftell(fpWav);
+	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
+	int32_t dataStartPos = ftell(fpWav);
 	rewind(fpWav);
 
 	if (dataSize > 0) {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 		CopyFile(fpWav, fpOut, dataStartPos);
 //		SetupWavHead(fpOut, formatChunkBuf, dataSize);
 
-		long sDebugFileDataStartPos;
+		int32_t sDebugFileDataStartPos;
 		SFormatChunk formatChunkDebug = formatChunkBuf;
 		{
 			formatChunkDebug.channel = 2;
@@ -246,7 +246,7 @@ void proceed_sample(int ch)
 enum { BUF_SIZE = 0x100000, };
 static unsigned char buf[BUF_SIZE];
 
-static void CopyFile(FILE* fpSrc, FILE* fpDst, long theSize)
+static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t theSize)
 {
 	size_t remainSize = theSize;
 	size_t copySize = BUF_SIZE;
