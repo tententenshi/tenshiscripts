@@ -29,7 +29,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 		for (int ch = 0; ch < num_ch; ch++) {
 			double val = ReadWaveData(theWavFile, &formatChunk);
 			if (format == 1) {
-				fprintf (fp, "%d", val);
+				fprintf (fp, "%d", (int)val);
 			} else if (format == 3) {
 				fprintf (fp, "%g", val);
 			}
