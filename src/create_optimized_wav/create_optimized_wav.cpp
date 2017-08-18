@@ -68,20 +68,6 @@ int main(int argc, char* argv[])
 }
 
 
-static void PutLongVal(uint32_t val_l, FILE* fp)
-{
-	for (int i = 0; i < 4; i++, (val_l >>= 8)) {
-		fputc(val_l & 0xff, fp);
-	}
-}
-static void PutShortVal(uint16_t val_s, FILE* fp)
-{
-	for (int i = 0; i < 2; i++, (val_s >>= 8)) {
-		fputc(val_s & 0xff, fp);
-	}
-}
-
-
 enum { BUF_SIZE = 0x100000, };
 static unsigned char buf[BUF_SIZE];
 
