@@ -267,40 +267,36 @@ sub GetUnityVal {
 sub ReadWavData {
 	my ($fh, $infoHashRef) = @_;
 
-	my $buf;
-	read $fh, $buf, $$infoHashRef{ "BLOCK_SIZE" };	# wav body
-
 	my @readData;
-	if ($$infoHashRef{ "NUM_OF_CH" } == 1) {
-		if ($$infoHashRef{ "BIT_LENGTH" } == 8) {
-			my $data = unpack "c", $buf;
-			push @readData, $data;
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 16) {
+	my $NUM_OF_CH = $$infoHashRef{ "NUM_OF_CH" };
+	my $BIT_LENGTH = $$infoHashRef{ "BIT_LENGTH" };
+
+	for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+		my $buf;
+		read $fh, $buf, $BIT_LENGTH / 8;	# wav body
+		if ($BIT_LENGTH == 16) {
 			my $data = unpack "v", $buf;
 			if ($data & 0x8000) { $data -= 0x10000; }
-			push @readData, $data;
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 24) {
+			push @readData, ($data / 0x8000);
+		} elsif ($BIT_LENGTH == 24) {
 			my @tmp = unpack "C3", $buf;
-			my $data;
-			if ($tmp[2] & 0x80) { # negative value
-				$data = (0xff << 24) | ($tmp[2] << 16) | ($tmp[1] << 8) | $tmp[0];
-			} else {
-				$data = (0x00 << 24) | ($tmp[2] << 16) | ($tmp[1] << 8) | $tmp[0];
-			}
-			my $tmpbin = pack "L", $data;
-			$data = unpack "l", $tmpbin;
-			push @readData, $data;
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 32) {
+			my $data = ($tmp[2] << 24) | ($tmp[1] << 16) | ($tmp[0] << 8);
+			my $tmpbin = pack "L", $data;	# unsigned 32bit
+			$data = unpack "l", $tmpbin;	# signed 32bit
+			push @readData, ($data / (0x8000 * 0x10000));
+		} elsif ($BIT_LENGTH == 32) {
 			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
 				my $tmpdata = unpack "V", $buf;
 				$tmpdata = pack "L", $tmpdata;
 				my $data = unpack "f", $tmpdata;
 				push @readData, $data;
 			} else {
-				my $data = unpack "V", $buf;
-				push @readData, $data;
+				my $data = unpack "V", $buf;	# unsigned little endian
+				my $tmpbin = pack "L", $data;	# unsigned 32bit
+				$data = unpack "l", $tmpbin;	# signed 32bit
+				push @readData, ($data / (0x8000 * 0x10000));
 			}
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 64) {
+		} elsif ($BIT_LENGTH == 64) {
 			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
 				my @tmpdata = unpack "V2", $buf;
 				my $tmpdata = pack "L2", @tmpdata;
@@ -308,110 +304,49 @@ sub ReadWavData {
 				push @readData, $data;
 			}
 		}
-	} else {
-		if ($$infoHashRef{ "BIT_LENGTH" } == 8) {
-			my ($dataL, $dataR) = unpack "c2", $buf;
-			push @readData, ($dataL, $dataR);
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 16) {
-			my ($dataL, $dataR) = unpack "v2", $buf;
-			if ($dataL & 0x8000) { $dataL -= 0x10000; }
-			if ($dataR & 0x8000) { $dataR -= 0x10000; }
-			push @readData, ($dataL, $dataR);
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 24) {
-			my @tmp = unpack "C6", $buf;
-
-			my $dataL = ($tmp[2] << 16) | ($tmp[1] << 8) | $tmp[0];
-			my $dataR = ($tmp[5] << 16) | ($tmp[4] << 8) | $tmp[3];
-			if ($tmp[2] & 0x80) { # negative value
-				$dataL |= (0xff << 24);
-			}
-			if ($tmp[5] & 0x80) { # negative value
-				$dataR |= (0xff << 24);
-			}
-			my $tmpbin = pack "L", $dataL;
-			$dataL = unpack "l", $tmpbin;
-			my $tmpbin = pack "L", $dataR;
-			$dataR = unpack "l", $tmpbin;
-			push @readData, ($dataL, $dataR);
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 32) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my ($tmpL, $tmpR) = unpack "V2", $buf;
-				$tmpL = pack "L", $tmpL;
-				$tmpR = pack "L", $tmpR;
-				my $dataL = unpack "f", $tmpL;
-				my $dataR = unpack "f", $tmpR;
-				push @readData, ($dataL, $dataR);
-			} else {
-				my ($dataL, $dataR) = unpack "V2", $buf;
-				push @readData, ($dataL, $dataR);
-			}
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 64) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my @tmpdata = unpack "V4", $buf;
-				my $tmpdata = pack "L4", @tmpdata;
-				my ($dataL, $dataR) = unpack "d2", $tmpdata;
-				push @readData, ($dataL, $dataR);
-			}
-		}
 	}
 
 	return @readData;
 }
 
+sub Bound {
+	my ($min, $val, $max) =@_;
+	return ($val < $min) ? $min : ($val > $max) ? $max : $val;
+}
+
 sub WriteWavData {
 	my ($fh, $infoHashRef, @dataArray) = @_;
 
-	my $out;
-	if ($$infoHashRef{ "NUM_OF_CH" } == 1) {
-		if ($$infoHashRef{ "BIT_LENGTH" } == 8) {
-			$out = pack "c", $dataArray[0];
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 16) {
-			$out = pack "v", ($dataArray[0] & 0xffff);
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 24) {
-			$out = pack "C3", (($dataArray[0] & 0xff), (($dataArray[0] >> 8) & 0xff), (($dataArray[0] >> 16) & 0xff));
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 32) {
+	my $NUM_OF_CH = $$infoHashRef{ "NUM_OF_CH" };
+	my $BIT_LENGTH = $$infoHashRef{ "BIT_LENGTH" };
+
+	for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+		my $out;
+		my $data = defined($dataArray[$ch]) ? $dataArray[$ch] : 0;
+		if ($BIT_LENGTH == 16) {
+			my $val = Bound(-0x8000, $data * 0x8000, 0x7fff);
+			$out = pack "v", ($val & 0xffff);
+		} elsif ($BIT_LENGTH == 24) {
+			my $val = Bound(-0x80000000, $data * 0x8000 * 0x10000, 0x7fffffff);
+			$out = pack "C3", ((($val >> 8) & 0xff), (($val >> 16) & 0xff), (($val >> 24) & 0xff));
+		} elsif ($BIT_LENGTH == 32) {
 			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = pack "f", $dataArray[0];
+				my $tmpdata = pack "f", $data;
 				$tmpdata = unpack "L", $tmpdata;
 				$out = pack "V", $tmpdata;
 			} else {
-				$out = pack "V", $dataArray[0];
+				my $val = Bound(-0x80000000, $data * 0x8000 * 0x10000, 0x7fffffff);
+				$out = pack "V", $val;
 			}
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 64) {
+		} elsif ($BIT_LENGTH == 64) {
 			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = pack "d", $dataArray[0];
+				my $tmpdata = pack "d", $data;
 				my @tmpdata = unpack "L2", $tmpdata;
 				$out = pack "V2", @tmpdata;
 			}
 		}
-	} else {
-		if ($$infoHashRef{ "BIT_LENGTH" } == 8) {
-			$out = pack "c2", ($dataArray[0], $dataArray[1]);
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 16) {
-			$out = pack "v2", (($dataArray[0] & 0xffff), ($dataArray[1] & 0xffff));
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 24) {
-			$out = pack "C6", (($dataArray[0] & 0xff), (($dataArray[0] >> 8) & 0xff), (($dataArray[0] >> 16) & 0xff),
-							   ($dataArray[1] & 0xff), (($dataArray[1] >> 8) & 0xff), (($dataArray[1] >> 16) & 0xff));
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 32) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdataL = pack "f", $dataArray[0];
-				$tmpdataL = unpack "L", $tmpdataL;
-				my $tmpdataR = pack "f", $dataArray[1];
-				$tmpdataR = unpack "L", $tmpdataR;
-				$out = pack "V2", ($tmpdataL, $tmpdataR);
-			} else {
-				$out = pack "V2", ($dataArray[0], $dataArray[1]);
-			}
-		} elsif ($$infoHashRef{ "BIT_LENGTH" } == 64) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = pack "d2", ($dataArray[0], $dataArray[1]);
-				my @tmpdata = unpack "L4", $tmpdata;
-				$out = pack "V4", @tmpdata;
-			}
-		}
+		print ($fh $out);
 	}
-
-	print ($fh $out);
 }
 
 
