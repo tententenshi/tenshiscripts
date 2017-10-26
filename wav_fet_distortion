@@ -31,9 +31,9 @@ my $DCF01 = -0.999643937;
 my $DCF02 =  0.999287874;
 
 sub Process {
-	my ($data, $ch, $data_1_0) = @_;
+	my ($data, $ch) = @_;
 
-	my $r3 = $data / $data_1_0 * 0.33333 + 0.33334;
+	my $r3 = $data * 0.33333 + 0.33334;
 	my $r7 = -$r3 * $r3 + 2.0;
 	my $r6 =  $r3 * $r3 + 2.0;
 	my $apfcoef = $r7 / $r6;
@@ -46,7 +46,7 @@ sub Process {
 #	$DCF1[$ch] = $APF1[$ch] * $DCF00 + $DCF0[$ch] * $DCF01 + $DCF1[$ch] * $DCF02;
 #	$DCF0[$ch] = $APF1[$ch];
 
-#	printf("data: $data, %x\n", $data_1_0);
+#	printf("data: $data\n");
 
 #	return $DCF1[$ch];
 }
@@ -73,23 +73,12 @@ sub max {
 	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
 	wav_util::WriteWavHeader($fhOut, \@preChunkBuf);
 
-	my $data_1_0 = 1.0;
-	if ($infoHash{ "FORMAT_ID" } == 1) {
-		if ($infoHash{ "BIT_LENGTH" } == 16) {
-			$data_1_0 = 0x8000;
-		} elsif ($infoHash{ "BIT_LENGTH" } == 24) {
-			$data_1_0 = 0x8000 * 0x100;
-		} elsif ($infoHash{ "BIT_LENGTH" } == 32) {
-			$data_1_0 = 0x8000 * 0x10000;
-		}
-	}
-
 	my $remain = $dataSize;
 	while($remain > 0) {
 		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
 
 		for (my $i = 0; $i <= $#dataArray; $i++) {
-			$dataArray[$i] = Process($dataArray[$i], $i, $data_1_0);
+			$dataArray[$i] = Process($dataArray[$i], $i);
 		}
 
 		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);

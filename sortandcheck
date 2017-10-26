@@ -4,8 +4,6 @@ use strict;
 use FindBin;
 use POSIX;
 
-require $FindBin::RealBin . "/wav_util.pm";
-
 
 my @data;
 

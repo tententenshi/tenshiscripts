@@ -32,7 +32,7 @@ my @PEAK_POS_REVERSE;
 my @PEAK_NEG_REVERSE;
 
 sub ProcessForward {
-	my ($fhOut, $pos, $data, $ch, $data_1_0) = @_;
+	my ($fhOut, $pos, $data, $ch) = @_;
 
 	if (($data >= 0) && ($ENV_POS[$ch] <= $data)) {
 		$ENV_POS[$ch] = $data;
@@ -53,7 +53,7 @@ sub ProcessForward {
 }
 
 sub ProcessReverse {
-	my ($fhOut, $pos, $data, $ch, $data_1_0) = @_;
+	my ($fhOut, $pos, $data, $ch) = @_;
 
 	if (($data >= 0) && ($ENV_POS[$ch] <= $data)) {
 		$ENV_POS[$ch] = $data;
@@ -91,24 +91,13 @@ sub ProcessReverse {
 	my @preChunkBuf, my @postChunkBuf;
 	my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
 
-	my $data_1_0 = 1.0;
-	if ($infoHash{ "FORMAT_ID" } == 1) {
-		if ($infoHash{ "BIT_LENGTH" } == 16) {
-			$data_1_0 = 0x8000;
-		} elsif ($infoHash{ "BIT_LENGTH" } == 24) {
-			$data_1_0 = 0x8000 * 0x100;
-		} elsif ($infoHash{ "BIT_LENGTH" } == 32) {
-			$data_1_0 = 0x8000 * 0x10000;
-		}
-	}
-
 	my $remain = $dataSize;
 	my $pos = 0;
 	while ($remain > 0) {
 		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
 
 		for (my $i = 0; $i <= $#dataArray; $i++) {
-			ProcessForward($fhOut, $pos, $dataArray[$i], $i, $data_1_0);
+			ProcessForward($fhOut, $pos, $dataArray[$i], $i);
 		}
 
 		$remain -= $infoHash{ "BLOCK_SIZE" };
@@ -119,7 +108,7 @@ sub ProcessReverse {
 	$pos--;
 	while (my $dataRef = pop @DATA_BUF) {
 		for (my $i = 0; $i <= $#$dataRef; $i++) {
-			ProcessReverse($fhOut, $pos, $$dataRef[$i], $i, $data_1_0);
+			ProcessReverse($fhOut, $pos, $$dataRef[$i], $i);
 		}
 		$pos--;
 	}

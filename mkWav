@@ -11,7 +11,7 @@ my $HEAD_LEADER = 0.0;	# 0.2 sec
 my $Freq_Start = 20;
 my $Freq_End = 20000;
 my $Time_Span = 30;	# 10 sec
-my $VOLUME = 0.5 * 0x8000;
+my $VOLUME = 0.5;
 
 
 
@@ -20,11 +20,6 @@ sub usage {
 	chomp $cmd;
 	print "usage: $cmd [inFile.(dat|bin|raw)] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=16] [ENDIAN=LITTLE] outWavFile\n";
 	exit 1;
-}
-
-sub Round {
-	my ($val) = @_;
-	return floor($val + 0.5);
 }
 
 
@@ -103,15 +98,16 @@ sub Round {
 			$phase = $phase + 2 * $PI * $tmp_freq / $infoHash{ "FS" };
 			my $sine_wave = sin($phase);
 			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (Round($sine_wave * $VOLUME)));
+				wav_util::WriteWavData($fhOut, \%infoHash, ($sine_wave * $VOLUME));
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (Round($sine_wave * $VOLUME), Round($sine_wave * $VOLUME)));
+				wav_util::WriteWavData($fhOut, \%infoHash, ($sine_wave * $VOLUME, $sine_wave * $VOLUME));
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 
 			$time++;
 		}
 	} elsif ($data_file_mode == 1) {
+		my $unity_val = wav_util::GetUnityVal(\%infoHash);
 		while (my $dat = <IN>) {
 			if      (($infoHash{ "NUM_OF_CH" } == 2) && ($infoHash{ "FORMAT_ID" } == 3)) {	#stereo float
 				$dat =~ /(-?\d*\.?[-\de]*)\s*?[,\s]\s*?(-?\d*\.?[-\de]*)/;
@@ -123,11 +119,11 @@ sub Round {
 #				print "mono float val $1\n";
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {	#stereo
 				$dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*?[,\s]\s*(-?0x[0-9a-f]+|-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1) / $unity_val, eval($2) / $unity_val));
 #				print "stereo decimal val $1/$2\n";
 			} elsif ($infoHash{ "NUM_OF_CH" } == 1) {	#mono
 				$dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
+				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1) / $unity_val));
 #				print "mono decimal val $1\n";
 			} else {
 				print "skipped $dat";

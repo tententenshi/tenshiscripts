@@ -105,10 +105,7 @@ sub AddHarmonicDistortion {
 		my @dataArray = wav_util::ReadWavData($fhIn, \%infoHash);
 
 		for (my $i = 0; $i <= $#dataArray; $i++) {
-			my $tmpdata = $dataArray[$i];
-			$tmpdata /= (1 << ($infoHash{ "BIT_LENGTH" } - 1));
-			my $tmp_out = AddHarmonicDistortion($tmpdata, $i);
-			$tmp_out *= (1 << ($infoHash{ "BIT_LENGTH" } - 1));
+			my $tmp_out = AddHarmonicDistortion($dataArray[$i], $i);
 			$dataArray[$i] = $tmp_out;
 		}
 

@@ -79,7 +79,7 @@ sub max {
  #		my $lr_ave = (abs($dataArray[0]) + abs($dataArray[1])) / 2;
 #		my $lr_max = max(abs($dataArray[0]), abs($dataArray[1]));
 #		my $mov_ave = Average($lr_max, 0);
- #		my $mov_ave = Average($lr_ave **2 / 0x8000, 0);
+ #		my $mov_ave = Average($lr_ave **2, 0);
 #		@dataArray = ($lr_max, $mov_ave);
 
 		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);

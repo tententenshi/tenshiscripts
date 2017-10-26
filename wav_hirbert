@@ -10,7 +10,7 @@ my $HEAD_LEADER = 1.0;	# 0.2 sec
 my $Freq_Start = 440;
 my $Freq_End = 440;
 my $Time_Span = 30;	# 10 sec
-my $VOLUME = 0.5 * 0x8000;
+my $VOLUME = 0.5;
 
 
 sub usage {

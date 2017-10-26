@@ -10,7 +10,7 @@ require $FindBin::RealBin . "/wav_util.pm";
 my $HEAD_LEADER = 0.0;	# 0.0 sec
 my $Freq = 440;
 my $Time = 30;
-my $VOLUME = 0.5 * 0x8000;
+my $VOLUME = 0.5;
 
 
 
@@ -20,11 +20,6 @@ sub usage {
 	print "usage: $cmd [FREQ=440] [TIME=30 (sec)] [VOLUME=0x4000] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=2] [BIT_LENGTH=16] outWavFile\n";
 	print "\tmake genuine square wave without alias noise, using Bandlimited Impulse Trains (BLIT) (http://www.geocities.jp/daichi1969/synthprog/index.html)\n";
 	exit 1;
-}
-
-sub Round {
-	my ($val) = @_;
-	return floor($val + 0.5);
 }
 
 
@@ -107,9 +102,9 @@ sub Round {
 			}
 
 			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (Round($output * $VOLUME)));
+				wav_util::WriteWavData($fhOut, \%infoHash, ($output * $VOLUME));
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (Round($output * $VOLUME), Round($output * $VOLUME)));
+				wav_util::WriteWavData($fhOut, \%infoHash, ($output * $VOLUME, $output * $VOLUME));
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 		}
