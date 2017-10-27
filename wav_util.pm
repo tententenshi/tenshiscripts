@@ -265,48 +265,56 @@ sub GetUnityVal {
 }
 
 sub ReadWavData {
-	my ($fh, $infoHashRef) = @_;
+	my ($fh, $infoHashRef, $samples) = @_;
 
-	my @readData;
+	if (!defined($samples)) { $samples = 1; }
+
 	my $NUM_OF_CH = $$infoHashRef{ "NUM_OF_CH" };
 	my $BIT_LENGTH = $$infoHashRef{ "BIT_LENGTH" };
 
-	for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-		my $buf;
-		read $fh, $buf, $BIT_LENGTH / 8;	# wav body
-		if ($BIT_LENGTH == 16) {
-			my $data = unpack "v", $buf;
-			if ($data & 0x8000) { $data -= 0x10000; }
-			push @readData, ($data / 0x8000);
-		} elsif ($BIT_LENGTH == 24) {
-			my @tmp = unpack "C3", $buf;
-			my $data = ($tmp[2] << 24) | ($tmp[1] << 16) | ($tmp[0] << 8);
-			my $tmpbin = pack "L", $data;	# unsigned 32bit
-			$data = unpack "l", $tmpbin;	# signed 32bit
-			push @readData, ($data / (0x8000 * 0x10000));
-		} elsif ($BIT_LENGTH == 32) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = unpack "V", $buf;
-				$tmpdata = pack "L", $tmpdata;
-				my $data = unpack "f", $tmpdata;
-				push @readData, $data;
-			} else {
-				my $data = unpack "V", $buf;	# unsigned little endian
-				my $tmpbin = pack "L", $data;	# unsigned 32bit
-				$data = unpack "l", $tmpbin;	# signed 32bit
-				push @readData, ($data / (0x8000 * 0x10000));
-			}
-		} elsif ($BIT_LENGTH == 64) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my @tmpdata = unpack "V2", $buf;
-				my $tmpdata = pack "L2", @tmpdata;
-				my $data = unpack "d", $tmpdata;
-				push @readData, $data;
+	if ($BIT_LENGTH == 16) {
+		read $fh, my $buf, $BIT_LENGTH / 8 * $samples * $NUM_OF_CH;	# wav body
+		my @dataArray = unpack "v*", $buf;	# unsigned 16bit little endian
+		my $tmpbin = pack "S*", @dataArray;	# unsigned 16bit environment dependent
+		@dataArray = unpack "s*", $tmpbin;	# signed 16bit environment dependent
+		foreach my $data (@dataArray) { $data = $data / 0x8000; }
+		return @dataArray;
+	} elsif ($BIT_LENGTH == 24) {
+		my @dataArray;
+		for (my $i = 0; $i < $samples; $i++) {
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				read $fh, my $buf, $BIT_LENGTH / 8;	# wav body
+				my @tmp = unpack "C3", $buf;
+				my $data = ($tmp[2] << 24) | ($tmp[1] << 16) | ($tmp[0] << 8);
+				my $tmpbin = pack "L", $data;	# unsigned 32bit environment dependent
+				$data = unpack "l", $tmpbin;	# signed 32bit environment dependent
+				push @dataArray, ($data / (0x8000 * 0x10000));
 			}
 		}
+		return @dataArray;
+	} elsif ($BIT_LENGTH == 32) {
+		read $fh, my $buf, $BIT_LENGTH / 8 * $samples * $NUM_OF_CH;	# wav body
+		if ($$infoHashRef{ "FORMAT_ID" } == 3) {
+			my @dataArray = unpack "V*", $buf;	# unsigned 32bit little endian
+			my $tmpbin = pack "L*", @dataArray;	# unsigned 32bit environment dependent
+			@dataArray = unpack "f*", $tmpbin;	# float 32bit environment dependent
+			return @dataArray;
+		} else {
+			my @dataArray = unpack "V*", $buf;	# unsigned 32bit little endian
+			my $tmpbin = pack "L*", @dataArray;	# unsigned 32bit environment dependent
+			@dataArray = unpack "l*", $tmpbin;	# signed 32bit environment dependent
+			foreach my $data (@dataArray) { $data = $data / (0x8000 * 0x10000); }
+			return @dataArray;
+		}
+	} elsif ($BIT_LENGTH == 64) {
+		read $fh, my $buf, $BIT_LENGTH / 8 * $samples * $NUM_OF_CH;	# wav body
+		if ($$infoHashRef{ "FORMAT_ID" } == 3) {
+			my @tmpdata = unpack "V*", $buf;	# unsigned 32bit little endian
+			my $tmpbin = pack "L*", @tmpdata;	# unsigned 32bit environment dependent
+			my @dataArray = unpack "d*", $tmpbin;	# double 64bit environment dependent
+			return @dataArray;
+		}
 	}
-
-	return @readData;
 }
 
 sub Bound {
@@ -315,40 +323,62 @@ sub Bound {
 }
 
 sub WriteWavData {
-	my ($fh, $infoHashRef, @dataArray) = @_;
+	my ($fh, $infoHashRef, $ref_dataArray, $samples) = @_;
 
+	if (!defined($samples)) { $samples = 1; }
 	my $NUM_OF_CH = $$infoHashRef{ "NUM_OF_CH" };
 	my $BIT_LENGTH = $$infoHashRef{ "BIT_LENGTH" };
 
-	for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-		my $out;
-		my $data = defined($dataArray[$ch]) ? $dataArray[$ch] : 0;
-		if ($BIT_LENGTH == 16) {
-			my $val = Bound(-0x8000, $data * 0x8000, 0x7fff);
-			$out = pack "v", ($val & 0xffff);
-		} elsif ($BIT_LENGTH == 24) {
-			my $val = Bound(-0x80000000, $data * 0x8000 * 0x10000, 0x7fffffff);
-			$out = pack "C3", ((($val >> 8) & 0xff), (($val >> 16) & 0xff), (($val >> 24) & 0xff));
-		} elsif ($BIT_LENGTH == 32) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = pack "f", $data;
-				$tmpdata = unpack "L", $tmpdata;
-				$out = pack "V", $tmpdata;
-			} else {
+	if (!defined($$ref_dataArray[$samples * $NUM_OF_CH -1])) { $$ref_dataArray[$samples * $NUM_OF_CH -1] = 0; }
+	if ($BIT_LENGTH == 16) {
+		foreach my $data (@$ref_dataArray) { $data = Bound(-0x8000, $data * 0x8000, 0x7fff); }
+		my $out = pack "v*", @$ref_dataArray;	# unsigned 16bit little endian
+		print ($fh $out);
+	} elsif ($BIT_LENGTH == 24) {
+		my $pointer = 0;
+		for (my $i = 0; $i < $samples; $i++) {
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				my $data = defined($$ref_dataArray[$pointer]) ? $$ref_dataArray[$pointer] : 0;	$pointer++;
 				my $val = Bound(-0x80000000, $data * 0x8000 * 0x10000, 0x7fffffff);
-				$out = pack "V", $val;
-			}
-		} elsif ($BIT_LENGTH == 64) {
-			if ($$infoHashRef{ "FORMAT_ID" } == 3) {
-				my $tmpdata = pack "d", $data;
-				my @tmpdata = unpack "L2", $tmpdata;
-				$out = pack "V2", @tmpdata;
+				my $out = pack "C3", ((($val >> 8) & 0xff), (($val >> 16) & 0xff), (($val >> 24) & 0xff));
+				print ($fh $out);
 			}
 		}
-		print ($fh $out);
+	} elsif ($BIT_LENGTH == 32) {
+		if ($$infoHashRef{ "FORMAT_ID" } == 3) {
+			my $tmpbin = pack "f*", @$ref_dataArray;	# float 32bit environment dependent
+			my @tmpdata = unpack "L*", $tmpbin;	# unsigned 32bit environment dependent
+			my $out = pack "V*", @tmpdata;		# unsigned 32bit little endian
+			print ($fh $out);
+		} else {
+			foreach my $data (@$ref_dataArray) { $data = Bound(-0x80000000, $data * 0x8000 * 0x10000, 0x7fffffff); }
+			my $out = pack "V*", @$ref_dataArray;	# unsigned 32bit little endian
+			print ($fh $out);
+		}
+	} elsif ($BIT_LENGTH == 64) {
+		if ($$infoHashRef{ "FORMAT_ID" } == 3) {
+			my $tmpbin = pack "d*", @$ref_dataArray;	# double 64bit environment dependent
+			my @tmpdata = unpack "L*", $tmpbin;	# unsigned 32bit environment dependent
+			my $out = pack "V*", @tmpdata;	# unsigned 32bit little endian
+			print ($fh $out);
+		}
 	}
 }
 
+
+#
+# confirm system endian
+#
+sub ConfirmSystemEndian
+{
+	my $testVal = 0x12345678;
+	my $binTestValBig = unpack("L", pack("N", $testVal));
+	my $binTestValLittle = unpack("L", pack("V", $testVal));
+	printf("L:0x%8x, N:0x%8x, V:0x%8x\n", $testVal, $binTestValBig, $binTestValLittle);
+	if    ($testVal == $binTestValBig) { return "BIG"; }
+	elsif ($testVal == $binTestValLittle) { return "LITTLE"; }
+	else { return "ERROR"; }
+}
 
 #
 # main sample

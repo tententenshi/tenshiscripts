@@ -81,9 +81,9 @@ sub usage {
 	if ($data_file_mode == 0) {
 		for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
 			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (0));
+				wav_util::WriteWavData($fhOut, \%infoHash, [0]);
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, (0, 0));
+				wav_util::WriteWavData($fhOut, \%infoHash, [0, 0]);
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 		}
@@ -98,9 +98,9 @@ sub usage {
 			$phase = $phase + 2 * $PI * $tmp_freq / $infoHash{ "FS" };
 			my $sine_wave = sin($phase);
 			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, ($sine_wave * $VOLUME));
+				wav_util::WriteWavData($fhOut, \%infoHash, [$sine_wave * $VOLUME]);
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, ($sine_wave * $VOLUME, $sine_wave * $VOLUME));
+				wav_util::WriteWavData($fhOut, \%infoHash, [$sine_wave * $VOLUME, $sine_wave * $VOLUME]);
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 
@@ -111,19 +111,19 @@ sub usage {
 		while (my $dat = <IN>) {
 			if      (($infoHash{ "NUM_OF_CH" } == 2) && ($infoHash{ "FORMAT_ID" } == 3)) {	#stereo float
 				$dat =~ /(-?\d*\.?[-\de]*)\s*?[,\s]\s*?(-?\d*\.?[-\de]*)/;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1), eval($2)));
+				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1), eval($2)]);
 #				print "stereo float val $1/$2\n";
 			} elsif (($infoHash{ "NUM_OF_CH" } == 1) && ($infoHash{ "FORMAT_ID" } == 3)) {	#mono float
 				$dat =~ /(-?\d*\.?[-\de]*)/;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1)));
+				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1)]);
 #				print "mono float val $1\n";
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {	#stereo
 				$dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*?[,\s]\s*(-?0x[0-9a-f]+|-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1) / $unity_val, eval($2) / $unity_val));
+				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1) / $unity_val, eval($2) / $unity_val]);
 #				print "stereo decimal val $1/$2\n";
 			} elsif ($infoHash{ "NUM_OF_CH" } == 1) {	#mono
 				$dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, (eval($1) / $unity_val));
+				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1) / $unity_val]);
 #				print "mono decimal val $1\n";
 			} else {
 				print "skipped $dat";

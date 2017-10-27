@@ -109,7 +109,7 @@ sub AddHarmonicDistortion {
 			$dataArray[$i] = $tmp_out;
 		}
 
-		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);
+		wav_util::WriteWavData($fhOut, \%infoHash, \@dataArray);
 
 		$remain -= $infoHash{ "BLOCK_SIZE" };
 	}

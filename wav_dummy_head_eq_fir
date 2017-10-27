@@ -329,7 +329,7 @@ sub max {
 			$dataArray[$i] = Process($dataArray[$i], $i);
 		}
 
-		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);
+		wav_util::WriteWavData($fhOut, \%infoHash, \@dataArray);
 
 		$remain -= $infoHash{ "BLOCK_SIZE" };
 	}

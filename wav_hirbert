@@ -152,7 +152,7 @@ sub Hirbert {
 
 	for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
 		my @data = Hirbert(0.35, $infoHash{ "FS" }, 0);
-		wav_util::WriteWavData($fhOut, \%infoHash, @data);
+		wav_util::WriteWavData($fhOut, \%infoHash, \@data);
 		$wav_size += $infoHash{ "BLOCK_SIZE" };
 	}
 
@@ -166,7 +166,7 @@ sub Hirbert {
 		my $sine_wave = sin($phase);
 
 		my @data = Hirbert(1.0, $infoHash{ "FS" }, $sine_wave * $VOLUME);
-		wav_util::WriteWavData($fhOut, \%infoHash, @data);
+		wav_util::WriteWavData($fhOut, \%infoHash, \@data);
 		$wav_size += $infoHash{ "BLOCK_SIZE" };
 		$time++;
 	}

@@ -82,7 +82,7 @@ sub max {
  #		my $mov_ave = Average($lr_ave **2, 0);
 #		@dataArray = ($lr_max, $mov_ave);
 
-		wav_util::WriteWavData($fhOut, \%infoHash, @dataArray);
+		wav_util::WriteWavData($fhOut, \%infoHash, \@dataArray);
 
 		$remain -= $infoHash{ "BLOCK_SIZE" };
 		AverageIncrement();

@@ -75,9 +75,9 @@ sub usage {
 
 	for (my $time = 0; $time <= $HEAD_LEADER * $infoHash{ "FS" }; $time++) {
 		if ($infoHash{ "NUM_OF_CH" } == 1) {
-			wav_util::WriteWavData($fhOut, \%infoHash, (0));
+			wav_util::WriteWavData($fhOut, \%infoHash, [0]);
 		} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-			wav_util::WriteWavData($fhOut, \%infoHash, (0, 0));
+			wav_util::WriteWavData($fhOut, \%infoHash, [0, 0]);
 		}
 		$wav_size += $infoHash{ "BLOCK_SIZE" };
 	}
@@ -102,9 +102,9 @@ sub usage {
 			}
 
 			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, ($output * $VOLUME));
+				wav_util::WriteWavData($fhOut, \%infoHash, [$output * $VOLUME]);
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, ($output * $VOLUME, $output * $VOLUME));
+				wav_util::WriteWavData($fhOut, \%infoHash, [$output * $VOLUME, $output * $VOLUME]);
 			}
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 		}
