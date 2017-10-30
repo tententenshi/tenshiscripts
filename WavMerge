@@ -1,0 +1,158 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Data::Dumper;
+
+#require $FindBin::RealBin . "/wav_util_little.pm";
+require $FindBin::RealBin . "/wav_util.pm";
+
+my $PI = 4 * atan2(1,1);
+
+my $BLOCK_SIZE = 0x10000;
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd [FORMAT_ID=3] [BIT_LENGTH=32] wav1.wav [\"operand\" wav2.wav]... outWavFile\n";
+	print "\toperand: \n";
+	print "\t\t\"+\": sum (+wav2)\n";
+	print "\t\t\"-\": subtract (-wav2)\n";
+	print "\t\t\"*\": mpy (*wav2)\n";
+	exit 1;
+}
+
+
+my @in_filenameArray;
+my @inOperArray;
+my $out_filename;
+my %outInfoHash;
+
+
+sub ParseArgument {
+	$out_filename = pop @ARGV;
+	while (my $str = shift @ARGV) {
+		if ($str =~ /FORMAT_ID=(.+)/) {
+			$outInfoHash{ "FORMAT_ID" } = eval($1);
+		} elsif ($str =~ /BIT_LENGTH=(.+)/) {
+			$outInfoHash{ "BIT_LENGTH" } = eval($1);
+		} elsif ($str =~ /^([\*+-])$/) {
+			my $operand = $1;
+			if    ($operand =~ /\+/) { push @inOperArray, '+'; }
+			elsif ($operand =~ /\-/) { push @inOperArray, '-'; }
+			elsif ($operand =~ /\*/) { push @inOperArray, '*'; }
+		} else {
+			push @in_filenameArray, $str;
+			if ($#inOperArray < $#in_filenameArray) {
+				push @inOperArray, '+';
+			}
+		}
+	}
+	if ($#in_filenameArray < 0) {
+		usage();
+	}
+
+	for (my $i = 0; $i <= $#in_filenameArray; $i++) {
+		print "in_file: $in_filenameArray[$i], oper: $inOperArray[$i]\n";
+	}
+}
+
+
+#
+# main
+#
+{
+	my $ENDIAN = wav_util::ConfirmSystemEndian();
+	print "SYSTEM_ENDIAN: $ENDIAN\n";
+	if ($ENDIAN ne "LITTLE") { die "system endian is not little, to be maintained.\n"; }
+
+	ParseArgument();
+
+	my $NUM_OF_CH;
+	my $FSAMP;
+
+	my @inInfoHashArray;
+	my @fhInArray;
+	my $fhOut;
+	my @inSamplesArray;
+
+	my $max_samples = 0;
+
+	foreach my $in_filename (@in_filenameArray) {
+		my $fhIn;
+		open($fhIn, "$in_filename") or die "cannot open $in_filename!\n";
+		binmode $fhIn;
+		push @fhInArray, $fhIn;
+
+		my %infoHash;
+		my @preChunkBuf, my @postChunkBuf;
+		my $dataSize = wav_util::ReadWavHeader($fhIn, \%infoHash, \@preChunkBuf, \@postChunkBuf);
+		my $samples = $dataSize / $infoHash{ "BLOCK_SIZE" };
+		push @inSamplesArray, $samples;
+		if ($max_samples < $samples) { $max_samples = $samples; }
+
+		if (!defined($FSAMP)) { $FSAMP = $infoHash{ "FS" }; }
+		elsif ($FSAMP != $infoHash{ "FS" }) {
+			die("Sampling Frequency ".$infoHash{ "FS" }." is not match $FSAMP\n");
+		}
+		if ($NUM_OF_CH < $infoHash{ "NUM_OF_CH" }) { $NUM_OF_CH = $infoHash{ "NUM_OF_CH" }; }
+		push @inInfoHashArray, \%infoHash;
+	}
+
+	open($fhOut, "> $out_filename") or die "cannot open $out_filename!\n";
+	wav_util::WriteWavHeader($fhOut);
+
+	$outInfoHash{ "FORMAT_ID" } =  3;	# Float
+#	$outInfoHash{ "FORMAT_ID" } =  1;	# PCM
+	$outInfoHash{ "NUM_OF_CH" } =  $NUM_OF_CH;	# Number of Channels
+	$outInfoHash{ "FS" } = 	    $FSAMP;	# Sampling Rate
+	$outInfoHash{ "BIT_LENGTH" } = 32;
+	$outInfoHash{ "BLOCK_SIZE" } = $outInfoHash{ "BIT_LENGTH" } / 8 * $outInfoHash{ "NUM_OF_CH" };
+	$outInfoHash{ "DATA_RATE" } =  $outInfoHash{ "BLOCK_SIZE" } * $outInfoHash{ "FS" };
+
+	my $cur_sample = 0;
+	my $next_checkpoint = 5 / 100 * $max_samples;
+	while ($cur_sample < $max_samples - 1) {
+		my @dataArray;
+		my $blockSize = ($max_samples - $cur_sample - 1 < $BLOCK_SIZE) ? ($max_samples - $cur_sample - 1) : $BLOCK_SIZE;
+		for(my $i = 0; $i <= $#fhInArray; $i++) {
+			my $fhIn = $fhInArray[$i];
+			my $ref_inInfoHash = $inInfoHashArray[$i];
+			my $inSamples = $inSamplesArray[$i];
+			my $inNUM_OF_CH = $ref_inInfoHash->{ "NUM_OF_CH" };
+			my $oper = $inOperArray[$i];
+
+			if ($cur_sample < $inSamples) {
+				my $myBlockSize = ($inSamples - $cur_sample - 1 < $BLOCK_SIZE) ? ($inSamples - $cur_sample - 1) : $BLOCK_SIZE;
+#				printf("blockSize: 0x%x, myBlockSize: 0x%x(inSamples:$inSamples, cur_sample:$cur_sample, max_samples:$max_samples)\n", $blockSize, $myBlockSize);
+				my @inDataArray = wav_util::ReadWavData($fhIn, $ref_inInfoHash, $myBlockSize);
+				for (my $i_blk = 0; $i_blk < $myBlockSize; $i_blk++) {
+					for (my $ch = 0; $ch < $inNUM_OF_CH; $ch++) {
+						if    ($oper eq '+') { $dataArray[$i_blk * $NUM_OF_CH + $ch] += shift @inDataArray; }
+						elsif ($oper eq '-') { $dataArray[$i_blk * $NUM_OF_CH + $ch] -= shift @inDataArray; }
+						elsif ($oper eq '*') { $dataArray[$i_blk * $NUM_OF_CH + $ch] *= shift @inDataArray; }
+#						printf("$i_blk:$ch %f\n", $dataArray[$i_blk * $NUM_OF_CH + $ch]);
+					}
+				}
+			}
+		}
+		wav_util::WriteWavData($fhOut, \%outInfoHash, \@dataArray, $blockSize);
+		$cur_sample += $blockSize;
+		if ($cur_sample >= $next_checkpoint) {
+			printf( "%f percent done!\n", $cur_sample * 100 / $max_samples);
+			$next_checkpoint += 5 / 100 * $max_samples;
+		}
+	}
+
+	wav_util::WriteWavTrailer($fhOut);
+
+	foreach my $fhIn (@fhInArray) {
+		close ($fhIn);
+	}
+	close ($fhOut);
+
+	my $dataSize = $outInfoHash{ "BLOCK_SIZE" } * $max_samples;
+	wav_util::MaintainWavHeader($out_filename, \%outInfoHash, $dataSize);
+}

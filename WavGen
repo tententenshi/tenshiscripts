@@ -1,0 +1,314 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Data::Dumper;
+
+#require $FindBin::RealBin . "/wav_util_little.pm";
+require $FindBin::RealBin . "/wav_util.pm";
+
+my $PI = 4 * atan2(1,1);
+
+my $BLOCK_SIZE = 0x10000;
+
+
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "usage: $cmd [FORMAT_ID=3] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=32] script.txt outWavFile\n";
+	print "\tscript descriptions:\n";
+	print "\t\tsine 440Hz [880Hz] 1.0 [0.2] [45degree] 0.5sec	// frequency [end_frequency] magnitude [end_magnitude] [start_phase] duration\n";
+	print "\t\tsqr 440Hz 1.0 [0.2] 0.5sec	// frequency magnitude [end_magnitude] duration\n";
+	print "\t\tDC 1.0 [0.2] 0.5sec	// magnitude [end_magnitude] duration\n";
+	print "\t\twhite 1.0 [0.2] 0.5sec	// magnitude [end_magnitude] duration\n";
+	exit 1;
+}
+
+
+my %infoHash;
+my $fhScript;
+my $fhOut;
+
+sub ParseScript {
+	my ($fhScript, $ref_sequence_data) = @_;
+
+	while (my $str = <$fhScript>) {
+		if ($str =~ /sine(.+)$/) {
+			my $desc = $1;
+			my %desc_hash;
+			$desc_hash{ type } = "sine";
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)degree(.*)$/) { my $phase = eval($2) / 180; if ($phase > 1) { $phase += -2; } $desc_hash{ start_phase } = $phase; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			push @$ref_sequence_data, \%desc_hash;
+#			print "sine stacked\n";
+#			print Dumper %desc_hash;
+		} elsif ($str =~ /sqr(.+)$/) {
+			my $desc = $1;
+			my %desc_hash; $desc_hash{ type } = "sqr";
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			push @$ref_sequence_data, \%desc_hash;
+#			print "sqr stacked\n";
+#			print Dumper %desc_hash;
+		} elsif ($str =~ /DC(.+)$/) {
+			my $desc = $1;
+			my %desc_hash; $desc_hash{ type } = "DC";
+			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			push @$ref_sequence_data, \%desc_hash;
+#			print "DC stacked\n";
+#			print Dumper %desc_hash;
+		} elsif ($str =~ /white(.+)$/) {
+			my $desc = $1;
+			my %desc_hash; $desc_hash{ type } = "white";
+			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			push @$ref_sequence_data, \%desc_hash;
+#			print "white stacked\n";
+#			print Dumper %desc_hash;
+		}
+	}
+}
+
+sub GenerateSine {
+	my ($fh, $infoHashRef, $ref_desc) = @_;
+
+	print("generating sine: frequency: ". $ref_desc->{ frequency } .", ");
+	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
+	print("magnitude: ". $ref_desc->{ magnitude } .", ");
+	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
+	print("duration: ". $ref_desc->{ duration } ."\n");
+
+	my $FS = $infoHashRef->{ FS };
+	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
+
+	my $start_frequency = $ref_desc->{ frequency };
+	my $end_frequency = defined($ref_desc->{ end_frequency }) ? $ref_desc->{ end_frequency } : $ref_desc->{ frequency };
+	my $start_magnitude = $ref_desc->{ magnitude };
+	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $dur_sample = $ref_desc->{ duration } * $FS;
+
+	my $phase = defined($ref_desc->{ start_phase }) ? $ref_desc->{ start_phase } : 0;
+	my $samples = 0;
+	while ($samples < $dur_sample - 1) {
+		my @dataArray;
+		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
+		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $frequency = $samples * ($end_frequency - $start_frequency) / $dur_sample + $start_frequency;
+			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $phase_delta = 2 * $frequency / $FS;
+			$phase += $phase_delta;
+			if ($phase >= 1) { $phase -= -2; }
+			my $output = sin($PI * $phase) * $magnitude;
+
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				push @dataArray, $output;
+			}
+		}
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+	}
+
+	return $samples;
+}
+
+sub GenerateSqr {
+	my ($fh, $infoHashRef, $ref_desc) = @_;
+
+	print("generating sqr: frequency: ". $ref_desc->{ frequency } .", ");
+	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
+	print("magnitude: ". $ref_desc->{ magnitude } .", ");
+	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	print("duration: ". $ref_desc->{ duration } ."\n");
+
+	my $FS = $infoHashRef->{ FS };
+	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
+
+	my $freqency = $ref_desc->{ frequency };
+	my $start_magnitude = $ref_desc->{ magnitude };
+	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $dur_sample = $ref_desc->{ duration } * $FS;
+
+	my $phase = 0;
+	my $phase_delta = 2 * $freqency / $FS;
+	my $p = 0.5 * $FS / $freqency;
+	my $m = 2 * int($p / 2 + 1);
+	my $sqr_val = 0.5;
+
+	my $samples = 0;
+	while ($samples < $dur_sample - 1) {
+		my @dataArray;
+		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
+		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			$phase += $phase_delta;
+			if ($phase >= 1) { $phase += -2; }
+
+			my $denom = sin($PI * $phase);
+			if ($denom == 0) {
+				$sqr_val += $m / $p;
+			} else {
+				$sqr_val += sin($PI * $m * $phase) / ($denom * $p);
+			}
+
+			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $output = $sqr_val * $magnitude;
+
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				push @dataArray, $output;
+			}
+		}
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+	}
+
+	return $samples;
+}
+
+sub GenerateWhite {
+	my ($fh, $infoHashRef, $ref_desc) = @_;
+
+	print("generating white: ");
+	print("magnitude: ". $ref_desc->{ magnitude } .", ");
+	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	print("duration: ". $ref_desc->{ duration } ."\n");
+
+	my $FS = $infoHashRef->{ FS };
+	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
+
+	my $start_magnitude = $ref_desc->{ magnitude };
+	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $dur_sample = $ref_desc->{ duration } * $FS;
+
+	my $samples = 0;
+	while ($samples < $dur_sample - 1) {
+		my @dataArray;
+		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
+		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $output = (rand(2) - 1.0) * $magnitude;
+
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				push @dataArray, $output;
+			}
+		}
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+	}
+	return $samples;
+}
+
+sub GenerateDC {
+	my ($fh, $infoHashRef, $ref_desc) = @_;
+
+	print("generating DC: ");
+	print("magnitude: ". $ref_desc->{ magnitude } .", ");
+	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	print("duration: ". $ref_desc->{ duration } ."\n");
+
+	my $FS = $infoHashRef->{ FS };
+	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
+
+	my $start_magnitude = $ref_desc->{ magnitude };
+	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $dur_sample = $ref_desc->{ duration } * $FS;
+
+	my $samples = 0;
+	while ($samples < $dur_sample - 1) {
+		my @dataArray;
+		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
+		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $output = $magnitude;
+
+			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+				push @dataArray, $output;
+			}
+		}
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+	}
+
+	return $samples;
+}
+
+
+#
+# main
+#
+{
+	my $ENDIAN = wav_util::ConfirmSystemEndian();
+	print "SYSTEM_ENDIAN: $ENDIAN\n";
+	if ($ENDIAN ne "LITTLE") { die "system endian is not little, to be maintained.\n"; }
+
+	$infoHash{ "FORMAT_ID" } =  3;	# Float
+#	$infoHash{ "FORMAT_ID" } =  1;	# PCM
+	$infoHash{ "NUM_OF_CH" } =  2;	# Number of Channels
+	$infoHash{ "FS" } = 	    44100;	# Sampling Rate
+	$infoHash{ "BIT_LENGTH" } = 32;
+
+	my $script_filename = "";
+	my $out_filename = "";
+
+	while (my $str = shift) {
+		if ($str =~ /FORMAT_ID=(.+)/) {
+			$infoHash{ "FORMAT_ID" } = eval($1);
+		} elsif ($str =~ /FS=(.+)/) {
+			$infoHash{ "FS" } = eval($1);
+#		} elsif ($str =~ /NUM_OF_CH=(.+)/) {
+#			$infoHash{ "NUM_OF_CH" } = eval($1);
+		} elsif ($str =~ /BIT_LENGTH=(.+)/) {
+			$infoHash{ "BIT_LENGTH" } = eval($1);
+		} elsif ($script_filename eq "") {
+			$script_filename = $str;
+		} else {
+			$out_filename = $str;
+		}
+	}
+	if ($out_filename eq "") {
+		usage();
+	}
+
+	open($fhScript, "$script_filename") or die "cannot open $script_filename!\n";
+	open($fhOut, "> $out_filename") or die "cannot open $out_filename!\n";
+
+	my @sequence_data;
+	ParseScript($fhScript, \@sequence_data);
+
+	wav_util::WriteWavHeader($fhOut);
+
+	$infoHash{ "BLOCK_SIZE" } = $infoHash{ "BIT_LENGTH" } / 8 * $infoHash{ "NUM_OF_CH" };
+	$infoHash{ "DATA_RATE" } =  $infoHash{ "BLOCK_SIZE" } * $infoHash{ "FS" };
+
+
+	my $wav_size = 0;
+
+	foreach my $cur_ref_desc (@sequence_data) {
+		my $samples;
+		if ($cur_ref_desc->{ type } eq "sine") {
+			$samples = GenerateSine($fhOut, \%infoHash, $cur_ref_desc);
+		} elsif ($cur_ref_desc->{ type } eq "sqr") {
+			$samples = GenerateSqr($fhOut, \%infoHash, $cur_ref_desc);
+		} elsif ($cur_ref_desc->{ type } eq "DC") {
+			$samples = GenerateDC($fhOut, \%infoHash, $cur_ref_desc);
+		} elsif ($cur_ref_desc->{ type } eq "white") {
+			$samples = GenerateWhite($fhOut, \%infoHash, $cur_ref_desc);
+		}
+		$wav_size += $infoHash{ "BLOCK_SIZE" } * $samples;
+	}
+
+	close(IN);
+	close($fhOut);
+
+	wav_util::MaintainWavHeader($out_filename, \%infoHash, $wav_size);
+}
