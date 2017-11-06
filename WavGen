@@ -105,8 +105,11 @@ sub GenerateSine {
 
 	my $phase = defined($ref_desc->{ start_phase }) ? $ref_desc->{ start_phase } : 0;
 	my $samples = 0;
-	while ($samples < $dur_sample - 1) {
+	my $overhang = 0;
+	my $waiting_zerocross = 0;
+	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
+		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $frequency = $samples * ($end_frequency - $start_frequency) / $dur_sample + $start_frequency;
@@ -119,11 +122,24 @@ sub GenerateSine {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			if (($samples + 1) >= ($dur_sample - 1)) {
+				if ($prevData * $output > 0) {
+					$blockSize++;
+					$overhang++;
+					$waiting_zerocross = 1;
+				} else {
+					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+						pop @dataArray;
+					}
+					$waiting_zerocross = 0;
+				}
+			}
+			$prevData = $output;
 		}
 		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
 	}
 
-	return $samples;
+	return ($samples, $overhang / $FS);
 }
 
 sub GenerateSqr {
@@ -150,8 +166,11 @@ sub GenerateSqr {
 	my $sqr_val = 0.5;
 
 	my $samples = 0;
-	while ($samples < $dur_sample - 1) {
+	my $overhang = 0;
+	my $waiting_zerocross = 0;
+	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
+		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			$phase += $phase_delta;
@@ -170,11 +189,24 @@ sub GenerateSqr {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			if (($samples + 1) >= ($dur_sample - 1)) {
+				if ($prevData * $output > 0) {
+					$blockSize++;
+					$overhang++;
+					$waiting_zerocross = 1;
+				} else {
+					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+						pop @dataArray;
+					}
+					$waiting_zerocross = 0;
+				}
+			}
+			$prevData = $output;
 		}
 		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
 	}
 
-	return $samples;
+	return ($samples, $overhang / $FS);
 }
 
 sub GenerateWhite {
@@ -253,7 +285,7 @@ sub GenerateDC {
 
 	$infoHash{ "FORMAT_ID" } =  3;	# Float
 #	$infoHash{ "FORMAT_ID" } =  1;	# PCM
-	$infoHash{ "NUM_OF_CH" } =  2;	# Number of Channels
+	$infoHash{ "NUM_OF_CH" } =  1;	# Number of Channels
 	$infoHash{ "FS" } = 	    44100;	# Sampling Rate
 	$infoHash{ "BIT_LENGTH" } = 32;
 
@@ -293,18 +325,24 @@ sub GenerateDC {
 
 	my $wav_size = 0;
 
-	foreach my $cur_ref_desc (@sequence_data) {
+	for (my $i = 0; $i <= $#sequence_data; $i++) {
+		my $cur_ref_desc = $sequence_data[$i];
 		my $samples;
+		my $overhang = 0;
 		if ($cur_ref_desc->{ type } eq "sine") {
-			$samples = GenerateSine($fhOut, \%infoHash, $cur_ref_desc);
+			($samples, $overhang) = GenerateSine($fhOut, \%infoHash, $cur_ref_desc);
 		} elsif ($cur_ref_desc->{ type } eq "sqr") {
-			$samples = GenerateSqr($fhOut, \%infoHash, $cur_ref_desc);
+			($samples, $overhang) = GenerateSqr($fhOut, \%infoHash, $cur_ref_desc);
 		} elsif ($cur_ref_desc->{ type } eq "DC") {
 			$samples = GenerateDC($fhOut, \%infoHash, $cur_ref_desc);
 		} elsif ($cur_ref_desc->{ type } eq "white") {
 			$samples = GenerateWhite($fhOut, \%infoHash, $cur_ref_desc);
 		}
 		$wav_size += $infoHash{ "BLOCK_SIZE" } * $samples;
+		if (defined($sequence_data[$i + 1]) && ($overhang > 0)) {
+			print "overhanged $overhang [sec]\n";
+			$sequence_data[$i + 1]->{ duration } -= $overhang;
+		}
 	}
 
 	close(IN);
