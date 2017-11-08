@@ -18,10 +18,13 @@ sub usage {
 	chomp $cmd;
 	print "usage: $cmd [FORMAT_ID=3] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=32] script.txt outWavFile\n";
 	print "\tscript descriptions:\n";
-	print "\t\tsine 440Hz [880Hz] 1.0 [0.2] [45degree] 0.5sec	// frequency [end_frequency] magnitude [end_magnitude] [start_phase] duration\n";
-	print "\t\tsqr 440Hz 1.0 [0.2] 0.5sec	// frequency magnitude [end_magnitude] duration\n";
-	print "\t\tDC 1.0 [0.2] 0.5sec	// magnitude [end_magnitude] duration\n";
-	print "\t\twhite 1.0 [0.2] 0.5sec	// magnitude [end_magnitude] duration\n";
+	print "\t\tsine 440Hz [880Hz] 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency [end_frequency] magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\tsqr 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
+	print "\t\tDC 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
+	print "\t\twhite 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
+	print "\n";
+	print "\t\tmagnitude_curve: (default is linear)\n";
+	print "\t\t\texp_curve (minimum magnitude is assumed to -80dB)\n";
 	exit 1;
 }
 
@@ -38,6 +41,12 @@ sub ParseScript {
 			my $desc = $1;
 			my %desc_hash;
 			$desc_hash{ type } = "sine";
+
+			# set default start phase to 0
+			if (($#{ $ref_sequence_data } >= 0) && ($$ref_sequence_data[-1]->{ type } ne "sine")) {
+				$desc_hash{ start_phase } = 0;
+			}
+
 			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
@@ -45,6 +54,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)degree(.*)$/) { my $phase = eval($2) / 180; if ($phase > 1) { $phase += -2; } $desc_hash{ start_phase } = $phase; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "sine stacked\n";
 #			print Dumper %desc_hash;
@@ -57,6 +67,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "sqr stacked\n";
 #			print Dumper %desc_hash;
@@ -67,6 +78,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "DC stacked\n";
 #			print Dumper %desc_hash;
@@ -77,12 +89,25 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "white stacked\n";
 #			print Dumper %desc_hash;
 		}
 	}
 }
+
+sub CalcMagnitude {
+	my ($type, $start, $end, $ratio) = @_;
+	if ($type eq "linear") {
+		return $ratio * ($end - $start) + $start;
+	} elsif ($type eq "exp") {
+		my $mag = exp(log(0.0001) * $ratio);	# threshold is assumed to -80dB
+		return $mag * ($start - $end) + $end;
+	}
+}
+
+my $sinePhase = 0;
 
 sub GenerateSine {
 	my ($fh, $infoHashRef, $ref_desc) = @_;
@@ -91,6 +116,7 @@ sub GenerateSine {
 	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
 	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
@@ -101,9 +127,12 @@ sub GenerateSine {
 	my $end_frequency = defined($ref_desc->{ end_frequency }) ? $ref_desc->{ end_frequency } : $ref_desc->{ frequency };
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase = defined($ref_desc->{ start_phase }) ? $ref_desc->{ start_phase } : 0;
+	if (defined($ref_desc->{ start_phase })) {
+		$sinePhase =  $ref_desc->{ start_phase };
+	}
 	my $samples = 0;
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
@@ -113,11 +142,11 @@ sub GenerateSine {
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $frequency = $samples * ($end_frequency - $start_frequency) / $dur_sample + $start_frequency;
-			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $phase_delta = 2 * $frequency / $FS;
-			$phase += $phase_delta;
-			if ($phase >= 1) { $phase -= -2; }
-			my $output = sin($PI * $phase) * $magnitude;
+			$sinePhase += $phase_delta;
+			if ($sinePhase >= 1) { $sinePhase -= -2; }
+			my $output = sin($PI * $sinePhase) * $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -149,6 +178,7 @@ sub GenerateSqr {
 	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -157,6 +187,7 @@ sub GenerateSqr {
 	my $freqency = $ref_desc->{ frequency };
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $phase = 0;
@@ -183,7 +214,7 @@ sub GenerateSqr {
 				$sqr_val += sin($PI * $m * $phase) / ($denom * $p);
 			}
 
-			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = $sqr_val * $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
@@ -215,6 +246,7 @@ sub GenerateWhite {
 	print("generating white: ");
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -222,6 +254,7 @@ sub GenerateWhite {
 
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $samples = 0;
@@ -229,7 +262,7 @@ sub GenerateWhite {
 		my @dataArray;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
-			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = (rand(2) - 1.0) * $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
@@ -247,6 +280,7 @@ sub GenerateDC {
 	print("generating DC: ");
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
+	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -254,6 +288,7 @@ sub GenerateDC {
 
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
+	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $samples = 0;
@@ -261,7 +296,7 @@ sub GenerateDC {
 		my @dataArray;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
-			my $magnitude = $samples * ($end_magnitude - $start_magnitude) / $dur_sample + $start_magnitude;
+			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
