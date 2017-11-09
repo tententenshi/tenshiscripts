@@ -116,7 +116,7 @@ sub ParseArgument {
 	my $next_checkpoint = 5 / 100 * $max_samples;
 	while ($cur_sample < $max_samples - 1) {
 		my @dataArray;
-		my $blockSize = ($max_samples - $cur_sample - 1 < $BLOCK_SIZE) ? ($max_samples - $cur_sample - 1) : $BLOCK_SIZE;
+		my $blockSize = ($max_samples - $cur_sample < $BLOCK_SIZE) ? ($max_samples - $cur_sample) : $BLOCK_SIZE;
 		for(my $i = 0; $i <= $#fhInArray; $i++) {
 			my $fhIn = $fhInArray[$i];
 			my $ref_inInfoHash = $inInfoHashArray[$i];
