@@ -99,6 +99,7 @@ sub ParseScript {
 
 sub CalcMagnitude {
 	my ($type, $start, $end, $ratio) = @_;
+	$ratio = ($ratio > 1.0) ? 1.0 : ($ratio < 0.0) ? 0.0 : $ratio;
 	if ($type eq "linear") {
 		return $ratio * ($end - $start) + $start;
 	} elsif ($type eq "exp") {
@@ -145,13 +146,13 @@ sub GenerateSine {
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $phase_delta = 2 * $frequency / $FS;
 			$sinePhase += $phase_delta;
-			if ($sinePhase >= 1) { $sinePhase -= -2; }
+			while ($sinePhase >= 1) { $sinePhase -= 2; }
 			my $output = sin($PI * $sinePhase) * $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
-			if (($samples + 1) >= ($dur_sample - 1)) {
+			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
 					$overhang++;
@@ -160,6 +161,7 @@ sub GenerateSine {
 					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 						pop @dataArray;
 					}
+					$sinePhase -= $phase_delta;
 					$waiting_zerocross = 0;
 				}
 			}
@@ -205,7 +207,7 @@ sub GenerateSqr {
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			$phase += $phase_delta;
-			if ($phase >= 1) { $phase += -2; }
+			while ($phase >= 1) { $phase -= 2; }
 
 			my $denom = sin($PI * $phase);
 			if ($denom == 0) {
@@ -220,7 +222,7 @@ sub GenerateSqr {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
-			if (($samples + 1) >= ($dur_sample - 1)) {
+			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
 					$overhang++;
