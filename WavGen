@@ -24,7 +24,8 @@ sub usage {
 	print "\t\twhite 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
 	print "\n";
 	print "\t\tmagnitude_curve: (default is linear)\n";
-	print "\t\t\texp_curve (minimum magnitude is assumed to -80dB)\n";
+	print "\t\t\texp_curve (rising curve is charging curve / minimum magnitude is assumed to -80dB)\n";
+	print "\t\t\tlog_curve (minimum magnitude is assumed to -80dB)\n";
 	exit 1;
 }
 
@@ -55,6 +56,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "sine stacked\n";
 #			print Dumper %desc_hash;
@@ -68,6 +70,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "sqr stacked\n";
 #			print Dumper %desc_hash;
@@ -79,6 +82,7 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "DC stacked\n";
 #			print Dumper %desc_hash;
@@ -90,11 +94,19 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
 #			print "white stacked\n";
 #			print Dumper %desc_hash;
 		}
 	}
+}
+
+my $LOG_MINVAL = 0.0001;	# threshold is assumed to -80dB
+
+sub max {
+	my ($a, $b) = @_;
+	return ($a >= $b) ? $a : $b;
 }
 
 sub CalcMagnitude {
@@ -103,8 +115,13 @@ sub CalcMagnitude {
 	if ($type eq "linear") {
 		return $ratio * ($end - $start) + $start;
 	} elsif ($type eq "exp") {
-		my $mag = exp(log(0.0001) * $ratio);	# threshold is assumed to -80dB
+		my $mag = exp(log($LOG_MINVAL) * $ratio);
 		return $mag * ($start - $end) + $end;
+	} elsif ($type eq "log") {
+		$end = max($LOG_MINVAL, abs($end));
+		$start = max($LOG_MINVAL, abs($start));
+		my $logmag = $ratio * (log($end) - log($start)) + log($start);
+		return exp($logmag);
 	}
 }
 
