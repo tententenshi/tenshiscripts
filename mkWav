@@ -110,11 +110,11 @@ sub usage {
 		my $unity_val = wav_util::GetUnityVal(\%infoHash);
 		while (my $dat = <IN>) {
 			if      (($infoHash{ "NUM_OF_CH" } == 2) && ($infoHash{ "FORMAT_ID" } == 3)) {	#stereo float
-				$dat =~ /(-?\d*\.?[-\de]*)\s*?[,\s]\s*?(-?\d*\.?[-\de]*)/;
-				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1), eval($2)]);
+				$dat =~ /(-?\d*(\d|\.)[-\de]*)\s*?[,\s]\s*?(-?\d*(\d|\.)[-\de]*)/;
+				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1), eval($3)]);
 #				print "stereo float val $1/$2\n";
 			} elsif (($infoHash{ "NUM_OF_CH" } == 1) && ($infoHash{ "FORMAT_ID" } == 3)) {	#mono float
-				$dat =~ /(-?\d*\.?[-\de]*)/;
+				$dat =~ /(-?\d*(\d|\.)[-\de]*)/;
 				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1)]);
 #				print "mono float val $1\n";
 			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {	#stereo
