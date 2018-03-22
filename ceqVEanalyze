@@ -67,41 +67,41 @@ my ($a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
 
 
 #as LPF
-{
-	my $ma0 = $a0 * $fr0 * $fr1;
-	my $ma1 = $a1 * $fr0 * $fr1;
-	my $ma2 = 0;
-	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
-	my $mb2 = -(1 + $fr0 * $q);
+#{
+#	my $ma0 = $a0 * $fr0 * $fr1;
+#	my $ma1 = $a1 * $fr0 * $fr1;
+#	my $ma2 = 0;
+#	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+#	my $mb2 = -(1 + $fr0 * $q);
 
-	print "as LPF...\n";
-	print "a0 as EA --> $ma0\n";
-	print "a1 as EA --> $ma1\n";
-	print "a2 as EA --> $ma2\n";
-	print "b1 as EA --> $mb1\n";
-	print "b2 as EA --> $mb2\n";
-	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
-	print "\n";
-}
+#	print "as LPF...\n";
+#	print "a0 as EA --> $ma0\n";
+#	print "a1 as EA --> $ma1\n";
+#	print "a2 as EA --> $ma2\n";
+#	print "b1 as EA --> $mb1\n";
+#	print "b2 as EA --> $mb2\n";
+#	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+#	print "\n";
+#}
 
 #as HPF
-{
+#{
 	#ignore a1
-	my $ma0 = $a0;
-	my $ma1 = -2 * $a0;
-	my $ma2 = $a0;
-	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
-	my $mb2 = -(1 + $fr0 * $q);
+#	my $ma0 = $a0;
+#	my $ma1 = -2 * $a0;
+#	my $ma2 = $a0;
+#	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+#	my $mb2 = -(1 + $fr0 * $q);
 
-	print "as HPF...\n";
-	print "a0 as EA --> $ma0\n";
-	print "a1 as EA --> $ma1\n";
-	print "a2 as EA --> $ma2\n";
-	print "b1 as EA --> $mb1\n";
-	print "b2 as EA --> $mb2\n";
-	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
-	print "\n";
-}
+#	print "as HPF...\n";
+#	print "a0 as EA --> $ma0\n";
+#	print "a1 as EA --> $ma1\n";
+#	print "a2 as EA --> $ma2\n";
+#	print "b1 as EA --> $mb1\n";
+#	print "b2 as EA --> $mb2\n";
+#	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+#	print "\n";
+#}
 
 #as PKG
 {
