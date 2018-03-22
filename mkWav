@@ -18,7 +18,7 @@ my $VOLUME = 0.5;
 sub usage {
 	my $cmd = `basename $0`;
 	chomp $cmd;
-	print "usage: $cmd [inFile.(dat|bin|raw)] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=16] [ENDIAN=LITTLE] outWavFile\n";
+	print "usage: $cmd [inFile.(csv|dat|bin|raw)] [FORMAT_ID=1] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=16] [ENDIAN=LITTLE] outWavFile\n";
 	exit 1;
 }
 
@@ -40,7 +40,7 @@ sub usage {
 	my $out_filename = "";
 
 	while (my $str = shift) {
-		if ($str =~ /.+\.dat$/) {
+		if ($str =~ /.+\.(csv|dat)$/) {
 			$data_file_mode = 1;
 			open(IN, "$str") or die "cannot open $str!\n";
 		} elsif ($str =~ /.+\.(bin|raw)$/) {
@@ -97,11 +97,12 @@ sub usage {
 #		for (my $time = 0; $time <= $Time_Span_Sample; $tmp_freq = ($Freq_End - $Freq_Start)*($time/$Time_Span_Sample) + $Freq_Start) {	# linear
 			$phase = $phase + 2 * $PI * $tmp_freq / $infoHash{ "FS" };
 			my $sine_wave = sin($phase);
-			if ($infoHash{ "NUM_OF_CH" } == 1) {
-				wav_util::WriteWavData($fhOut, \%infoHash, [$sine_wave * $VOLUME]);
-			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {
-				wav_util::WriteWavData($fhOut, \%infoHash, [$sine_wave * $VOLUME, $sine_wave * $VOLUME]);
+			my $output = $sine_wave * $VOLUME;
+			my @output_buf;
+			for (my $ch = 0; $ch < $infoHash{ "NUM_OF_CH" }; $ch++) {
+				push @output_buf, $output;
 			}
+			wav_util::WriteWavData($fhOut, \%infoHash, \@output_buf);
 			$wav_size += $infoHash{ "BLOCK_SIZE" };
 
 			$time++;
@@ -109,27 +110,22 @@ sub usage {
 	} elsif ($data_file_mode == 1) {
 		my $unity_val = wav_util::GetUnityVal(\%infoHash);
 		while (my $dat = <IN>) {
-			if      (($infoHash{ "NUM_OF_CH" } == 2) && ($infoHash{ "FORMAT_ID" } == 3)) {	#stereo float
-				$dat =~ /(-?\d*(\d|\.)[-\de]*)\s*?[,\s]\s*?(-?\d*(\d|\.)[-\de]*)/;
-				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1), eval($3)]);
-#				print "stereo float val $1/$2\n";
-			} elsif (($infoHash{ "NUM_OF_CH" } == 1) && ($infoHash{ "FORMAT_ID" } == 3)) {	#mono float
-				$dat =~ /(-?\d*(\d|\.)[-\de]*)/;
-				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1)]);
-#				print "mono float val $1\n";
-			} elsif ($infoHash{ "NUM_OF_CH" } == 2) {	#stereo
-				$dat =~ /(-?0x[0-9a-f]+|-?\d+)\s*?[,\s]\s*(-?0x[0-9a-f]+|-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1) / $unity_val, eval($2) / $unity_val]);
-#				print "stereo decimal val $1/$2\n";
-			} elsif ($infoHash{ "NUM_OF_CH" } == 1) {	#mono
-				$dat =~ /(-?0x[0-9a-f]+|^-?\d+)/i;
-				wav_util::WriteWavData($fhOut, \%infoHash, [eval($1) / $unity_val]);
-#				print "mono decimal val $1\n";
-			} else {
-				print "skipped $dat";
-				next;
+			$dat =~ s/,\s+/,/g;
+			$dat =~ s/\s+/,/g;
+			my @dat_array = split(/,/, $dat);
+			foreach my $tmpDat (@dat_array) {
+				if ($infoHash{ "FORMAT_ID" } == 1) {
+#					$tmpDat = eval($tmpDat) / $unity_val;
+					$tmpDat = eval($tmpDat);
+				} else {
+					$tmpDat = eval($tmpDat);
+				}
 			}
-			$wav_size += $infoHash{ "BLOCK_SIZE" };
+			splice(@dat_array, $infoHash{ "NUM_OF_CH" });
+			if ($#dat_array >= 0) {
+				wav_util::WriteWavData($fhOut, \%infoHash, \@dat_array);
+				$wav_size += $infoHash{ "BLOCK_SIZE" };
+			}
 		}
 	} elsif ($data_file_mode == 2) {
 		$wav_size = (stat(IN))[7];
