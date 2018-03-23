@@ -68,6 +68,11 @@ sub usage {
 		usage();
 	}
 
+	print "FORMAT_ID: " . $infoHash{ "FORMAT_ID" } . "\n";
+	print "FS: " . $infoHash{ "FS" } . "\n";
+	print "NUM_OF_CH: " . $infoHash{ "NUM_OF_CH" } . "\n";
+	print "BIT_LENGTH: " . $infoHash{ "BIT_LENGTH" } . "\n";
+
 	my $fhOut;
 	open($fhOut, "> $out_filename") or die "cannot open $out_filename!\n";
 	wav_util::WriteWavHeader($fhOut);
@@ -121,7 +126,7 @@ sub usage {
 					$tmpDat = eval($tmpDat);
 				}
 			}
-			splice(@dat_array, $infoHash{ "NUM_OF_CH" });
+			$#dat_array = $infoHash{ "NUM_OF_CH" } - 1;	# adjust array size
 			if ($#dat_array >= 0) {
 				wav_util::WriteWavData($fhOut, \%infoHash, \@dat_array);
 				$wav_size += $infoHash{ "BLOCK_SIZE" };
