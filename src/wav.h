@@ -100,16 +100,16 @@ static double ReadWaveData(FILE* fpWav, const SFormatChunk* formatChunk)
 		if (bitLength == 16) {
 			int16_t sval;
 			fread(&sval, 2, 1, fpWav);
-			return (double)sval;
+			return (double)sval / 0x8000;
 		} else if (bitLength == 24) {
 			int32_t lval;
 			fread(&lval, 3, 1, fpWav);
 			lval <<= 8;	// 24 --> 32
-			return (double)lval;
+			return (double)lval / 0x8000 / 0x10000;
 		} else if (bitLength == 32) {
 			int32_t lval;
 			fread(&lval, 4, 1, fpWav);
-			return (double)lval;
+			return (double)lval / 0x8000 / 0x10000;
 		}
 	} else if (format == 3) {
 		if (bitLength == 32) {
@@ -121,9 +121,13 @@ static double ReadWaveData(FILE* fpWav, const SFormatChunk* formatChunk)
 			fread(&dval, 8, 1, fpWav);
 			return dval;
 		}
-	} else {
-		return 0;
 	}
+	return 0;
+}
+
+static inline double Bound(double min, double val, double max)
+{
+	return (val < min) ? min : (val > max) ? max : val;
 }
 
 static void WriteWaveData(FILE* fp, const SFormatChunk* formatChunk, double val)
@@ -132,16 +136,16 @@ static void WriteWaveData(FILE* fp, const SFormatChunk* formatChunk, double val)
 	int bitLength = formatChunk->bitLength;
 	if (format == 1) {
 		if (bitLength == 16) {
-			val = (val > 0x7fff) ? 0x7fff : ((val < -0x8000) ? -0x8000 : val);
+			val = Bound(-0x8000, val * 0x8000, 0x7fff);
 			int16_t aData = (int16_t)val;
 			fwrite(&aData, 2, 1, fp);
 		} else if (bitLength == 24) {
-			val = (val > 0x7fffff00) ? 0x7fffff00 : ((val < -(double)0x80000000) ? -(double)0x80000000 : val);
+			val = Bound(-(double)0x80000000, val * 0x8000 * 0x10000, 0x7fffffff);
 			int32_t aData = (int32_t)val;
 			aData >>= 8;
 			fwrite(&aData, 3, 1, fp);
 		} else if (bitLength == 32) {
-			val = (val > 0x7fffffff) ? 0x7fffffff : ((val < -(double)0x80000000) ? -(double)0x80000000 : val);
+			val = Bound(-(double)0x80000000, val * 0x8000 * 0x10000, 0x7fffffff);
 			int32_t aData = (int32_t)val;
 			fwrite(&aData, 4, 1, fp);
 		}
@@ -152,8 +156,6 @@ static void WriteWaveData(FILE* fp, const SFormatChunk* formatChunk, double val)
 		} else if (bitLength == 64) {
 			fwrite(&val, 8, 1, fp);
 		}
-	} else {
-		return;
 	}
 }
 
