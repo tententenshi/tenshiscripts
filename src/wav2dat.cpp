@@ -25,9 +25,10 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 		return;
 	}
 
+	double aUnityVal = GetUnityVal(&formatChunk);
 	for (int i = 0; i < aEndSample - aStartSample; i++) {
 		for (int ch = 0; ch < num_ch; ch++) {
-			double val = ReadWaveData(theWavFile, &formatChunk);
+			double val = ReadWaveData(theWavFile, &formatChunk) * aUnityVal;
 			if (format == 1) {
 				fprintf (fp, "%d", (int)val);
 			} else if (format == 3) {
