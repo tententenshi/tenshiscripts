@@ -52,21 +52,21 @@ int main(int argc, char* argv[])
 
 	FILE *fpWav, *fpOut;
 
-	if ((fpWav = fopen(inWav, "r")) == NULL) {
+	if ((fpWav = fopen(inWav, "rb")) == NULL) {
 		printf("Cannot open %s\n", inWav);
 		exit(1);
 	}
-	if ((fpOut = fopen(outfile, "w")) == NULL) {
+	if ((fpOut = fopen(outfile, "wb")) == NULL) {
 		printf("Cannot open %s\n", outfile);
 		exit(1);
 	}
 	FILE *fpDebug1;
 	FILE *fpDebug2;
-	if ((fpDebug1 = fopen("Debug1.wav", "w")) == NULL) {
+	if ((fpDebug1 = fopen("Debug1.wav", "wb")) == NULL) {
 		printf("Cannot open Debug1.wav\n");
 		exit(1);
 	}
-	if ((fpDebug2 = fopen("Debug2.wav", "w")) == NULL) {
+	if ((fpDebug2 = fopen("Debug2.wav", "wb")) == NULL) {
 		printf("Cannot open Debug2.wav\n");
 		exit(1);
 	}

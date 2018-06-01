@@ -53,15 +53,15 @@ int main(int argc, char* argv[])
 
 	FILE *fpWav, *fp, *fp2;
 
-	if ((fpWav = fopen(inWav, "r")) == NULL) {
+	if ((fpWav = fopen(inWav, "rb")) == NULL) {
 		printf("Cannot open %s\n", inWav);
 		exit(1);
 	}
-	if ((fp = fopen(firFile, "r")) == NULL) {
+	if ((fp = fopen(firFile, "rb")) == NULL) {
 		printf("Cannot open %s\n", firFile);
 		exit(1);
 	}
-	if ((fp2 = fopen(outFile, "w")) == NULL) {
+	if ((fp2 = fopen(outFile, "wb")) == NULL) {
 		printf("Cannot open %s\n", outFile);
 		exit(1);
 	}

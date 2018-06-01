@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
 	FILE *fpWav, *fp;
 
-	if ((fpWav = fopen(inWav, "r")) == NULL) {
+	if ((fpWav = fopen(inWav, "rb")) == NULL) {
 		printf("Cannot open %s\n", inWav);
 		exit(1);
 	}

@@ -29,11 +29,11 @@ int main(int argc, char* argv[])
 
 	FILE *fpWav, *fp;
 
-	if ((fpWav = fopen(inWav, "r")) == NULL) {
+	if ((fpWav = fopen(inWav, "rb")) == NULL) {
 		printf("Cannot open %s\n", inWav);
 		exit(1);
 	}
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	if ((fp = fopen(outfile, "wb")) == NULL) {
 		printf("Cannot open %s\n", outfile);
 		exit(1);
 	}
