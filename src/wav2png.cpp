@@ -21,35 +21,48 @@ void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 	int aStartSample = (startPoint >= 0) ? (int)(startPoint) : 0;
 	int aEndSample = (endPoint >= 0) ? (int)(endPoint) : wavSamples;
 
+	if (aStartSample > aEndSample) return;
+	if (fseek(theWavFile, dataStartPos + aStartSample * formatChunk.blockSize, SEEK_SET) != 0) {
+		return;
+	}
+
+	double** aDataBuf = new double* [num_ch];
+	for (int i = 0; i < num_ch; i++) {
+		aDataBuf[i] = new double [aEndSample - aStartSample + 1];
+	}
+	for (int i = 0; i <= aEndSample - aStartSample; i++) {
+		for (int ch = 0; ch < num_ch; ch++) {
+			aDataBuf[ch][i] = ReadWaveData(theWavFile, &formatChunk);
+		}
+	}
+
 	fprintf(gp, "plot ");
 	for (int i = 0; i < num_ch; i++) {
-		fprintf(gp, "'-' using 1:%d w lines", i+2);
+		fprintf(gp, "'-' w lines");
 		if (i < num_ch-1) {
 			fprintf(gp, ", ");
 		}
 	}
 	fprintf(gp, "\n");
 
-	for (int ch__ = 0; ch__ < num_ch; ch__++) {
-		if (fseek(theWavFile, dataStartPos + aStartSample * formatChunk.blockSize, SEEK_SET) != 0) {
-			return;
-		}
-		for (int i = 0; i < aEndSample - aStartSample; i++) {
+	for (int ch = 0; ch < num_ch; ch++) {
+		for (int i = 0; i <= aEndSample - aStartSample; i++) {
 			fprintf(gp, "%d ",i);
-			for (int ch = 0; ch < num_ch; ch++) {
-				double val = ReadWaveData(theWavFile, &formatChunk);
+			fprintf(gp, "%g", aDataBuf[ch][i]);
 
-				fprintf(gp, "%g", val);
-
-				if (ch < num_ch - 1) {
-//					fprintf (gp, ", ");
-					fprintf (gp, "	");
-				}
+			if (ch < num_ch - 1) {
+//				fprintf (gp, ", ");
+				fprintf (gp, "	");
 			}
-			fprintf(gp, "\n",i);
+			fprintf(gp, "\n");
 		}
 		fprintf(gp, "e\n");
 	}
+
+	for (int i = 0; i < num_ch; i++) {
+		delete [] aDataBuf[i];
+	}
+	delete [] aDataBuf;
 }
 
 int main(int argc, char* argv[])
