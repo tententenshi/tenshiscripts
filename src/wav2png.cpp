@@ -12,7 +12,7 @@ void Usage(const char* command)
 	fprintf(stderr, "%s from_sample to_sample(set -1 for whole sample) input_wav_file [...]\n\n", command);
 }
 
-void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, double startPoint, double endPoint)
+void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataStartPos, int dataSize, double startPoint, double endPoint)
 {
 	int wavSamples = dataSize / formatChunk.blockSize;
 	int num_ch = formatChunk.channel;
@@ -21,33 +21,35 @@ void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 	int aStartSample = (startPoint >= 0) ? (int)(startPoint) : 0;
 	int aEndSample = (endPoint >= 0) ? (int)(endPoint) : wavSamples;
 
-	if (fseek(theWavFile, aStartSample * formatChunk.blockSize, SEEK_CUR) != 0) {
-		return;
-	}
-
 	fprintf(gp, "plot ");
 	for (int i = 0; i < num_ch; i++) {
-		fprintf(gp, "'-' w lines");
+		fprintf(gp, "'-' using 1:%d w lines", i+2);
 		if (i < num_ch-1) {
 			fprintf(gp, ", ");
 		}
 	}
 	fprintf(gp, "\n");
 
-	for (int i = 0; i < aEndSample - aStartSample; i++) {
-		for (int ch = 0; ch < num_ch; ch++) {
-			double val = ReadWaveData(theWavFile, &formatChunk);
-
-			fprintf(gp, "%g", val);
-
-			if (ch < num_ch - 1) {
-				fprintf (gp, ", ");
-//				fprintf (gp, "	");
-			}
+	for (int ch__ = 0; ch__ < num_ch; ch__++) {
+		if (fseek(theWavFile, dataStartPos + aStartSample * formatChunk.blockSize, SEEK_SET) != 0) {
+			return;
 		}
-		fprintf(gp, " :%d\n",i);
+		for (int i = 0; i < aEndSample - aStartSample; i++) {
+			fprintf(gp, "%d ",i);
+			for (int ch = 0; ch < num_ch; ch++) {
+				double val = ReadWaveData(theWavFile, &formatChunk);
+
+				fprintf(gp, "%g", val);
+
+				if (ch < num_ch - 1) {
+//					fprintf (gp, ", ");
+					fprintf (gp, "	");
+				}
+			}
+			fprintf(gp, "\n",i);
+		}
+		fprintf(gp, "e\n");
 	}
-	fprintf(gp, "e\n");
 }
 
 int main(int argc, char* argv[])
@@ -88,11 +90,29 @@ int main(int argc, char* argv[])
 
 		printf("dataSize is %d, output [%d:%d]\n", dataSize, From_Sample, To_Sample);
 		if (dataSize > 0) {
+			char out_basename[512];
+			strcpy(out_basename, inWavArray[i]);
+			*strstr(out_basename, ".wav") = '\0';
+
 			char out_png[512];
-			strcpy(out_png, inWavArray[i]);
-			strcpy(strstr(out_png, ".wav"), ".png");
+			sprintf(out_png, "%s.png", out_basename);
+			FILE *fpOutTest;
+			if ((fpOutTest = fopen(out_png, "r")) == NULL) {
+			} else {
+				fclose(fpOutTest);
+				for (int i = 0; i < 1000; i++) {
+					sprintf(out_png, "%s_%03d.png", out_basename, i);
+					if ((fpOutTest = fopen(out_png, "r")) == NULL) {
+						break;
+					} else {
+						fclose(fpOutTest);
+					}
+				}
+			}
+
 			fprintf(gp, "set output \"%s\"\n", out_png);
-			Process(gp, fpWav, formatChunkBuf, dataSize, From_Sample, To_Sample);
+			Process(gp, fpWav, formatChunkBuf, dataStartPos, dataSize, From_Sample, To_Sample);
+//			Process(stderr, fpWav, formatChunkBuf, dataStartPos, dataSize, From_Sample, To_Sample);
 		}
 
 		fclose(fpWav);
