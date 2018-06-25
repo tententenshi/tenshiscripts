@@ -16,7 +16,7 @@ my $BLOCK_SIZE = 0x10000;
 sub usage {
 	my $cmd = `basename $0`;
 	chomp $cmd;
-	print "usage: $cmd [FORMAT_ID=3] [BIT_LENGTH=32] [ENDIAN=LITTLE] wav1.wav [wav2.wav]... outWavFile\n";
+	print "usage: $cmd [FORMAT_ID=3] [BIT_LENGTH=32] [ENDIAN=LITTLE] inWav.wav outWav1.wav [outWav2.wav] ...\n";
 	exit 1;
 }
 
