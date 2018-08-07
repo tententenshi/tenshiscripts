@@ -397,6 +397,30 @@ class CPKG2 : public CEA {
 	}
 };
 
+class CBEF2 : public CEA {
+	double mFreq;
+	double mGain;
+	double mQ;
+  public:
+	CBEF2(double theFS) : CEA(theFS) {}
+	void SetProperty(double theFreq, double theGain, double theQ) {
+		mFreq = theFreq; mGain = theGain; mQ = theQ;
+		double w0 = tan(M_PI * theFreq / FS);
+		double den = 1 + w0 / theQ + w0 * w0;
+		a0 = (1 + dB2Gain(theGain) * w0 / theQ + w0 * w0) / den;
+		a1 = 2 * (w0 * w0 - 1) / den;
+		a2 = (1 - dB2Gain(theGain) * w0 / theQ + w0 * w0) / den;
+		b1 = -a1;
+		b2 = -(1 - w0 / theQ + w0 * w0) / den;
+	}
+	void ShowProperty() {
+		printf("BEF2\n");
+		printf(" freq %g (Hz)\n", mFreq);
+		printf(" gain %g (dB)\n", mGain);
+		printf(" Q    %g\n", mQ);
+	}
+};
+
 class CSINE : public CFilterBase {
   protected:
 	double	FS;
