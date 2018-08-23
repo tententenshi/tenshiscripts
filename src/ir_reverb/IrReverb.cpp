@@ -133,16 +133,6 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile, int WetR
 		int num_ch = formatChunkBuf.channel;
 		int aRemainSize = wavSamples;
 
-#if 1
-		while ( aRemainSize > 0) {
-			for (int ch = 0; ch < num_ch; ch++) {
-				double aVal = ReadWaveData(FP_SrcWaveFile, &formatChunkBuf);
-				WriteWaveData(FP_OutWaveFile, &formatChunkBuf, aVal);
-			}
-			aRemainSize--;
-		}
-		int outDataSize = dataSize;
-#else
 		double** dataBuf;
 		dataBuf = new double* [num_ch];
 		for (int ch = 0; ch < num_ch; ch++) {
@@ -242,7 +232,6 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile, int WetR
 		delete [] src_fft_data;
 		delete [] ip;
 		delete [] w;
-#endif
 
 		CopyFile(FP_SrcWaveFile, FP_OutWaveFile, -1);
 
