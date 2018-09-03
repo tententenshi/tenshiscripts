@@ -103,17 +103,20 @@ my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
 my $w0;
 if ($w0_2 > 0) {
     $w0 = sqrt($w0_2);
-} elsif ((1 + $b1 - $b2 == 0) && ($b2 != -1)) {	# s^2 become zero, actually this filter has only one pole
-    $w0 = (1 - $b1 - $b2) / (1 + $b2);
-    printf "this filter has only one pole at %9.2f (Hz)\n", $w0 * $Fs / pi();
-} elsif ((1 - $b1 - $b2 == 0) && ($a0 + $a1 + $a2 == 0)) {
-    $w0 = (1 - $b1 - $b2) / (1 + $b2);
+} elsif ((1 + $b1 - $b2 == 0) && ($a0 - $a1 + $a2 == 0)) {	# s^2 become zero
     printf "this filter is actually 1st order filter\n";
-    my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 +$b2);
-    my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 +$b2);
-    my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 +$b2);
+    my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
+    my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
+    my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
     exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
-    exit 1;
+    exit 0;
+} elsif ((1 - $b1 - $b2 == 0) && ($a0 + $a1 + $a2 == 0)) {	# s^0 become zero
+    printf "this filter is actually 1st order filter\n";
+    my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
+    my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
+    my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
+    exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
+    exit 0;
 } else {
     print "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"\n";
     exit 1;
