@@ -109,14 +109,14 @@ if ($w0_2 > 0) {
     my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
     my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
     exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
-    exit 0;
+    exit;
 } elsif ((1 - $b1 - $b2 == 0) && ($a0 + $a1 + $a2 == 0)) {	# s^0 become zero
     printf "this filter is actually 1st order filter\n";
     my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
     my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
     my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
     exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
-    exit 0;
+    exit;
 } else {
     print "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"\n";
     exit 1;
@@ -136,12 +136,14 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
 	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
 	printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
+	exit;
 } elsif (($a0 == $a2) && (round( $a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# LPF
 	print "LPF\n";
 	printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
 	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
 	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
 	printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
+	exit;
 } elsif ((round(($b1 * $a0 + $a1 - $a1 * $b2 + $b1 * $a2) * $ERROR_BITDEPTH) == 0) && ($b1 != 0)) {	# PKG | BPF | APF
 	if ($a1 == 0) {
 		print "BPF\n";
@@ -149,6 +151,7 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
 		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
 		printf "	cutoff gain  --> %9.2f (dB) ($gain_cutoff)\n", $gain_cutoff;
+		exit;
 	} elsif (round(($a1 * (1 + $b2) -$b1 * ($a0 - $a2)) * $ERROR_BITDEPTH) == 0) {
 		print "APF\n";
 		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
@@ -156,7 +159,8 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
 		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
 		printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-	} else {
+		exit;
+	} elsif ((round(($a0 + $a1 + $a2) * $ERROR_BITDEPTH) != 0) && (round(($a0 - $a1 + $a2) * $ERROR_BITDEPTH) != 0)) {
 		print "PKG\n";
 		my $mag_pkg = -$b1 * ($a0 - $a2) / ($a1 * (1 + $b2));
 		my $gain_pkg   = ($mag_pkg    != 0) ? 20 * log(abs($mag_pkg)) / log(10) : "-infinite";
@@ -175,6 +179,7 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 
 		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
 		printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
+		exit;
 	}
 } elsif ((round($mag_dc * $mag_nyquist * $ERROR_BITDEPTH) == round($mag_cutoff * $mag_cutoff * $ERROR_BITDEPTH)) && ($b1 != 0)) {
 	my $freq1 = $freq_d / $mag_cutoff;
@@ -190,10 +195,16 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 	printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
 	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
 	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-} else {
-	if (($a2 == 0) && ($b2 == 0)) {	# 1st order filter
-		exec ("ceqFAanalyze $a0 $a1 $b1 $Fs");
-	} else {
+	exit;
+} elsif (($a2 == 0) && ($b2 == 0)) {	# 1st order filter
+	exec ("ceqFAanalyze $a0 $a1 $b1 $Fs");
+	exit;
+}
+
+
+#
+# not a regular filters (complexed)
+#
 		print "complexed filter ...\n";
 		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
 		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
@@ -212,6 +223,4 @@ if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERRO
 		}
 		printf "as LPF ...\n";
 		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-	}
-}
 
