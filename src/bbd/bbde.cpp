@@ -21,6 +21,7 @@ static double	buf_441[NUM_OF_MAX_CH][4];
 
 void	init(void);
 double	proc(int ch, double val, const SFormatChunk& formatChunk);
+double	proc_only_interpolationread(int ch, double val, const SFormatChunk& formatChunk);
 double	interpolated_read(const double*, double);
 void	proceed_sample(int ch);
 static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
@@ -29,7 +30,7 @@ static double sCurReadSpead;
 static double sCurWriteSpead;
 static double sCurPitch;
 static double sCurWriteAdrs;
-static double sCurPitch2;
+//static double sCurPitch2;
 
 // --------------------------------------------------------------------
 void Usage(const char* command)
@@ -46,6 +47,15 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
+	eEndian aEndian = ConfirmSystemEndian();
+	if (aEndian == eBIG) {
+		printf("this system is big endian\n");
+	} else if (aEndian == eLITTLE) {
+		printf("this system is little endian\n");
+	} else {
+		printf("this system is unknown\n");
+	}
+
 //	int wavLen = atoi(*++argv);
 	char* inWav = *++argv;
 	char* outfile = *++argv;
@@ -60,37 +70,28 @@ int main(int argc, char* argv[])
 		printf("Cannot open %s\n", outfile);
 		exit(1);
 	}
-	FILE *fpDebug1;
-	FILE *fpDebug2;
-	if ((fpDebug1 = fopen("Debug1.wav", "wb")) == NULL) {
-		printf("Cannot open Debug1.wav\n");
-		exit(1);
-	}
-	if ((fpDebug2 = fopen("Debug2.wav", "wb")) == NULL) {
-		printf("Cannot open Debug2.wav\n");
-		exit(1);
-	}
 
 	SFormatChunk formatChunkBuf;
 	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
 	int32_t dataStartPos = ftell(fpWav);
-	rewind(fpWav);
+//	rewind(fpWav);
 
 	if (dataSize > 0) {
 		init();
 
-		CopyFile(fpWav, fpOut, dataStartPos);
-//		SetupWavHead(fpOut, formatChunkBuf, dataSize);
+//		CopyFile(fpWav, fpOut, dataStartPos);
 
-		int32_t sDebugFileDataStartPos;
-		SFormatChunk formatChunkDebug = formatChunkBuf;
+		int32_t sOutFileDataStartPos;
+		SFormatChunk formatChunkOut;
+
+		enum { DEBUG_ITEM_NUM = 3, };
 		{
-			formatChunkDebug.channel = 2;
-			formatChunkDebug.bitLength = 32;
-			formatChunkDebug.format = 3;
+			int num_ch = formatChunkBuf.channel + DEBUG_ITEM_NUM;
+			int FSAMP = formatChunkBuf.fsamp;
+			int bitLength = 32;
+			int format = 3;
 
-			sDebugFileDataStartPos = CreateWavHeader(fpDebug1, &formatChunkDebug);
-			CreateWavHeader(fpDebug2, &formatChunkDebug);
+			sOutFileDataStartPos = CreateWavHeader(fpOut, &formatChunkOut, num_ch, FSAMP, bitLength, format);
 		}
 
 		{
@@ -103,28 +104,26 @@ int main(int argc, char* argv[])
 					double val = ReadWaveData(fpWav, &formatChunkBuf);
 		
 //					printf("%4d ", i);
-					double new_val = proc(ch, val, formatChunkBuf);
+//					double new_val = proc(ch, val, formatChunkBuf);
+					double new_val = proc_only_interpolationread(ch, val, formatChunkBuf);
 
-					WriteWaveData(fpOut, &formatChunkBuf, new_val);
-//					WriteWaveData(fpOut, &formatChunkBuf, 0.5 * val + 0.5 * new_val);
+					WriteWaveData(fpOut, &formatChunkOut, new_val);
+//					WriteWaveData(fpOut, &formatChunkOut, 0.5 * val + 0.5 * new_val);
 				}
-				WriteWaveData(fpDebug1, &formatChunkDebug, sCurReadSpead / 10.0);
-				WriteWaveData(fpDebug1, &formatChunkDebug, sCurWriteSpead / 10.0);
-				WriteWaveData(fpDebug2, &formatChunkDebug, (sCurPitch - 1.0) * 40);
-				WriteWaveData(fpDebug2, &formatChunkDebug, (sCurPitch2 - 1.0) * 40);
-//				WriteWaveData(fpDebug2, &formatChunkDebug, sCurWriteAdrs / BBD_LENGTH);
-
+#if 1
+				WriteWaveData(fpOut, &formatChunkOut, sCurReadSpead / 10.0);
+				WriteWaveData(fpOut, &formatChunkOut, sCurWriteSpead / 10.0);
+				WriteWaveData(fpOut, &formatChunkOut, (sCurPitch - 1.0) * 40);
+//				WriteWaveData(fpOut, &formatChunkOut, sCurWriteAdrs / BBD_LENGTH);
+#endif
 			}
 		}
 
-		CopyFile(fpWav, fpOut, -1);
+//		CopyFile(fpWav, fpOut, -1);
 
 		{
-			int aDataSize = dataSize / formatChunkBuf.blockSize * 8;
-			MaintainWavHeader(fpDebug1, aDataSize, sDebugFileDataStartPos);
-			MaintainWavHeader(fpDebug2, aDataSize, sDebugFileDataStartPos);
-			fclose(fpDebug1);
-			fclose(fpDebug2);
+			int aDataSize = dataSize / formatChunkBuf.blockSize * formatChunkOut.blockSize;
+			MaintainWavHeader(fpOut, aDataSize, sOutFileDataStartPos);
 		}
 	}
 
@@ -142,8 +141,8 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
 
 	double aCurPoint = fabs(ChorusLFO[ch]);
-	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
-//	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
+//	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
+	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
 //	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * aCurPoint);	// exponential
 //	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * aCurPoint * aCurPoint;	// square
 	double inc_bbd = TargetBBDClock / FSAMP;	// phase increment
@@ -166,17 +165,18 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	static int sCurTime[NUM_OF_MAX_CH] = {0};	// for debug
 	{
 		sCurTime[ch]++;
-		static double sPrevReadTime;
+//		static double sPrevReadTime;
 		// for debug "inc_bbd" modulation
 		double inc_bbd_on_wr = interpolated_read(buf_inc_bbd[ch], rp);	// for debug
+		double time_on_wr = interpolated_read(buf_time_history_bbd[ch], rp);	// for debug
 //		printf("ChorusLFO: %lf, TargetBBDClock: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, bp_bbd: %lf\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, bp_bbd[ch] - BBD_LENGTH);
+//		printf("ChorusLFO: %lf, TargetBBDClock: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, bp_bbd: %lf, time_on_wr: %lf\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, bp_bbd[ch] - BBD_LENGTH, time_on_wr);
 		sCurReadSpead = inc_bbd;
 		sCurWriteSpead = inc_bbd_on_wr;
 		sCurPitch = inc_bbd / inc_bbd_on_wr;
 		sCurWriteAdrs = bp_bbd[ch] - BBD_LENGTH;
-		double time_on_wr = interpolated_read(buf_time_history_bbd[ch], rp);
-		sCurPitch2 = (time_on_wr - sPrevReadTime);	// pitch is delta of delay time, simple analysis
-		sPrevReadTime = time_on_wr;
+//		sCurPitch2 = (time_on_wr - sPrevReadTime);	// pitch is delta of delay time, simple analysis
+//		sPrevReadTime = time_on_wr;
 	}
 
 	double bp_new = bp_bbd[ch] + inc_bbd;							// post proc / update for next sample period
@@ -199,6 +199,71 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	proceed_sample(ch);
 	return rd;
 }
+
+
+
+
+
+
+double proc_only_interpolationread(int ch, double val, const SFormatChunk& formatChunk)
+{
+	static double ChorusLFO[NUM_OF_MAX_CH] = {0};
+#if 1
+	int FSAMP = formatChunk.fsamp;
+	ChorusLFO[ch] += 1.0 / (sModulationPeriod * FSAMP);
+	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
+
+	double aCurPoint = fabs(ChorusLFO[ch]);
+//	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
+	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
+//	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * aCurPoint);	// exponential
+//	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * aCurPoint * aCurPoint;	// square
+	double inc_bbd = TargetBBDClock / FSAMP;	// phase increment
+#else
+	double inc_bbd = 1.0;	//0.2;	// phase increment
+#endif
+
+	static double	rp_buf[NUM_OF_MAX_CH];			// float phase
+	static int wp_buf[NUM_OF_MAX_CH];
+
+	double rp = rp_buf[ch] + 4;											// 0x1fc: bbd cell count(BBD_LENGTH) - some latency@input
+	double rd = interpolated_read(buf_bbd[ch], rp);
+//	printf(" READ_bbd inc: %lf, rp: %lf, bbd_val[0]: %lf, bbd_val[1]: %lf, rd: %lf\n", inc_bbd, rp, buf_bbd[ch][(int)rp+0], buf_bbd[ch][(int)rp+1], rd);
+
+	static double	buf_inc_bbd[NUM_OF_MAX_CH][BBD_LENGTH * 2];	// for debug "inc_bbd" modulation
+	static double	buf_time_history_bbd[NUM_OF_MAX_CH][BBD_LENGTH * 2];	// for debug
+	static int sCurTime[NUM_OF_MAX_CH] = {0};	// for debug
+	{
+		sCurTime[ch]++;
+		// for debug "inc_bbd" modulation
+		double inc_bbd_on_wr = interpolated_read(buf_inc_bbd[ch], rp);	// for debug
+		double time_on_wr = interpolated_read(buf_time_history_bbd[ch], rp);	// for debug
+//		printf("ChorusLFO: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, wp_buf: %d, rp_buf: %lf\n", ChorusLFO[ch], inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, wp_buf[ch], rp_buf[ch]);
+//		printf("ChorusLFO: %lf, TargetBBDClock: %lf, inc_bbd_wr: %lf, inc_bbd: %lf, ratio: %lf, bp_bbd: %lf, time_on_wr: %lf\n", ChorusLFO[ch], TargetBBDClock, inc_bbd_on_wr, inc_bbd, inc_bbd / inc_bbd_on_wr, rp_buf[ch], time_on_wr);
+		sCurReadSpead = inc_bbd;
+		sCurWriteSpead = inc_bbd_on_wr;
+		sCurPitch = (inc_bbd_on_wr <= 0) ? inc_bbd : (inc_bbd / inc_bbd_on_wr);
+	}
+
+	double rp_new = rp_buf[ch] + sCurPitch;							// post proc / update for next sample period
+	rp_new = (rp_new >= BBD_LENGTH) ? (rp_new - BBD_LENGTH) : (rp_new < 0) ? (rp_new + BBD_LENGTH) : rp_new;
+	int wp_new = wp_buf[ch] + 1;
+	wp_new = (wp_new >= BBD_LENGTH) ? (wp_new - BBD_LENGTH) : (wp_new < 0) ? (wp_new + BBD_LENGTH) : wp_new;
+
+	buf_bbd[ch][wp_new + BBD_LENGTH] = buf_bbd[ch][wp_new] = val;
+	buf_inc_bbd[ch][wp_new + BBD_LENGTH] = buf_inc_bbd[ch][wp_new] = inc_bbd;	// for debug "inc_bbd" modulation
+	buf_time_history_bbd[ch][wp_new + BBD_LENGTH] = buf_time_history_bbd[ch][wp_new] = sCurTime[ch];	// for debug "inc_bbd" modulation
+
+	rp_buf[ch] = rp_new;
+	wp_buf[ch] = wp_new;
+
+	proceed_sample(ch);
+	return rd;
+}
+
+// --------------------------------------------------------------------
+
+
 
 // --------------------------------------------------------------------
 void init(void)
