@@ -30,6 +30,7 @@ static double sCurReadSpead;
 static double sCurWriteSpead;
 static double sCurPitch;
 static double sCurWriteAdrs;
+static double sCurDelayTime;
 //static double sCurPitch2;
 
 // --------------------------------------------------------------------
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 		int32_t sOutFileDataStartPos;
 		SFormatChunk formatChunkOut;
 
-		enum { DEBUG_ITEM_NUM = 3, };
+		enum { DEBUG_ITEM_NUM = 4, };
 		{
 			int num_ch = formatChunkBuf.channel + DEBUG_ITEM_NUM;
 			int FSAMP = formatChunkBuf.fsamp;
@@ -104,8 +105,11 @@ int main(int argc, char* argv[])
 					double val = ReadWaveData(fpWav, &formatChunkBuf);
 		
 //					printf("%4d ", i);
-//					double new_val = proc(ch, val, formatChunkBuf);
+#if defined(ORIGINAL_ALG)
+					double new_val = proc(ch, val, formatChunkBuf);
+#else
 					double new_val = proc_only_interpolationread(ch, val, formatChunkBuf);
+#endif
 
 					WriteWaveData(fpOut, &formatChunkOut, new_val);
 //					WriteWaveData(fpOut, &formatChunkOut, 0.5 * val + 0.5 * new_val);
@@ -115,6 +119,7 @@ int main(int argc, char* argv[])
 				WriteWaveData(fpOut, &formatChunkOut, sCurWriteSpead / 10.0);
 				WriteWaveData(fpOut, &formatChunkOut, (sCurPitch - 1.0) * 40);
 //				WriteWaveData(fpOut, &formatChunkOut, sCurWriteAdrs / BBD_LENGTH);
+				WriteWaveData(fpOut, &formatChunkOut, sCurDelayTime / BBD_LENGTH);
 #endif
 			}
 		}
@@ -131,6 +136,15 @@ int main(int argc, char* argv[])
 	fclose(fpOut);
 }
 
+static inline double GetPhaseIncrement(double theCurPoint, double FSAMP)
+{
+	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * theCurPoint + 1/MinBBDClock);	// reciplocal
+//	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * theCurPoint + MinBBDClock;	// linear
+//	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * theCurPoint);	// exponential
+//	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * theCurPoint * theCurPoint;	// square
+	return TargetBBDClock / FSAMP;
+}
+
 // --------------------------------------------------------------------
 double proc(int ch, double val, const SFormatChunk& formatChunk)
 {
@@ -141,11 +155,7 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
 
 	double aCurPoint = fabs(ChorusLFO[ch]);
-//	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
-	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
-//	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * aCurPoint);	// exponential
-//	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * aCurPoint * aCurPoint;	// square
-	double inc_bbd = TargetBBDClock / FSAMP;	// phase increment
+	double inc_bbd = GetPhaseIncrement(aCurPoint, FSAMP);
 #else
 	double inc_bbd = 0.2;	// phase increment
 #endif
@@ -177,6 +187,7 @@ double proc(int ch, double val, const SFormatChunk& formatChunk)
 		sCurWriteAdrs = bp_bbd[ch] - BBD_LENGTH;
 //		sCurPitch2 = (time_on_wr - sPrevReadTime);	// pitch is delta of delay time, simple analysis
 //		sPrevReadTime = time_on_wr;
+		sCurDelayTime = sCurTime[ch] - time_on_wr;
 	}
 
 	double bp_new = bp_bbd[ch] + inc_bbd;							// post proc / update for next sample period
@@ -214,11 +225,7 @@ double proc_only_interpolationread(int ch, double val, const SFormatChunk& forma
 	if (ChorusLFO[ch] > 1.0) { ChorusLFO[ch] -= 2.0; }
 
 	double aCurPoint = fabs(ChorusLFO[ch]);
-//	double TargetBBDClock = 1 / ((1/MaxBBDClock - 1/MinBBDClock) * aCurPoint + 1/MinBBDClock);	// reciplocal
-	double TargetBBDClock = (MaxBBDClock - MinBBDClock) * aCurPoint + MinBBDClock;	// linear
-//	double TargetBBDClock = MinBBDClock * exp(log(MaxBBDClock / MinBBDClock) * aCurPoint);	// exponential
-//	double TargetBBDClock = MinBBDClock + (MaxBBDClock - MinBBDClock) * aCurPoint * aCurPoint;	// square
-	double inc_bbd = TargetBBDClock / FSAMP;	// phase increment
+	double inc_bbd = GetPhaseIncrement(aCurPoint, FSAMP);
 #else
 	double inc_bbd = 1.0;	//0.2;	// phase increment
 #endif
@@ -243,6 +250,7 @@ double proc_only_interpolationread(int ch, double val, const SFormatChunk& forma
 		sCurReadSpead = inc_bbd;
 		sCurWriteSpead = inc_bbd_on_wr;
 		sCurPitch = (inc_bbd_on_wr <= 0) ? inc_bbd : (inc_bbd / inc_bbd_on_wr);
+		sCurDelayTime = sCurTime[ch] - time_on_wr;
 	}
 
 	double rp_new = rp_buf[ch] + sCurPitch;							// post proc / update for next sample period
