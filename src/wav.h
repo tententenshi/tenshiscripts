@@ -174,12 +174,14 @@ void PutShortVal(uint16_t val_s, FILE* fp)
 	}
 }
 
-int32_t CreateWavHeader(FILE* fp, const SFormatChunk* formatChunk)
+int32_t CreateWavHeader(FILE* fp, SFormatChunk* formatChunk, int num_ch, int FSAMP, int bitLength, int format)
 {
-	int num_ch = formatChunk->channel;
-	int FSAMP = formatChunk->fsamp;
-	int bitLength = formatChunk->bitLength;
-	int format = formatChunk->format;
+	formatChunk->format = format;
+	formatChunk->channel = num_ch;
+	formatChunk->fsamp = FSAMP;
+	formatChunk->bitLength = bitLength;
+	formatChunk->dataRate = FSAMP * num_ch * bitLength / 8;
+	formatChunk->blockSize = bitLength / 8 * num_ch;
 
 	fputs("RIFF", fp);
 	PutLongVal(0, fp);	// total size
@@ -201,6 +203,8 @@ int32_t CreateWavHeader(FILE* fp, const SFormatChunk* formatChunk)
 
 void MaintainWavHeader(FILE* fp, int dataSize, int32_t dataStartPos)
 {
+	fflush(fp);
+
 	struct stat stbuf;
 	int file_size;
 	if (fstat(fileno(fp), &stbuf) == -1) {
@@ -214,6 +218,27 @@ void MaintainWavHeader(FILE* fp, int dataSize, int32_t dataStartPos)
 
 	fseek(fp, dataStartPos - 4, SEEK_SET);
 	PutLongVal(dataSize, fp);
+}
+
+enum eEndian {
+	eUNKNOWN, eBIG, eLITTLE,
+};
+eEndian ConfirmSystemEndian(void)
+{
+	union UTest {
+		unsigned long longVal;
+		unsigned char charVal[4];
+	};
+	UTest testVal;
+	testVal.longVal = 0x12345678;
+
+	if (testVal.charVal[0] = 0x12) {
+		return eBIG;
+	} else if (testVal.charVal[0] = 0x12) {
+		return eLITTLE;
+	} else {
+		return eUNKNOWN;
+	}
 }
 
 #endif // _wav_h_
