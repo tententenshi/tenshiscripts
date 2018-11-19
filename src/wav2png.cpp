@@ -9,10 +9,10 @@ void Usage(const char* command)
 {
 	fprintf(stderr, "print out wav as png\n");
 //	fprintf(stderr, "%s from_sample to_sample(set -1 for whole sample) output_filename.gif input_wav_file [...]\n\n", command);
-	fprintf(stderr, "%s from_sample to_sample(set -1 for whole sample) input_wav_file [...]\n\n", command);
+	fprintf(stderr, "%s from_sample to_sample(set -1 for whole sample) channel(set -1 for whole channel) input_wav_file [...]\n\n", command);
 }
 
-void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataStartPos, int dataSize, double startPoint, double endPoint)
+void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataStartPos, int dataSize, double startPoint, double endPoint, int Channel)
 {
 	int wavSamples = dataSize / formatChunk.blockSize;
 	int num_ch = formatChunk.channel;
@@ -37,23 +37,36 @@ void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 	}
 
 	fprintf(gp, "plot ");
-	for (int i = 0; i < num_ch; i++) {
-		fprintf(gp, "'-' w lines");
-		if (i < num_ch-1) {
-			fprintf(gp, ", ");
+	if (Channel == -1) {
+		for (int i = 0; i < num_ch; i++) {
+			fprintf(gp, "'-' w lines");
+			if (i < num_ch-1) {
+				fprintf(gp, ", ");
+			}
 		}
+	} else {
+		fprintf(gp, "'-' w lines");
 	}
 	fprintf(gp, "\n");
 
-	for (int ch = 0; ch < num_ch; ch++) {
+	if (Channel == -1) {
+		for (int ch = 0; ch < num_ch; ch++) {
+			for (int i = 0; i <= aEndSample - aStartSample; i++) {
+				fprintf(gp, "%d ",i);
+				fprintf(gp, "%g", aDataBuf[ch][i]);
+
+				if (ch < num_ch - 1) {
+//					fprintf (gp, ", ");
+					fprintf (gp, "	");
+				}
+				fprintf(gp, "\n");
+			}
+			fprintf(gp, "e\n");
+		}
+	} else {
 		for (int i = 0; i <= aEndSample - aStartSample; i++) {
 			fprintf(gp, "%d ",i);
-			fprintf(gp, "%g", aDataBuf[ch][i]);
-
-			if (ch < num_ch - 1) {
-//				fprintf (gp, ", ");
-				fprintf (gp, "	");
-			}
+			fprintf(gp, "%g", aDataBuf[Channel][i]);
 			fprintf(gp, "\n");
 		}
 		fprintf(gp, "e\n");
@@ -67,7 +80,7 @@ void Process(FILE *gp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 
 int main(int argc, char* argv[])
 {
-	if (argc < 4) {
+	if (argc < 5) {
 		Usage(argv[0]);
 		exit(1);
 	}
@@ -76,6 +89,7 @@ int main(int argc, char* argv[])
 	int From_Sample = atoi(*argv++);	argc--;
 	int To_Sample = atoi(*argv++);		argc--;
 //	char* outfile = *argv++;			argc--;
+	int Channel = atoi(*argv++);	argc--;
 
 	int inWavNum = argc;
 	char* inWavArray[inWavNum];
@@ -124,7 +138,7 @@ int main(int argc, char* argv[])
 			}
 
 			fprintf(gp, "set output \"%s\"\n", out_png);
-			Process(gp, fpWav, formatChunkBuf, dataStartPos, dataSize, From_Sample, To_Sample);
+			Process(gp, fpWav, formatChunkBuf, dataStartPos, dataSize, From_Sample, To_Sample, Channel);
 //			Process(stderr, fpWav, formatChunkBuf, dataStartPos, dataSize, From_Sample, To_Sample);
 		}
 
