@@ -18,7 +18,7 @@ cd () {
 alias back='cd "$OLDPWD"'
 
 function e () {
-	echo "$EDITOR $*" | sh
+	$EDITOR $*
 }
 
 alias h='history | less'
@@ -37,23 +37,23 @@ function psg () {
 function sg () {
 	tar_path=$1; shift
 	pattern=`echo $* | sed 's/\\\\t/	/g' | sed 's/\\\\s/[ 	]/g' | sed 's/\\\\S/[^ 	]/g' | sed 's/\\\\d/[0-9]/g' | sed 's/\\\\D/[^0-9]/g'`
-	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fd[aphsx]" -or -name "*.blk" -or -name "*.inc" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -aE "$pattern" | less -p "$pattern"
+	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fda" -or -name "*.blk" -or -name "*.inc" -or -name "*.preprocess" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -aE "$pattern" | less -p "$pattern"
 }
 function Sg () {
 	tar_path=$1; shift
 	pattern=`echo $* | sed 's/\\\\t/	/g' | sed 's/\\\\s/[ 	]/g' | sed 's/\\\\S/[^ 	]/g' | sed 's/\\\\d/[0-9]/g' | sed 's/\\\\D/[^0-9]/g'`
-	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fd[aphsx]" -or -name "*.blk" -or -name "*.inc" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -aiE "$pattern" | less -i -p "$pattern"
+	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fda" -or -name "*.blk" -or -name "*.inc" -or -name "*.preprocess" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -aiE "$pattern" | less -i -p "$pattern"
 }
 
 function sg_list () {
 	tar_path=$1; shift
 	pattern=`echo $* | sed 's/\\\\t/	/g' | sed 's/\\\\s/[ 	]/g' | sed 's/\\\\S/[^ 	]/g' | sed 's/\\\\d/[0-9]/g' | sed 's/\\\\D/[^0-9]/g'`
-	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fd[aphsx]" -or -name "*.blk" -or -name "*.inc" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -alE "$pattern"
+	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fda" -or -name "*.blk" -or -name "*.inc" -or -name "*.preprocess" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -alE "$pattern"
 }
 function Sg_list () {
 	tar_path=$1; shift
 	pattern=`echo $* | sed 's/\\\\t/	/g' | sed 's/\\\\s/[ 	]/g' | sed 's/\\\\S/[^ 	]/g' | sed 's/\\\\d/[0-9]/g' | sed 's/\\\\D/[^0-9]/g'`
-	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fd[aphsx]" -or -name "*.blk" -or -name "*.inc" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -ailE "$pattern"
+	command find $tar_path -follow \( \( -name "*~" -o -name "*.svn*" -o -name "*.htm*" -o -name "*.crf*" \) -o \( -name "*.[csShx]*" -or -name "*.asp" -or -name "*.e[ah]" -or -name "*.v*[ah]" -or -name "*.fda" -or -name "*.blk" -or -name "*.inc" -or -name "*.preprocess" -or -name "Makefile*" -or -name "make.com" \) -type f -print0 \) |xargs -0 grep -ailE "$pattern"
 }
 
 function calcf() {
