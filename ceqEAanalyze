@@ -6,6 +6,7 @@ use POSIX;
 use Math::Complex;
 
 require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+require $FindBin::RealBin . "/ceqAnalyzeCore.pm";
 
 my $ERROR_BITDEPTH = (1 << 19);
 my $ERROR_BITDEPTH2 = (1 << 16);
@@ -62,165 +63,164 @@ if ($eb_alg) {
 	$a2 = -$m0 * $b2 + $a2 * $m1;
 }
 
-print "a0 as EA --> $a0\n";
-print "a1 as EA --> $a1\n";
-print "a2 as EA --> $a2\n";
-print "b1 as EA --> $b1\n";
-print "b2 as EA --> $b2\n";
-
-#print "plot 20*log10(abs(H_EA_N(z(x), $a0, $a1, $a2) / H_EA_D(z(x), $b1, $b2)))\n";
-#print "plot sin(t), cos(t) notitle with lines, \\\nreal(pole1($b1,$b2)), imag(pole1($b1,$b2)), \\\nreal(pole2($b1,$b2)), imag(pole2($b1,$b2)), \\\n";
-#print "real(zero1($a0,$a1,$a2)), imag(zero1($a0,$a1,$a2)), \\\nreal(zero2($a0,$a1,$a2)), imag(zero2($a0,$a1,$a2))\n";
-
-
-my $mag_dc      = (1 - $b1 - $b2 != 0) ? (($a0 + $a1 + $a2) / (1 - $b1 - $b2)) : "infinite";
-my $mag_nyquist = (1 + $b1 - $b2 != 0) ? ($a0 - $a1 + $a2) / (1 + $b1 - $b2) : "infinite";
-my $mag_cutoff  = (1 + $b2 != 0) ? ($a0 - $a2) / (1 + $b2) : "infinite";
-my $gain_dc      = ($mag_dc      eq "infinite") ? "infinite" : ($mag_dc      != 0) ? 20 * log(abs($mag_dc)) / log(10) : "-infinite";
-my $gain_nyquist = ($mag_nyquist eq "infinite") ? "infinite" : ($mag_nyquist != 0) ? 20 * log(abs($mag_nyquist)) / log(10) : "-infinite";
-my $gain_cutoff  = ($mag_cutoff  eq "infinite") ? "infinite" : ($mag_cutoff  != 0) ? 20 * log(abs($mag_cutoff)) / log(10) : "-infinite";
-
-my $pole1 = ($b1 + sqrt(cplx($b1**2 + 4*$b2, 0))) / 2;
-my $pole2 = ($b1 - sqrt(cplx($b1**2 + 4*$b2, 0))) / 2;
-my $zero1 = ($a0 != 0) ? (-$a1 + sqrt(cplx($a1**2 - 4*$a0*$a2, 0))) / (2*$a0) : (($a1 != 0) ? (-$a2 / $a1) : 0);
-my $zero2 = ($a0 != 0) ? (-$a1 - sqrt(cplx($a1**2 - 4*$a0*$a2, 0))) / (2*$a0) : (($a1 != 0) ? (-$a2 / $a1) : 0);
-
-#printf "pole1 (%8.5f, %8.5f), pole2 (%8.5f, %8.5f) / zero1 (%8.5f, %8.5f), zero2 (%8.5f, %8.5f)\n", 
-#	Re($pole1), Im($pole1), Re($pole2), Im($pole2), Re($zero1), Im($zero1), Re($zero2), Im($zero2);
-
-#printf "pole1 arg(%7.2f, %9.2fHz), pole2 (%7.2f, %9.2fHz) / zero1 (%7.2f, %9.2fHz), zero2 (%7.2f, %9.2fHz)\n", 
-#	180 * arg($pole1) / pi(), $Fs / 2 * arg($pole1) / pi(), 180 * arg($pole2) / pi(), $Fs / 2 * arg($pole2) / pi(), 
-#	180 * arg($zero1) / pi(), $Fs / 2 * arg($zero1) / pi(), 180 * arg($zero2) / pi(), $Fs / 2 * arg($zero2) / pi();
-
-
-if ((abs($pole1) > 1) || (abs($pole2) > 1)) {
-    print "pole is out of unit circle. this filter will be unstable!\n";
-    exit 1;
-}
-
-my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
-
-my $w0;
-if ($w0_2 > 0) {
-    $w0 = sqrt($w0_2);
-} elsif ((1 + $b1 - $b2 == 0) && ($a0 - $a1 + $a2 == 0)) {	# s^2 become zero
-    printf "this filter is actually 1st order filter\n";
-    my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
-    my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
-    my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
-    exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
-    exit;
-} elsif ((1 - $b1 - $b2 == 0) && ($a0 + $a1 + $a2 == 0)) {	# s^0 become zero
-    printf "this filter is actually 1st order filter\n";
-    my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
-    my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
-    my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
-    exec ("ceqFAanalyze $a0_FA $a1_FA $b1_FA $Fs");
-    exit;
+if (($a2 != 0) || ($b2 != 0)) {	# 2nd order filter
+	print "a0 as EA --> $a0\n";
+	print "a1 as EA --> $a1\n";
+	print "a2 as EA --> $a2\n";
+	print "b1 as EA --> $b1\n";
+	print "b2 as EA --> $b2\n";
 } else {
-    print "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"\n";
-    exit 1;
+	print "a0 as FA --> $a0\n";
+	print "a1 as FA --> $a1\n";
+	print "b1 as FA --> $b1\n";
 }
 
-my $freq_a = $w0 *$Fs / pi();
-my $freq_d = (1 + $b1 - $b2 != 0) ? atan2($w0, 1) / pi() * $Fs : $Fs;	# reverse prewarping
 
-my $q_a = ($b2 != -1) ? sqrt((1 - $b1 - $b2) * (1 + $b1 - $b2)) / (2 * $b2 + 2) : "infinite";
-#my $q_a = -$b1 * $w0 / ((2 + $b1) * $w0_2 - 2 + $b1);
-my $q_d = (($freq_d != 0) && ($q_a ne "infinite")) ? $q_a * $Fs * tan(pi() * $freq_d / $Fs) / ($freq_d * pi()) : "infinite";	# reverse prewarping
+my $result_ref = CeqAnalyzeCore($a0, $a1, $a2, $b1, $b2, $Fs);
 
+if (defined($$result_ref{ memo })) { print $$result_ref{ memo } . "\n"; }
 
-if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# HPF
-	print "HPF\n";
-	printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-	printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-	exit;
-} elsif (($a0 == $a2) && (round( $a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# LPF
-	print "LPF\n";
-	printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-	printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-	exit;
-} elsif ((round(($b1 * $a0 + $a1 - $a1 * $b2 + $b1 * $a2) * $ERROR_BITDEPTH) == 0) && ($b1 != 0)) {	# PKG | BPF | APF
-	if ($a1 == 0) {
-		print "BPF\n";
-		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-		printf "	cutoff gain  --> %9.2f (dB) ($gain_cutoff)\n", $gain_cutoff;
-		exit;
-	} elsif (round(($a1 * (1 + $b2) -$b1 * ($a0 - $a2)) * $ERROR_BITDEPTH) == 0) {
-		print "APF\n";
-		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-		printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-		exit;
-	} elsif ((round(($a0 + $a1 + $a2) * $ERROR_BITDEPTH) != 0) && (round(($a0 - $a1 + $a2) * $ERROR_BITDEPTH) != 0)) {
-		print "PKG\n";
-		my $mag_pkg = -$b1 * ($a0 - $a2) / ($a1 * (1 + $b2));
-		my $gain_pkg   = ($mag_pkg    != 0) ? 20 * log(abs($mag_pkg)) / log(10) : "-infinite";
-
-#		print "mag_pkg --> $mag_pkg, q_d --> $q_d\n";
-		if (abs($mag_pkg) < 1) {
-			$q_d = $q_d / abs($mag_pkg);
-			$q_a = $q_a / abs($mag_pkg);
-		}
-
-		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-		printf "	gain_pass    --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-		printf "	gain as pkg  --> %9.2f (dB) ($gain_pkg)\n", $gain_pkg;
-
-		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-		printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-		exit;
+if ($$result_ref{ type } eq "ERROR") {
+	exit 1;
+} elsif ($$result_ref{ type } eq "THRU") {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) | --------------------\n", $$result_ref{ gain_dc };
+	print "          |\n";
+} elsif ($$result_ref{ type } =~ /HPF/) {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) |            +--------\n", $$result_ref{ gain_nyquist };
+	print "          |           /\n";
+	print "          |          /\n";
+	print "          |         /\n";
+	print "                       p\n";
+	print "                       |\n";
+	print "                       +--- $$result_ref{ freq_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
-} elsif ((round($mag_dc * $mag_nyquist * $ERROR_BITDEPTH) == round($mag_cutoff * $mag_cutoff * $ERROR_BITDEPTH)) && ($b1 != 0)) {
-	my $freq1 = $freq_d / $mag_cutoff;
-	my $freq2 = $freq_d * $mag_cutoff;
-	my $freq_low  = ($freq1 < $freq2) ? $freq1 : $freq2;
-	my $freq_high = ($freq1 < $freq2) ? $freq2 : $freq1;
-
-	print "2nd Order Shelving Filter\n";
-	printf "	freq_low     --> %9.2f (Hz) ($freq_low)\n", $freq_low;
-	printf "	freq_center  --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-	printf "	freq_high    --> %9.2f (Hz) ($freq_high)\n", $freq_high;
-	printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-	printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-	printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-	printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-	exit;
-} elsif (($a2 == 0) && ($b2 == 0)) {	# 1st order filter
-	exec ("ceqFAanalyze $a0 $a1 $b1 $Fs");
-	exit;
+} elsif ($$result_ref{ type } =~ /LPF/) {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) | ------+\n", $$result_ref{ gain_dc };
+	print "          |        \\\n";
+	print "          |         \\\n";
+	print "          |          \\\n";
+	print "                  p\n";
+	print "                  |\n";
+	print "                  +-------- $$result_ref{ freq_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /HI_BOOST/) {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) |          +--------\n", $$result_ref{ gain_nyquist };
+	print "          |         /\n";
+	print "          |        /\n";
+	printf "%5.1f(dB) | ------+\n", $$result_ref{ gain_dc };
+	print "                  z  p\n";
+	print "                  |  |\n";
+	print "                  |  +--- $$result_ref{ freq2_d } (Hz)\n";
+	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /HI_CUT/) {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) | ------+\n", $$result_ref{ gain_dc };
+	print "          |        \\\n";
+	print "          |         \\\n";
+	printf "%5.1f(dB) |          +--------\n", $$result_ref{ gain_nyquist };
+	print "                  p  z\n";
+	print "                  |  |\n";
+	print "                  |  +--- $$result_ref{ freq2_d } (Hz)\n";
+	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /APF/) {
+	print "$$result_ref{ type }\n";
+	print "          |\n";
+	printf "%5.1f(dB) | --------------------\n", $$result_ref{ gain_dc };
+	print "          |\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /BPF/) {
+	print "$$result_ref{ type }\n";
+	print  "          |\n";
+	printf "%5.1f(dB) |          +\n", $$result_ref{ gain_cutoff };
+	print  "          |         / \\\n";
+	print  "          |        /   \\\n";
+	print  "          |       /     \\\n";
+	print  "                     p\n";
+	print  "                     |\n";
+	print  "                     +-------- $$result_ref{ freq_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /BEF/) {
+	print "$$result_ref{ type }\n";
+	print  "          |\n";
+	printf "%5.1f(dB) |------+       +------ %5.1f(dB)\n", $$result_ref{ gain_dc }, $$result_ref{ gain_nyquist };
+	print  "          |       \\     /\n";
+	print  "          |        \\   /\n";
+	print  "          |         \\ /\n";
+	print  "          |           +\n";
+	print  "                     p\n";
+	print  "                     |\n";
+	print  "                     +-------- $$result_ref{ freq_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } =~ /PKG/) {
+	print "$$result_ref{ type }\n";
+	print  "          |\n";
+	if ($$result_ref{ gain_pkg } >= 0) {
+		printf "%5.1f(dB) |          +\n", $$result_ref{ gain_pkg };
+		print  "          |         / \\\n";
+		print  "          |        /   \\\n";
+		printf "%5.1f(dB) |------+      +------ %5.1f(dB)\n", $$result_ref{ gain_dc }, $$result_ref{ gain_nyquist };
+	} else {
+		printf "%5.1f(dB) |------+      +------ %5.1f(dB)\n", $$result_ref{ gain_dc }, $$result_ref{ gain_nyquist };
+		print  "          |        \\   /\n";
+		print  "          |         \\ /\n";
+		printf "%5.1f(dB) |          +\n", $$result_ref{ gain_pkg };
+	}
+	print  "                     p\n";
+	print  "                     |\n";
+	print  "                     +-------- $$result_ref{ freq_d } (Hz)\n";
+	if ($$result_ref{ type } =~ /2$/) {
+		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	}
+} elsif ($$result_ref{ type } eq "COMPLEX") {
+	print "complexed filter ...\n";
+	printf "	freq         --> %9.2f (Hz) ($$result_ref{ freq_d } : $$result_ref{ freq_a }(analog))\n", $$result_ref{ freq_d };
+	printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+	printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
+	printf "\n";
+	printf "as HPF ...\n";
+	printf "	gain_nyquist --> %9.2f (dB) ($$result_ref{ gain_nyquist })\n", $$result_ref{ gain_nyquist };
+	printf "as BPF ...\n";
+	printf "	cutoff gain  --> %9.2f (dB) ($$result_ref{ gain_cutoff })\n", $$result_ref{ gain_cutoff };
+	if (defined($$result_ref{ mag_pkg }) && (abs($$result_ref{ mag_pkg }) < 1) && ($$result_ref{ mag_pkg } != 0)) {
+		my $q_neg = $$result_ref{ q_d } / abs($$result_ref{ mag_pkg });
+		printf "	q as cut     --> %9.2f (dB) ($q_neg)\n", $q_neg;
+	}
+	printf "as LPF ...\n";
+	printf "	gain_dc      --> %9.2f (dB) ($$result_ref{ gain_dc })\n", $$result_ref{ gain_dc };
+} else {
+	print "unknown result type (" . $$result_ref { type } . ") returned\n";
+	exit 1;
 }
-
-
-#
-# not a regular filters (complexed)
-#
-		print "complexed filter ...\n";
-		printf "	freq         --> %9.2f (Hz) ($freq_d : $freq_a(analog))\n", $freq_d;
-		printf "	q            --> %9.2f      ($q_d)\n", $q_d;
-		printf "	q (as analog)--> %9.2f      ($q_a)\n", $q_a;
-		printf "\n";
-		printf "as HPF ...\n";
-		printf "	gain_nyquist --> %9.2f (dB) ($gain_nyquist)\n", $gain_nyquist;
-		printf "as BPF ...\n";
-		printf "	cutoff gain  --> %9.2f (dB) ($gain_cutoff)\n", $gain_cutoff;
-		if (($a1 * (1 + $b2)) != 0) {
-			my $mag_pkg = -$b1 * ($a0 - $a2) / ($a1 * (1 + $b2));
-			if (($mag_pkg < 1) && ($mag_pkg != 0)) {
-				my $q_neg = $q_d / abs($mag_pkg);
-				printf "	q as cut     --> %9.2f (dB) ($q_neg)\n", $q_neg;
-			}
-		}
-		printf "as LPF ...\n";
-		printf "	gain_dc      --> %9.2f (dB) ($gain_dc)\n", $gain_dc;
-
