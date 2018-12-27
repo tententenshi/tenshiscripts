@@ -172,12 +172,12 @@ sub CeqAnalyzeCore {
 	} elsif (($a0 == $a2) && (round( $a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# LPF
 		$result{ type } = "LPF2";
 		return \%result;
-	} elsif ($a0 == $a2) {	# BEF
-		$result{ type } = "BEF2";
-		return \%result;
 	} elsif ((round(($b1 * $a0 + $a1 - $a1 * $b2 + $b1 * $a2) * $ERROR_BITDEPTH) == 0) && ($b1 != 0)) {	# PKG | BPF | APF
 		if ($a1 == 0) {
 			$result{ type } = "BPF2";
+			return \%result;
+		} elsif ($a0 == $a2) {	# BEF
+			$result{ type } = "BEF2";
 			return \%result;
 		} elsif (round(($a1 * (1 + $b2) -$b1 * ($a0 - $a2)) * $ERROR_BITDEPTH) == 0) {
 			$result{ type } = "APF2";
@@ -219,7 +219,7 @@ sub CeqAnalyzeCore {
 	# not a regular filters (complexed)
 	#
 	$result{ type } = "COMPLEX";
-	if (($a1 * (1 + $b2)) != 0) {
+	if (($result{ mag_cutoff } != 0) && ($a1 * (1 + $b2) != 0)) {
 		$result{ mag_pkg }  = -$b1 / $a1 * $result{ mag_cutoff };
 		$result{ gain_pkg } = ($result{ mag_pkg } != 0) ? 20 * log(abs($result{ mag_pkg })) / log(10) : "-infinite";
 	}

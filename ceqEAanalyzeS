@@ -1,0 +1,130 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Math::Complex;
+
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+require $FindBin::RealBin . "/ceqAnalyzeCore.pm";
+
+
+my @argument = ParseArgument(\@ARGV);
+
+if (($#argument != 5) && ($#argument != 7)) {
+#	my $cmd = `basename $0`;
+#	chomp $cmd;
+#	print "usage: $cmd a0 a1 a2 b1 b2 Fs\n";
+#	print " --+-|>---(+)------+--\n";
+#	print "   | a0  // \\\\     |  \n";
+#	print "   +-|>-+/   \\+-<|-+  \n";
+#	print "   | a1 /     \\ b1 |  \n";
+#	print "   +-|>+       +<|-+  \n";
+#	print "     a2         b2    \n";
+#	print "\n\n";
+#	print "usage: $cmd a0 a1 a2 b1 b2 m0 m1 Fs\n";
+#	print "   +------------------|>-+\n";
+#	print "   |                  m0  \\\n";
+#	print " --+-|>---(+)------+--|>--(+)--\n";
+#	print "   | a0  // \\\\     |  m1 \n";
+#	print "   +-|>-+/   \\+-<|-+  \n";
+#	print "   | a1 /     \\ b1 |  \n";
+#	print "   +-|>+       +<|-+  \n";
+#	print "     a2         b2    \n";
+#	print "\n\n";
+#	print "This calculation is based on the following analysis,\n";
+#	print "http://web.ck.miyakoda.roland.co.jp/piano/software/dsp/tools/filter_analyze.html\n";
+	exit 1;
+}
+
+my $eb_alg = 0;
+if ($#argument == 7) {
+	$eb_alg = 1;
+}
+
+my $a0 = shift @argument;
+my $a1 = shift @argument;
+my $a2 = shift @argument;
+my $b1 = shift @argument;
+my $b2 = shift @argument;
+my $m0; my $m1;
+if ($eb_alg) {
+	$m0 = shift @argument;
+	$m1 = shift @argument;
+}
+my $Fs = shift @argument;
+
+if ($eb_alg) {
+	$a0 = $m0 + $a0 * $m1;
+	$a1 = -$m0 * $b1 + $a1 * $m1;
+	$a2 = -$m0 * $b2 + $a2 * $m1;
+}
+
+if (($a2 != 0) || ($b2 != 0)) {	# 2nd order filter
+#	print "a0 as EA --> $a0\n";
+#	print "a1 as EA --> $a1\n";
+#	print "a2 as EA --> $a2\n";
+#	print "b1 as EA --> $b1\n";
+#	print "b2 as EA --> $b2\n";
+} else {
+#	print "a0 as FA --> $a0\n";
+#	print "a1 as FA --> $a1\n";
+#	print "b1 as FA --> $b1\n";
+}
+
+
+my $result_ref = CeqAnalyzeCore($a0, $a1, $a2, $b1, $b2, $Fs);
+
+if (defined($$result_ref{ memo })) { print $$result_ref{ memo } . "\n"; }
+
+if ($$result_ref{ type } eq "ERROR") {
+	exit 1;
+} elsif ($$result_ref{ type } eq "THRU") {
+	print "{$$result_ref{ mag_dc }, eEQType$$result_ref{ type }, 0, 0, 0}";
+} elsif ($$result_ref{ type } =~ /HPF/) {
+	print "{$$result_ref{ mag_nyquist }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, 0, $$result_ref{ q_a }}";
+} elsif ($$result_ref{ type } =~ /LPF/) {
+	print "{$$result_ref{ mag_dc }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, 0, $$result_ref{ q_a }}";
+} elsif (($$result_ref{ type } =~ /HI_BOOST/) || ($$result_ref{ type } =~ /HI_CUT/)) {
+	if (abs($$result_ref{ gain_nyquist }) > abs($$result_ref{ gain_dc })) {
+		if ($$result_ref{ type } =~ /2$/) {
+			print "{$$result_ref{ mag_dc }, eEQTypeHSV2, $$result_ref{ freq2_d }, %f, $$result_ref{ q_a }}", $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc };
+		} else {
+			print "{$$result_ref{ mag_dc }, eEQTypeHSV1, $$result_ref{ freq2_d }, %f, 0}", $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc };
+		}
+	} else {
+		if ($$result_ref{ type } =~ /2$/) {
+			print "{$$result_ref{ mag_nyquist }, eEQTypeLSV2, $$result_ref{ freq1_d }, %f, $$result_ref{ q_a }}", $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist };
+		} else {
+			printf "{$$result_ref{ mag_nyquist }, eEQTypeLSV1, $$result_ref{ freq1_d }, %f, 0}", $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist };
+		}
+	}
+} elsif ($$result_ref{ type } =~ /APF/) {
+	print "{$$result_ref{ mag_dc }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, 0, $$result_ref{ q_a }}";
+} elsif ($$result_ref{ type } =~ /BPF/) {
+	print "{$$result_ref{ mag_cutoff }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, 0, $$result_ref{ q_d }}";
+} elsif ($$result_ref{ type } =~ /BEF/) {
+	print "{$$result_ref{ mag_dc }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, 0, $$result_ref{ q_d }}";
+} elsif ($$result_ref{ type } =~ /PKG/) {
+	print "{$$result_ref{ mag_dc }, eEQType$$result_ref{ type }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d }}";
+	print "$$result_ref{ type }\n";
+} elsif ($$result_ref{ type } eq "COMPLEX") {
+	print "complexed filter ...\n";
+	if (defined($$result_ref{ mag_pkg })) {
+		if ((abs($$result_ref{ mag_pkg }) < 1) && (abs($$result_ref{ mag_pkg }) != 0)) {
+			my $q_neg = $$result_ref{ q_d } / abs($$result_ref{ mag_pkg });
+			print "{$$result_ref{ mag_dc },  eEQTypePKG2, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $q_neg}";
+		} else {
+			print "{$$result_ref{ mag_dc },  eEQTypePKG2, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d }}";
+		}
+	} else {
+		print "{$$result_ref{ mag_nyquist }, eEQTypeHPF2, $$result_ref{ freq_d }, 0, $$result_ref{ q_a }} and \n";
+		print "{$$result_ref{ mag_dc },      eEQTypeLPF2, $$result_ref{ freq_d }, 0, $$result_ref{ q_a }} and \n";
+		print "{$$result_ref{ mag_cutoff },  eEQTypeBPF2, $$result_ref{ freq_d }, 0, $$result_ref{ q_d }}";
+	}
+} else {
+	print "unknown result type (" . $$result_ref { type } . ") returned\n";
+	exit 1;
+}
+
+print "\n";

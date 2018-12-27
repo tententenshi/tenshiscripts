@@ -8,8 +8,6 @@ use Math::Complex;
 require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 require $FindBin::RealBin . "/ceqAnalyzeCore.pm";
 
-my $ERROR_BITDEPTH = (1 << 19);
-my $ERROR_BITDEPTH2 = (1 << 16);
 
 
 my @argument = ParseArgument(\@ARGV);
