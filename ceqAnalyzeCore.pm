@@ -2,8 +2,7 @@ use strict;
 use POSIX;
 use Math::Complex;
 
-my $ERROR_BITDEPTH = (1 << 19);
-my $ERROR_BITDEPTH2 = (1 << 16);
+my $ERROR_LEVEL = 1 / (1 << 19);
 
 
 
@@ -42,13 +41,13 @@ sub CeqFA_Analyze {
 		}
 	}
 
-	if ($$result_ref{ mag_dc } == 0) {
+	if ($$result_ref{ mag_dc } < $ERROR_LEVEL) {
 		$$result_ref{ type } = "HPF1";
-	} elsif ($$result_ref{ mag_nyquist } == 0) {
+	} elsif ($$result_ref{ mag_nyquist } < $ERROR_LEVEL) {
 		$$result_ref{ type } = "LPF1";
-	} elsif ($$result_ref{ mag_dc } == $$result_ref{ mag_nyquist }) {
+	} elsif (abs($$result_ref{ mag_dc } - $$result_ref{ mag_nyquist }) < $ERROR_LEVEL) {
 		$$result_ref{ type } = "THRU";
-	} elsif ($$result_ref{ mag_dc } == -$$result_ref{ mag_nyquist }) {
+	} elsif (abs($$result_ref{ mag_dc } + $$result_ref{ mag_nyquist }) < $ERROR_LEVEL) {
 		$$result_ref{ type } = "APF1";
 	} elsif (abs($$result_ref{ mag_dc }) < abs($$result_ref{ mag_nyquist })) {
 		$$result_ref{ type } = "HI_BOOST1";
@@ -64,8 +63,6 @@ sub CeqFA_Analyze {
 		$$result_ref{ type } = "ERROR";
 		$$result_ref{ memo } = "unknown filter type\n";
 	}
-
-
 }
 
 
@@ -114,6 +111,31 @@ sub CeqAnalyzeCore {
 	$result{ gain_nyquist } = ($result{ mag_nyquist } eq "infinite") ? "infinite" : ($result{ mag_nyquist } != 0) ? 20 * log(abs($result{ mag_nyquist })) / log(10) : "-infinite";
 	$result{ gain_cutoff }  = ($result{ mag_cutoff }  eq "infinite") ? "infinite" : ($result{ mag_cutoff }  != 0) ? 20 * log(abs($result{ mag_cutoff })) / log(10) : "-infinite";
 
+	my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
+	my $w0;
+
+	if ((abs(1 + $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 - $a1 + $a2) < $ERROR_LEVEL)) {	# s^2 become zero
+		$result{ memo } = "this filter is actually 1st order filter";
+		my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
+		my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
+		my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
+		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
+		return \%result;
+	} elsif ((abs(1 - $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 + $a1 + $a2) < $ERROR_LEVEL)) {	# s^0 become zero
+		$result{ memo } = "this filter is actually 1st order filter";
+		my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
+		my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
+		my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
+		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
+		return \%result;
+	} elsif ($w0_2 > 0) {
+		$w0 = sqrt($w0_2);
+	} else {
+		$result{ memo } = "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"";
+		$result{ type } = "ERROR";
+		return \%result;
+	}
+
 	$result{ pole1 } = ($b1 + sqrt(cplx($b1**2 + 4*$b2, 0))) / 2;
 	$result{ pole2 } = ($b1 - sqrt(cplx($b1**2 + 4*$b2, 0))) / 2;
 	$result{ zero1 } = ($a0 != 0) ? (-$a1 + sqrt(cplx($a1**2 - 4*$a0*$a2, 0))) / (2*$a0) : (($a1 != 0) ? (-$a2 / $a1) : 0);
@@ -133,31 +155,6 @@ sub CeqAnalyzeCore {
 		return \%result;
 	}
 
-	my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
-
-	my $w0;
-	if ($w0_2 > 0) {
-		$w0 = sqrt($w0_2);
-	} elsif ((1 + $b1 - $b2 == 0) && ($a0 - $a1 + $a2 == 0)) {	# s^2 become zero
-		$result{ memo } = "this filter is actually 1st order filter";
-		my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
-		my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
-		my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
-		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
-		return \%result;
-	} elsif ((1 - $b1 - $b2 == 0) && ($a0 + $a1 + $a2 == 0)) {	# s^0 become zero
-		$result{ memo } = "this filter is actually 1st order filter";
-		my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
-		my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
-		my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
-		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
-		return \%result;
-	} else {
-		$result{ memo } = "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"";
-		$result{ type } = "ERROR";
-		return \%result;
-	}
-
 	$result{ freq_a } = $w0 * $Fs / pi();
 	$result{ freq_d } = (1 + $b1 - $b2 != 0) ? atan2($w0, 1) / pi() * $Fs : $Fs;	# reverse prewarping
 
@@ -166,23 +163,23 @@ sub CeqAnalyzeCore {
 	$result{ q_d } = (($result{ freq_d } != 0) && ($result{ q_a } ne "infinite")) ? $result{ q_a } * $Fs * tan(pi() * $result{ freq_d } / $Fs) / ($result{ freq_d } * pi()) : "infinite";	# reverse prewarping
 
 
-	if      (($a0 == $a2) && (round(-$a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# HPF
+	if      (($a0 == $a2) && (abs(2 * $a0 + $a1) < $ERROR_LEVEL)) {	# HPF
 		$result{ type } = "HPF2";
 		return \%result;
-	} elsif (($a0 == $a2) && (round( $a1 * $ERROR_BITDEPTH) == round(2 * $a0 * $ERROR_BITDEPTH))) {	# LPF
+	} elsif (($a0 == $a2) && (abs(2 * $a0 - $a1) < $ERROR_LEVEL)) {	# LPF
 		$result{ type } = "LPF2";
 		return \%result;
-	} elsif ((round(($b1 * $a0 + $a1 - $a1 * $b2 + $b1 * $a2) * $ERROR_BITDEPTH) == 0) && ($b1 != 0)) {	# PKG | BPF | APF
+	} elsif ((abs($b1 * $a0 + $a1 - $a1 * $b2 + $b1 * $a2) < $ERROR_LEVEL) && ($b1 != 0)) {	# PKG | BPF | APF
 		if ($a1 == 0) {
 			$result{ type } = "BPF2";
 			return \%result;
 		} elsif ($a0 == $a2) {	# BEF
 			$result{ type } = "BEF2";
 			return \%result;
-		} elsif (round(($a1 * (1 + $b2) -$b1 * ($a0 - $a2)) * $ERROR_BITDEPTH) == 0) {
+		} elsif (abs($a1 * (1 + $b2) -$b1 * ($a0 - $a2)) < $ERROR_LEVEL) {
 			$result{ type } = "APF2";
 			return \%result;
-		} elsif ((round(($a0 + $a1 + $a2) * $ERROR_BITDEPTH) != 0) && (round(($a0 - $a1 + $a2) * $ERROR_BITDEPTH) != 0)) {
+		} elsif ((abs($a0 + $a1 + $a2) > $ERROR_LEVEL) && (abs($a0 - $a1 + $a2) > $ERROR_LEVEL)) {
 			$result{ type } = "PKG2";
 			$result{ mag_pkg }  = -$b1 / $a1 * $result{ mag_cutoff };
 			$result{ gain_pkg } = ($result{ mag_pkg } != 0) ? 20 * log(abs($result{ mag_pkg })) / log(10) : "-infinite";
@@ -197,7 +194,7 @@ sub CeqAnalyzeCore {
 
 			return \%result;
 		}
-	} elsif ((round($result{ mag_dc } * $result{ mag_nyquist } * $ERROR_BITDEPTH) == round($result{ mag_cutoff } * $result{ mag_cutoff } * $ERROR_BITDEPTH)) && ($b1 != 0)) {
+	} elsif ((abs($result{ mag_dc } * $result{ mag_nyquist } - $result{ mag_cutoff } ** 2) < $ERROR_LEVEL) && ($b1 != 0)) {
 		my $w0_svf1 = ($result{ mag_cutoff } > 0) ? $w0 / $result{ mag_cutoff } : $w0 * $result{ mag_cutoff };
 		my $w0_svf2 = ($result{ mag_cutoff } < 0) ? $w0 / $result{ mag_cutoff } : $w0 * $result{ mag_cutoff };
 		$result{ freq1_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf1, 1) / pi() * $Fs : $Fs;	# reverse prewarping
