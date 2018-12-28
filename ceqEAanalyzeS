@@ -80,46 +80,46 @@ my $result_ref = CeqAnalyzeCore($a0, $a1, $a2, $b1, $b2, $Fs);
 if ($$result_ref{ type } eq "ERROR") {
 	exit 1;
 } elsif ($$result_ref{ type } eq "THRU") {
-	printf "{%7.1f, eEQType$$result_ref{ type },     0.0,     0.0,     0.0}", $$result_ref{ mag_dc };
+	printf "{%8.5f, eEQType$$result_ref{ type },     0.0,   0.00,   0.00}", $$result_ref{ mag_dc };
 } elsif ($$result_ref{ type } =~ /HPF/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_nyquist }, $$result_ref{ freq_d }, $$result_ref{ q_a };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_nyquist }, $$result_ref{ freq_d }, $$result_ref{ q_a };
 } elsif ($$result_ref{ type } =~ /LPF/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_a };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_a };
 } elsif (($$result_ref{ type } =~ /HI_BOOST/) || ($$result_ref{ type } =~ /HI_CUT/)) {
 	if (abs($$result_ref{ gain_nyquist }) > abs($$result_ref{ gain_dc })) {
 		if ($$result_ref{ type } =~ /2$/) {
-			printf "{%7.1f, eEQTypeHSV2, %7.1f, %7.1f, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq2_d }, $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc }, $$result_ref{ q_a };
+			printf "{%8.5f, eEQTypeHSV2, %7.1f, %6.2f, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq2_d }, $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc }, $$result_ref{ q_a };
 		} else {
-			printf "{%7.1f, eEQTypeHSV1, %7.1f, %7.1f,     0.0}", $$result_ref{ mag_dc }, $$result_ref{ freq2_d }, $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc };
+			printf "{%8.5f, eEQTypeHSV1, %7.1f, %6.2f,   0.00}", $$result_ref{ mag_dc }, $$result_ref{ freq2_d }, $$result_ref{ gain_nyquist } - $$result_ref{ gain_dc };
 		}
 	} else {
 		if ($$result_ref{ type } =~ /2$/) {
-			printf "{%7.1f, eEQTypeLSV2, %7.1f, %7.1f, %7.1f}", $$result_ref{ mag_nyquist }, $$result_ref{ freq1_d }, $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist }, $$result_ref{ q_a };
+			printf "{%8.5f, eEQTypeLSV2, %7.1f, %6.2f, %6.2f}", $$result_ref{ mag_nyquist }, $$result_ref{ freq1_d }, $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist }, $$result_ref{ q_a };
 		} else {
-			printf "{%7.1f, eEQTypeLSV1, %7.1f, %7.1f,     0.0}", $$result_ref{ mag_nyquist }, $$result_ref{ freq1_d }, $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist };
+			printf "{%8.5f, eEQTypeLSV1, %7.1f, %6.2f,   0.00}", $$result_ref{ mag_nyquist }, $$result_ref{ freq1_d }, $$result_ref{ gain_dc } - $$result_ref{ gain_nyquist };
 		}
 	}
 } elsif ($$result_ref{ type } =~ /APF/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_d };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_d };
 } elsif ($$result_ref{ type } =~ /BPF/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_cutoff }, $$result_ref{ freq_d }, $$result_ref{ q_d };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_cutoff }, $$result_ref{ freq_d }, $$result_ref{ q_d };
 } elsif ($$result_ref{ type } =~ /BEF/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_d };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_d };
 } elsif ($$result_ref{ type } =~ /PKG/) {
-	printf "{%7.1f, eEQType$$result_ref{ type }, %7.1f, %7.1f, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d };
+	printf "{%8.5f, eEQType$$result_ref{ type }, %7.1f, %6.2f, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d };
 } elsif ($$result_ref{ type } eq "COMPLEX") {
 	print "complexed filter ...\n";
 	if (defined($$result_ref{ mag_pkg })) {
 		if ((abs($$result_ref{ mag_pkg }) < 1) && (abs($$result_ref{ mag_pkg }) != 0)) {
 			my $q_neg = $$result_ref{ q_d } / abs($$result_ref{ mag_pkg });
-			printf "{%7.1f,  eEQTypePKG2, %7.1f, %7.1f, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $q_neg;
+			printf "{%8.5f,  eEQTypePKG2, %7.1f, %6.2f, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $q_neg;
 		} else {
-			printf "{%7.1f,  eEQTypePKG2, %7.1f, %7.1f, %7.1f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d };
+			printf "{%8.5f,  eEQTypePKG2, %7.1f, %6.2f, %6.2f}", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ gain_pkg }, $$result_ref{ q_d };
 		}
 	} else {
-		printf "{%7.1f, eEQTypeHPF2, %7.1f,     0.0, %7.1f} and \n", $$result_ref{ mag_nyquist }, $$result_ref{ freq_d }, $$result_ref{ q_a };
-		printf "{%7.1f, eEQTypeLPF2, %7.1f,     0.0, %7.1f} and \n", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_a };
-		printf "{%7.1f, eEQTypeBPF2, %7.1f,     0.0, %7.1f}", $$result_ref{ mag_cutoff }, $$result_ref{ freq_d }, $$result_ref{ q_d };
+		printf "{%8.5f, eEQTypeHPF2, %7.1f,   0.00, %6.2f} and \n", $$result_ref{ mag_nyquist }, $$result_ref{ freq_d }, $$result_ref{ q_a };
+		printf "{%8.5f, eEQTypeLPF2, %7.1f,   0.00, %6.2f} and \n", $$result_ref{ mag_dc }, $$result_ref{ freq_d }, $$result_ref{ q_a };
+		printf "{%8.5f, eEQTypeBPF2, %7.1f,   0.00, %6.2f}", $$result_ref{ mag_cutoff }, $$result_ref{ freq_d }, $$result_ref{ q_d };
 	}
 } else {
 	print "unknown result type (" . $$result_ref { type } . ") returned\n";
