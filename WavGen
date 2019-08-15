@@ -53,8 +53,10 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)degree(.*)$/) { my $phase = eval($2) / 180; if ($phase > 1) { $phase += -2; } $desc_hash{ start_phase } = $phase; $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ end_magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
@@ -67,8 +69,10 @@ sub ParseScript {
 			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ end_magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
@@ -79,8 +83,10 @@ sub ParseScript {
 			my %desc_hash; $desc_hash{ type } = "DC";
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ end_magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
@@ -91,8 +97,10 @@ sub ParseScript {
 			my %desc_hash; $desc_hash{ type } = "white";
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ end_magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ end_magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?exp_curve(.*)$/) { $desc_hash{ magnitude_curve } = "exp"; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?log_curve(.*)$/) { $desc_hash{ magnitude_curve } = "log"; $desc = $1 . " " . $3; }
 			push @$ref_sequence_data, \%desc_hash;
@@ -159,7 +167,7 @@ sub GenerateSine {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
-			my $frequency = $samples * ($end_frequency - $start_frequency) / $dur_sample + $start_frequency;
+			my $frequency = exp($samples * log($end_frequency / $start_frequency) / $dur_sample) * $start_frequency;
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $phase_delta = 2 * $frequency / $FS;
 			$sinePhase += $phase_delta;
