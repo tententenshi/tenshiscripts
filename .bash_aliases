@@ -126,7 +126,8 @@ function replace() {
 
 		for i
 		do
-			overwrite $i sed -rz "s@$left@$right@g" $i
+#			overwrite $i sed -rz "s@$left@$right@g" $i
+			overwrite $i replace.pl "$left" "$right" $i
 		done
 	esac
 }
