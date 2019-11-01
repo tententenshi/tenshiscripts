@@ -9,5 +9,6 @@ left="$1"; right="$2"; shift; shift;
 
 for i
 do
-	overwrite $i sed "s@$left@$right@g" $i
+#	overwrite $i sed "s@$left@$right@g" $i
+	overwrite $i replace.pl "$left" "$right" $i
 done
