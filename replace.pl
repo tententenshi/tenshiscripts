@@ -8,6 +8,9 @@ sub usage {
 	chomp $cmd;
 	print "replace description using regular expression\n";
 	print "usage: $cmd \"PATTERN_BEFORE\" \"PATTERN_AFTER\" file1 [file2 ...]\n";
+	print "	tips: double quotation '\"' should be preceded by triple backslashes '\\\\\\\"'\n";
+	print "	      doller '\$' should be preceded by single backslashes '\\\$'\n";
+	print "	      backslash itself '\\' should be preceded by triple backslashes '\\\\\\\\'\n";
 	exit 1;
 }
 
@@ -18,6 +21,10 @@ sub usage {
 {
 	my $PATTERN_BEFORE = shift;
 	my $PATTERN_AFTER = '"' . shift . '"';	# add '"' preparing for eval(eval($PATTERN_AFTER))
+
+	if ($#ARGV < 0) {
+		usage();
+	}
 
 #	print "\n\nPATTERN_BEFORE: $PATTERN_BEFORE\n\n";
 #	print "\n\nPATTERN_AFTER: $PATTERN_AFTER\n\n";
