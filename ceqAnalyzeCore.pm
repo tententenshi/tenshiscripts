@@ -10,6 +10,9 @@ my $ERROR_LEVEL = 1 / (1 << 19);
 sub CeqFA_Analyze {
 	my ($a0, $a1, $b1, $Fs, $result_ref) = @_;
 
+	$$result_ref{ q_a } = 0;
+	$$result_ref{ q_d } = 0;
+
 	$$result_ref{ zero1 } = ($a0 != 0) ? -$a1 / $a0 : 0;
 	$$result_ref{ pole1 } = $b1;
 
