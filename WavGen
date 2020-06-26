@@ -187,13 +187,15 @@ sub GenerateSine {
 			my $frequency = exp($samples * log($end_frequency / $start_frequency) / $dur_sample) * $start_frequency;
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $phase_delta = 2 * $frequency / $FS;
-			$sinePhase += $phase_delta;
-			while ($sinePhase >= 1) { $sinePhase -= 2; }
+
 			my $output = sin($PI * $sinePhase) * $magnitude;
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+
+			$sinePhase += $phase_delta;
+			while ($sinePhase >= 1) { $sinePhase -= 2; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
@@ -248,9 +250,6 @@ sub GenerateSqr {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
-			$phase += $phase_delta;
-			while ($phase >= 1) { $phase -= 2; }
-
 			my $denom = sin($PI * $phase);
 			if ($denom == 0) {
 				$sqr_val += $m / $p;
@@ -264,6 +263,9 @@ sub GenerateSqr {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+
+			$phase += $phase_delta;
+			while ($phase >= 1) { $phase -= 2; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
@@ -328,8 +330,6 @@ sub GenerateSaw {
 				my $delta = 2 * sin($PI * $m * $phase) / ($denom * $p);
 				$saw_val = $delta + $saw_delta + $saw_val * 0.99995;
 			}
-			$phase += $phase_delta;
-			while ($phase >= 1) { $phase -= 1; }
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = $saw_val * $magnitude;
@@ -337,6 +337,9 @@ sub GenerateSaw {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+
+			$phase += $phase_delta;
+			while ($phase >= 1) { $phase -= 1; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
