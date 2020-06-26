@@ -19,6 +19,7 @@ sub usage {
 	print "usage: $cmd [FORMAT_ID=3] [FS=44100] [NUM_OF_CH=1] [BIT_LENGTH=32] script.txt outWavFile\n";
 	print "\tscript descriptions:\n";
 	print "\t\tsine 440Hz [880Hz] 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency [end_frequency] magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\tsine 256Hzsample [64Hzsample] 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency_by_cycle_sample [end_frequency_by_cycle_sample] magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
 	print "\t\tsqr 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
 	print "\t\tsaw 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
 	print "\t\tDC 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
@@ -49,8 +50,10 @@ sub ParseScript {
 				$desc_hash{ start_phase } = 0;
 			}
 
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ end_frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)degree(.*)$/) { my $phase = eval($2) / 180; if ($phase > 1) { $phase += -2; } $desc_hash{ start_phase } = $phase; $desc = $1 . " " . $3; }
@@ -66,8 +69,10 @@ sub ParseScript {
 		} elsif ($str =~ /sqr(.+)$/) {
 			my $desc = $1;
 			my %desc_hash; $desc_hash{ type } = "sqr";
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ end_frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
@@ -82,8 +87,10 @@ sub ParseScript {
 		} elsif ($str =~ /saw(.+)$/) {
 			my $desc = $1;
 			my %desc_hash; $desc_hash{ type } = "saw";
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency } = eval($2); $desc = $1 . " " . $3; }
-			if ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([\d.]+)Hzsample(.*)$/) { $desc_hash{ end_frequency_period } = eval($2); $desc = $1 . " " . $3; }
+			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
@@ -155,8 +162,8 @@ my $sinePhase = 0;
 sub GenerateSine {
 	my ($fh, $infoHashRef, $ref_desc) = @_;
 
-	print("generating sine: frequency: ". $ref_desc->{ frequency } .", ");
-	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
+	print("generating sine: frequency: ". $infoHashRef->{ FS } / $ref_desc->{ frequency_period } .", ");
+	if (defined($ref_desc->{ end_frequency_period })) { print("end_frequency: ". $infoHashRef->{ FS } / $ref_desc->{ end_frequency_period } .", "); }
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
@@ -166,8 +173,8 @@ sub GenerateSine {
 	my $FS = $infoHashRef->{ FS };
 	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
 
-	my $start_frequency = $ref_desc->{ frequency };
-	my $end_frequency = defined($ref_desc->{ end_frequency }) ? $ref_desc->{ end_frequency } : $ref_desc->{ frequency };
+	my $start_frequency_period = $ref_desc->{ frequency_period };
+	my $end_frequency_period = defined($ref_desc->{ end_frequency_period }) ? $ref_desc->{ end_frequency_period } : $ref_desc->{ frequency_period };
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
@@ -184,9 +191,8 @@ sub GenerateSine {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
-			my $frequency = exp($samples * log($end_frequency / $start_frequency) / $dur_sample) * $start_frequency;
+			my $frequency_period = exp($samples * log($end_frequency_period / $start_frequency_period) / $dur_sample) * $start_frequency_period;
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
-			my $phase_delta = 2 * $frequency / $FS;
 
 			my $output = sin($PI * $sinePhase) * $magnitude;
 
@@ -194,6 +200,7 @@ sub GenerateSine {
 				push @dataArray, $output;
 			}
 
+			my $phase_delta = 2 / $frequency_period;
 			$sinePhase += $phase_delta;
 			while ($sinePhase >= 1) { $sinePhase -= 2; }
 			if (($samples + 1) >= $dur_sample) {
@@ -220,8 +227,8 @@ sub GenerateSine {
 sub GenerateSqr {
 	my ($fh, $infoHashRef, $ref_desc) = @_;
 
-	print("generating sqr: frequency: ". $ref_desc->{ frequency } .", ");
-	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
+	print("generating sqr: frequency: ". $infoHashRef->{ FS } / $ref_desc->{ frequency_period } .", ");
+	if (defined($ref_desc->{ end_frequency_period })) { print("end_frequency: ". $infoHashRef->{ FS } / $ref_desc->{ end_frequency_period } .", "); }
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
@@ -230,15 +237,15 @@ sub GenerateSqr {
 	my $FS = $infoHashRef->{ FS };
 	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
 
-	my $freqency = $ref_desc->{ frequency };
+	my $frequency_period = $ref_desc->{ frequency_period };
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $phase = 0;
-	my $phase_delta = 2 * $freqency / $FS;
-	my $p = 0.5 * $FS / $freqency;
+	my $phase_delta = 2 / $frequency_period;
+	my $p = 0.5 * $frequency_period;
 	my $m = 2 * int($p / 2 + 1);
 	my $sqr_val = 0.5;
 
@@ -289,8 +296,8 @@ sub GenerateSqr {
 sub GenerateSaw {
 	my ($fh, $infoHashRef, $ref_desc) = @_;
 
-	print("generating saw: frequency: ". $ref_desc->{ frequency } .", ");
-	if (defined($ref_desc->{ end_frequency })) { print("end_frequency: ". $ref_desc->{ end_frequency } .", "); }
+	print("generating saw: frequency: ". $infoHashRef->{ FS } / $ref_desc->{ frequency_period } .", ");
+	if (defined($ref_desc->{ end_frequency_period })) { print("end_frequency: ". $infoHashRef->{ FS } / $ref_desc->{ end_frequency_period } .", "); }
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
@@ -299,15 +306,15 @@ sub GenerateSaw {
 	my $FS = $infoHashRef->{ FS };
 	my $NUM_OF_CH = $infoHashRef->{ NUM_OF_CH };
 
-	my $freqency = $ref_desc->{ frequency };
+	my $frequency_period = $ref_desc->{ frequency_period };
 	my $start_magnitude = $ref_desc->{ magnitude };
 	my $end_magnitude = defined($ref_desc->{ end_magnitude }) ? $ref_desc->{ end_magnitude } : $ref_desc->{ magnitude };
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $phase = 0;
-	my $phase_delta = $freqency / $FS;
-	my $p = $FS / $freqency;
+	my $phase_delta = 1 / $frequency_period;
+	my $p = $frequency_period;
 	my $m = 2 * int($p / 2) + 1;	# maximum odd value that no more than p
 	my $saw_delta = -2 * $phase_delta;
 	my $saw_val = -($m / $p) - $saw_delta;
