@@ -122,7 +122,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	printf "%5.1f(dB) | ------+\n", $$result_ref{ gain_dc };
 	print "                  z  p\n";
 	print "                  |  |\n";
-	print "                  |  +--- $$result_ref{ freq2_d } (Hz)\n";
+	print "                  |  +--- $$result_ref{ freq2_d } (Hz) (as analog: $$result_ref{ freq2_a } (Hz))\n";
 	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
 		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
@@ -137,7 +137,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	printf "%5.1f(dB) |          +--------\n", $$result_ref{ gain_nyquist };
 	print "                  p  z\n";
 	print "                  |  |\n";
-	print "                  |  +--- $$result_ref{ freq2_d } (Hz)\n";
+	print "                  |  +--- $$result_ref{ freq2_d } (Hz) (as analog: $$result_ref{ freq2_a } (Hz))\n";
 	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
 		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };

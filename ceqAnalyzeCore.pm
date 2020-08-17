@@ -38,9 +38,10 @@ sub CeqFA_Analyze {
 
 	if (($a0 == 0) || ($a1 == 0)) {
 		if ($b1 >= 3 - 2 * sqrt(2)) {
-			$$result_ref{ memo } = "filter without zero, calculate through Z-plane direct method";
+			my $freq_d_Zplane = acos(-(1 + $b1**2 - 4 * $b1) / (2 * $b1)) * $Fs / (2 * pi());
+			$$result_ref{ memo } = "filter without zero, cutoff from Z-plane direct method --> $freq_d_Zplane";
 			# reverse calculation from b1 = 2 - cos - sqrt((2 - cos)**2 - 1)
-			$$result_ref{ freq_d } = acos(-(1 + $b1**2 - 4 * $b1) / (2 * $b1)) * $Fs / (2 * pi());
+			$$result_ref{ freq_d_Zplane } = $freq_d_Zplane;
 		}
 	}
 
@@ -55,13 +56,17 @@ sub CeqFA_Analyze {
 	} elsif (abs($$result_ref{ mag_dc }) < abs($$result_ref{ mag_nyquist })) {
 		$$result_ref{ type } = "HI_BOOST1";
 		my $w0_svf = $w0 * abs($$result_ref{ mag_dc }) / abs($$result_ref{ mag_nyquist });
+		$$result_ref{ freq1_a } = $w0_svf * $Fs / pi();
 		$$result_ref{ freq1_d } = atan2($w0_svf, 1) / pi() * $Fs;
 		$$result_ref{ freq2_d } = $$result_ref{ freq_d };
+		$$result_ref{ freq2_a } = $$result_ref{ freq_a };
 	} elsif (abs($$result_ref{ mag_dc }) > abs($$result_ref{ mag_nyquist })) {
 		$$result_ref{ type } = "HI_CUT1";
 		my $w0_svf = $w0 * abs($$result_ref{ mag_dc }) / abs($$result_ref{ mag_nyquist });
+		$$result_ref{ freq2_a } = $w0_svf * $Fs / pi();
 		$$result_ref{ freq2_d } = atan2($w0_svf, 1) / pi() * $Fs;
 		$$result_ref{ freq1_d } = $$result_ref{ freq_d };
+		$$result_ref{ freq1_a } = $$result_ref{ freq_a };
 	} else {
 		$$result_ref{ type } = "ERROR";
 		$$result_ref{ memo } = "unknown filter type\n";
