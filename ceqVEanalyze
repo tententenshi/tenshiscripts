@@ -8,46 +8,19 @@ use Math::Complex;
 require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
 
-my @argument = ParseArgument(\@ARGV);
+my $cmd = `basename $0`;
+chomp $cmd;
 
-if ($#argument != 6) {
-	my $cmd = `basename $0`;
-	chomp $cmd;
-	print "usage: $cmd a0 a1 fr0 q fr1 g Fs\n";
-	print "    +---------------------------------------+\n";
-	print "    |                                  g     \\\n";
-	print "    |                            +-----|>----(+)-------------------->\n";
-	print "    |   a0             fr0       |\n";
-	print "  --+---|>-----( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
-	print "    |           /\\ \\           \\        |  fr1     \\     |   |\n";
-	print "   [ ]         /  \\ \\           +-------+           \\   [ ]  |\n";
-	print "    |         /    \\ \\                  |            \\   |   |\n";
-	print "    +---|>---+      \\ +-----<|----------+             +--+   |\n";
-	print "        a1           \\      q                                |\n";
-	print "                      +-----------------------<|-------------+\n";
-	print "                                             -1.0\n";
-
-	print "\nfor VF type filter...\n";
-	print "    +--------------------------------------------------+\n";
-	print "    |                                             g     \\\n";
-	print "    |                                       +-----|>----(+)-------------------->\n";
-	print "    |   a0(0.5)        q          fr        |\n";
-	print "  --+---|>-----( + )---|>---(+)----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
-	print "    |           / \\           \\           \\        |  fr      \\     |   |\n";
-	print "   [ ]         /   \\           \\           +-------+           \\   [ ]  |\n";
-	print "    |         /     \\           \\                  |            \\   |   |\n";
-	print "    +---|>---+       +-----<|----------------------+             +--+   |\n";
-	print "        a1(0.5)           -1.0    \\                                     |\n";
-	print "                                   +---------------------<|-------------+\n";
-	print "                                                        -1.0\n";
-
-	print "\nto convert VE coef --> VF coef,\n";
-	print "g = g * q\n";
+if (!($ARGV[0] =~ /(PKG|HPF|LPF)/)) {
+	print "usage: $cmd PKG|HPF|LPF a0 [a1] [a2] fr0 q fr1 [g] Fs\n";
+	print "       parameter \"a1\" is only required for LPF|PKG\n";
+	print "       parameter \"a2\" is only required for LPF\n";
+	print "       parameter \"g\" is only required for PKG\n";
 
 	exit 1;
 }
 
-my ($a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
+my @argument = ParseArgument(\@ARGV);
 
 
 # Transfer Function as LPF
@@ -66,62 +39,140 @@ my ($a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
 #                1 - (fr0 * q + fr0 * fr1 * (-1) + 2) * z**-1 + (1 + fr0 * q) * z**-2
 
 
-#as LPF
-#{
-#	my $ma0 = $a0 * $fr0 * $fr1;
-#	my $ma1 = $a1 * $fr0 * $fr1;
-#	my $ma2 = 0;
-#	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
-#	my $mb2 = -(1 + $fr0 * $q);
+if ($ARGV[0] =~ /LPF/) {
+	if ($#argument != 7) {
+		print "usage: $cmd LPF a0 a1 a2 fr0 q fr1 Fs\n";
+		print "        a0               fr0\n";
+		print "  --+---|>-------( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+---> \n";
+		print "    |            //\\ \\           \\        |  fr1     \\     |   |\n";
+		print "   [ ]          //  \\ \\           +-------+           \\   [ ]  |\n";
+		print "    |          //    \\ \\                  |            \\   |   |\n";
+		print "    +---|>----+/      \\ +-----<|----------+             +--+   |\n";
+		print "    |   a1    /        \\      q                                |\n";
+		print "   [ ]       /          +-----------------------<|-------------+\n";
+		print "    |       /                                 -1.0\n";
+		print "    +--|>--+\n";
+		print "       a2\n";
 
-#	print "as LPF...\n";
-#	print "a0 as EA --> $ma0\n";
-#	print "a1 as EA --> $ma1\n";
-#	print "a2 as EA --> $ma2\n";
-#	print "b1 as EA --> $mb1\n";
-#	print "b2 as EA --> $mb2\n";
-#	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
-#	print "\n";
-#}
+		exit 1;
+	}
+	#as LPF
+	{
+		my ($type, $a0, $a1, $a2, $fr0, $q, $fr1, $Fs) = @argument;
 
-#as HPF
-#{
-	#ignore a1
-#	my $ma0 = $a0;
-#	my $ma1 = -2 * $a0;
-#	my $ma2 = $a0;
-#	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
-#	my $mb2 = -(1 + $fr0 * $q);
+		my $ma0 = $a0 * $fr0 * $fr1;
+		my $ma1 = $a1 * $fr0 * $fr1;
+		my $ma2 = $a2 * $fr0 * $fr1;
+		my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+		my $mb2 = -(1 + $fr0 * $q);
 
-#	print "as HPF...\n";
-#	print "a0 as EA --> $ma0\n";
-#	print "a1 as EA --> $ma1\n";
-#	print "a2 as EA --> $ma2\n";
-#	print "b1 as EA --> $mb1\n";
-#	print "b2 as EA --> $mb2\n";
-#	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
-#	print "\n";
-#}
+#		print "as LPF...\n";
+#		print "a0 as EA --> $ma0\n";
+#		print "a1 as EA --> $ma1\n";
+#		print "a2 as EA --> $ma2\n";
+#		print "b1 as EA --> $mb1\n";
+#		print "b2 as EA --> $mb2\n";
+#		print "\n";
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	}
+}
 
-#as PKG
-{
-	my $ma0 = $a0 * $fr0;
-	my $ma1 = (-$a0 + $a1) * $fr0;
-	my $ma2 = -$a1 * $fr0;
-	my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
-	my $mb2 = -(1 + $fr0 * $q);
-	my $mm0 = 1.0;
-	my $mm1 = $g;
+if ($ARGV[0] =~ /HPF/) {
+	if ($#argument != 5) {
+		print "usage: $cmd HPF a0 fr0 q fr1 Fs\n";
+		print "                       +------------------------->\n";
+		print "        a0             | fr0\n";
+		print "  --+---|>------( + )--+--|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+		print "    |           / \\ \\            \\        |  fr1     \\     |   |\n";
+		print "   [ ]         /   \\ \\            +-------+           \\   [ ]  |\n";
+		print "    |         /     \\ \\                   |            \\   |   |\n";
+		print "    +---|>---+       \\ +------<|----------+             +--+   |\n";
+		print "        a1            \\       q                                |\n";
+		print "                       +------------------------<|-------------+\n";
+		print "                                              -1.0\n";
 
-	print "as PKG...\n";
-	print "a0 as EA --> $ma0\n";
-	print "a1 as EA --> $ma1\n";
-	print "a2 as EA --> $ma2\n";
-	print "b1 as EA --> $mb1\n";
-	print "b2 as EA --> $mb2\n";
-	print "m0 as EA --> $mm0\n";
-	print "m1 as EA --> $mm1\n";
-	print "\n";
-	system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+		exit 1;
+	}
+	#as HPF
+	{
+		my ($type, $a0, $fr0, $q, $fr1, $Fs) = @argument;
+
+		#ignore a1
+		my $ma0 = $a0;
+		my $ma1 = -2 * $a0;
+		my $ma2 = $a0;
+		my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+		my $mb2 = -(1 + $fr0 * $q);
+
+#		print "as HPF...\n";
+#		print "a0 as EA --> $ma0\n";
+#		print "a1 as EA --> $ma1\n";
+#		print "a2 as EA --> $ma2\n";
+#		print "b1 as EA --> $mb1\n";
+#		print "b2 as EA --> $mb2\n";
+#		print "\n";
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+	}
+
+}
+
+if ($ARGV[0] =~ /PKG/) {
+	if ($#argument != 7) {
+		print "usage: $cmd PKG a0 a1 fr0 q fr1 g Fs\n";
+		print "    +---------------------------------------+\n";
+		print "    |                                  g     \\\n";
+		print "    |                            +-----|>----(+)-------------------->\n";
+		print "    |   a0             fr0       |\n";
+		print "  --+---|>-----( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+		print "    |           /\\ \\           \\        |  fr1     \\     |   |\n";
+		print "   [ ]         /  \\ \\           +-------+           \\   [ ]  |\n";
+		print "    |         /    \\ \\                  |            \\   |   |\n";
+		print "    +---|>---+      \\ +-----<|----------+             +--+   |\n";
+		print "        a1           \\      q                                |\n";
+		print "                      +-----------------------<|-------------+\n";
+		print "                                             -1.0\n";
+
+		print "\nfor VF type filter...\n";
+		print "    +--------------------------------------------------+\n";
+		print "    |                                             g     \\\n";
+		print "    |                                       +-----|>----(+)-------------------->\n";
+		print "    |   a0(0.5)        q          fr        |\n";
+		print "  --+---|>-----( + )---|>---(+)----|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+		print "    |           / \\           \\           \\        |  fr      \\     |   |\n";
+		print "   [ ]         /   \\           \\           +-------+           \\   [ ]  |\n";
+		print "    |         /     \\           \\                  |            \\   |   |\n";
+		print "    +---|>---+       +-----<|----------------------+             +--+   |\n";
+		print "        a1(0.5)           -1.0    \\                                     |\n";
+		print "                                   +---------------------<|-------------+\n";
+		print "                                                        -1.0\n";
+
+		print "\nto convert VE coef --> VF coef,\n";
+		print "g = g * q\n";
+
+		exit 1;
+	}
+
+	#as PKG
+	{
+		my ($type, $a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
+		my $ma0 = $a0 * $fr0;
+		my $ma1 = (-$a0 + $a1) * $fr0;
+		my $ma2 = -$a1 * $fr0;
+		my $mb1 = $fr0 * $q - $fr0 * $fr1 + 2;
+		my $mb2 = -(1 + $fr0 * $q);
+		my $mm0 = 1.0;
+		my $mm1 = $g;
+
+#		print "as PKG...\n";
+#		print "a0 as EA --> $ma0\n";
+#		print "a1 as EA --> $ma1\n";
+#		print "a2 as EA --> $ma2\n";
+#		print "b1 as EA --> $mb1\n";
+#		print "b2 as EA --> $mb2\n";
+#		print "m0 as EA --> $mm0\n";
+#		print "m1 as EA --> $mm1\n";
+#		print "\n";
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+	}
 }
 
