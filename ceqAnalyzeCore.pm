@@ -45,9 +45,9 @@ sub CeqFA_Analyze {
 		}
 	}
 
-	if ($$result_ref{ mag_dc } < $ERROR_LEVEL) {
+	if (abs($$result_ref{ mag_dc }) < $ERROR_LEVEL) {
 		$$result_ref{ type } = "HPF1";
-	} elsif ($$result_ref{ mag_nyquist } < $ERROR_LEVEL) {
+	} elsif (abs($$result_ref{ mag_nyquist }) < $ERROR_LEVEL) {
 		$$result_ref{ type } = "LPF1";
 	} elsif (abs($$result_ref{ mag_dc } - $$result_ref{ mag_nyquist }) < $ERROR_LEVEL) {
 		$$result_ref{ type } = "THRU";
