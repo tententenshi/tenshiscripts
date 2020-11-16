@@ -171,7 +171,10 @@ sub CeqAnalyzeCore {
 	$result{ q_d } = (($result{ freq_d } != 0) && ($result{ q_a } ne "infinite")) ? $result{ q_a } * $Fs * tan(pi() * $result{ freq_d } / $Fs) / ($result{ freq_d } * pi()) : "infinite";	# reverse prewarping
 
 
-	if      (($a0 == $a2) && (abs(2 * $a0 + $a1) < $ERROR_LEVEL)) {	# HPF
+	if      (($a2 == 0) && ($b2 == 0)) {	# 1st order filter
+		CeqFA_Analyze($a0, $a1, $b1, $Fs, \%result);
+		return \%result;
+	} elsif (($a0 == $a2) && (abs(2 * $a0 + $a1) < $ERROR_LEVEL)) {	# HPF
 		$result{ type } = "HPF2";
 		return \%result;
 	} elsif (($a0 == $a2) && (abs(2 * $a0 - $a1) < $ERROR_LEVEL)) {	# LPF
@@ -214,9 +217,8 @@ sub CeqAnalyzeCore {
 			$result{ type } = "HI_CUT2";
 		}
 		return \%result;
-	} elsif (($a2 == 0) && ($b2 == 0)) {	# 1st order filter
-		CeqFA_Analyze($a0, $a1, $b1, $Fs, \%result);
-		return \%result;
+	} else {
+		$result{ type } = "UNKNOWN";
 	}
 
 
