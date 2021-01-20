@@ -223,6 +223,23 @@ class CLSV1 : public CFA {
 	}
 };
 
+class CAPF1 : public CFA {
+	double mFreq;
+  public:
+	CAPF1(double theFS) : CFA(theFS) {}
+	void SetProperty(double theFreq) {
+		mFreq = theFreq;
+		double w0 = tan(M_PI * theFreq / FS);
+		a0 = -(1.0 - w0) / (1.0 + w0);
+		a1 = 1;
+		b1 = (1.0 - w0) / (1.0 + w0);
+	}
+	void ShowProperty() {
+		printf("APF1\n");
+		printf(" freq %g (Hz)\n", mFreq);
+	}
+};
+
 
 class CEA : public CFilterBase {
   protected:
@@ -420,6 +437,29 @@ class CBEF2 : public CEA {
 		printf(" Q    %g\n", mQ);
 	}
 };
+
+class CAPF2 : public CEA {
+	double mFreq;
+	double mQ;
+  public:
+	CAPF2(double theFS) : CEA(theFS) {}
+	void SetProperty(double theFreq, double theQ) {
+		mFreq = theFreq; mQ = theQ;
+		double w0 = tan(M_PI * theFreq / FS);
+		double den = 1 + w0 / theQ + w0 * w0;
+		a0 = (1 - w0 / theQ + w0 * w0) / den;
+		a1 = 2 * (w0 * w0 - 1) / den;
+		a2 = 1;
+		b1 = -a1;
+		b2 = -(1 - w0 / theQ + w0 * w0) / den;
+	}
+	void ShowProperty() {
+		printf("APF2\n");
+		printf(" freq %g (Hz)\n", mFreq);
+		printf(" Q    %g\n", mQ);
+	}
+};
+
 
 class CSINE : public CFilterBase {
   protected:

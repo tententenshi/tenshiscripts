@@ -22,11 +22,13 @@ void Usage(const char* command)
 	fprintf(stderr, "\t\tLSV1_Trad -- 1st order low shelving filter (traditional operation)\n");
 	fprintf(stderr, "\t\tHSV1      -- 1st order high shelving filter\n");
 	fprintf(stderr, "\t\tLSV1      -- 1st order low shelving filter\n");
+	fprintf(stderr, "\t\tAPF1      -- 1st order all pass filter\n");
 	fprintf(stderr, "\t\tHPF2      -- 2nd order high pass filter\n");
 	fprintf(stderr, "\t\tLPF2      -- 2nd order low pass filter\n");
 	fprintf(stderr, "\t\tHSV2      -- 2nd order high shelving filter\n");
 	fprintf(stderr, "\t\tLSV2      -- 2nd order low shelving filter\n");
 	fprintf(stderr, "\t\tPKG2      -- 2nd order peaking filter\n");
+	fprintf(stderr, "\t\tAPF2      -- 2nd order all pass filter\n");
 }
 
 void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk);
@@ -92,11 +94,13 @@ enum EType {
 	LSV1_Trad,
 	HSV1,
 	LSV1,
+	APF1,
 	HPF2,
 	LPF2,
 	HSV2,
 	LSV2,
 	PKG2,
+	APF2,
 	NONE,
 };
 
@@ -118,6 +122,8 @@ EType ParseEType(const char* str)
 		return HSV1;
 	} else if (strcmp(str, "LSV1") == 0) {
 		return LSV1;
+	} else if (strcmp(str, "APF1") == 0) {
+		return APF1;
 	} else if (strcmp(str, "HPF2") == 0) {
 		return HPF2;
 	} else if (strcmp(str, "LPF2") == 0) {
@@ -128,6 +134,8 @@ EType ParseEType(const char* str)
 		return LSV2;
 	} else if (strcmp(str, "PKG2") == 0) {
 		return PKG2;
+	} else if (strcmp(str, "APF2") == 0) {
+		return APF2;
 	}
 	return NONE;
 }
@@ -191,6 +199,9 @@ void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 			case LSV1:
 				{ CFilterBase* aIns = new CLSV1(FSAMP);    spList[ch].push_back(aIns); ((CLSV1*)aIns)->SetProperty(freq, gain); }
 				break;
+			case APF1:
+				{ CFilterBase* aIns = new CAPF1(FSAMP);      spList[ch].push_back(aIns); ((CAPF1*)aIns)->SetProperty(freq); }
+				break;
 			case HPF2:
 				{ CFilterBase* aIns = new CHPF2(FSAMP);      spList[ch].push_back(aIns);
 					if (aColNum == 4) {
@@ -217,6 +228,15 @@ void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 				break;
 			case PKG2:
 				{ CFilterBase* aIns = new CPKG2(FSAMP);    spList[ch].push_back(aIns); ((CPKG2*)aIns)->SetProperty(freq, gain, q); }
+				break;
+			case APF2:
+				{ CFilterBase* aIns = new CAPF2(FSAMP);      spList[ch].push_back(aIns);
+					if (aColNum == 4) {
+						((CAPF2*)aIns)->SetProperty(freq, q);
+					} else if (aColNum == 3) {
+						((CAPF2*)aIns)->SetProperty(freq, gain);
+					}
+				}
 				break;
 			default:
 				printf("skipping unknown type %s -- %s", aTypeStr, aBuf);
