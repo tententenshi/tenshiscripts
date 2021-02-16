@@ -64,7 +64,7 @@ static void ParseIrWaveFile(FILE* FP_IrWaveFile, SFormatChunk* aFormat)
 	int num_ch = aFormat->channel;
 
 	int aFFTBit = (int)(ceil(log(wavSamples)/log(2.0)));
-	sFFTLength = 1 << (aFFTBit + 1);
+	sFFTLength = 1 << (aFFTBit + 1);	// FFT length is twice of IR wave length
 
 	printf("samples: %d and fft length: %d\n", wavSamples, sFFTLength);
 
@@ -86,8 +86,13 @@ static void ParseIrWaveFile(FILE* FP_IrWaveFile, SFormatChunk* aFormat)
 		}
 		power[ch] = sqrt(power[ch]);
 		printf("power of impulse (ch %d): %.3g\n", ch, power[ch]);
-		if (power[ch] == 0) { printf("power of impulse is zero\n"); exit(1); }
 	}
+
+	double powerMax = 0;
+	for (int ch = 0; ch < num_ch; ch++) {
+		powerMax = fmax(powerMax, power[ch]);
+	}
+	if (powerMax == 0) { printf("power of impulse is zero\n"); exit(1); }
 
 	// memory allocation
 	int n = sFFTLength * 2;
@@ -98,8 +103,8 @@ static void ParseIrWaveFile(FILE* FP_IrWaveFile, SFormatChunk* aFormat)
 		ir_fft_data[ch] = new double[n];
 
 		/* preparation of impulse response */
-		for (int i = 0; i < wavSamples; i++) { REAL(ir_fft_data[ch], i) = dataBuf[ch][i] / power[ch]; }
-		for (int i = wavSamples; i < sFFTLength; i++) { REAL(ir_fft_data[ch], i) = 0; }
+		for (int i = 0; i < wavSamples; i++) { REAL(ir_fft_data[ch], i) = dataBuf[ch][i] / powerMax; }
+		for (int i = wavSamples; i < sFFTLength; i++) { REAL(ir_fft_data[ch], i) = 0; }		// zero padding for linear convolution
 		for (int i = 0; i < sFFTLength; i++) { IMAG(ir_fft_data[ch], i) = 0; }
 	}
 
@@ -184,6 +189,7 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile, int WetR
 				cdft(n, -1, src_fft_data[ch], ip, w);
 
 				for (int i = 0; i < sFFTLength; i++) {
+					// convolution
 					REAL(out_fft_data[ch], i) = REAL(src_fft_data[ch], i) * REAL(ir_fft_data[ch], i)
 															- IMAG(src_fft_data[ch], i) * IMAG(ir_fft_data[ch], i);
 					IMAG(out_fft_data[ch], i) = REAL(src_fft_data[ch], i) * IMAG(ir_fft_data[ch], i)
