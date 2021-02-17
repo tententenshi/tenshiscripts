@@ -205,13 +205,18 @@ void MaintainWavHeader(FILE* fp, int dataSize, int32_t dataStartPos)
 {
 	fflush(fp);
 
+#if 0
 	struct stat stbuf;
 	int file_size;
-	if (fstat(fileno(fp), &stbuf) == -1) {
+	if (fstat(_fileno(fp), &stbuf) == -1) {
 		file_size = 0;
 	} else {
 		file_size = stbuf.st_size;
 	}
+#else
+	fseek(fp, 0L, SEEK_END);
+	int file_size = ftell(fp);
+#endif
 
 	fseek(fp, 4, SEEK_SET);
 	PutLongVal(file_size, fp);	// total size

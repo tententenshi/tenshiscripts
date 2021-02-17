@@ -17,7 +17,7 @@ extern void cdft(int n, int isgn, double *a, int *ip, double *w);
 int main(int argc, char *argv[])
 {
 	if (argc != 5) {
-		printf("usage %s IrWaveFile SrcWaveFile OutWaveFile Wet_Ratio(in %)\n", argv[0]);
+		printf("usage %s IrWaveFile SrcWaveFile OutWaveFile Wet_Ratio(in %%)\n", argv[0]);
 		exit(1);
 	}
 	const char* aIrWaveFile = argv[1];
