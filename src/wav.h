@@ -151,7 +151,7 @@ static void WriteWaveData(FILE* fp, const SFormatChunk* formatChunk, double val)
 		}
 	} else if (format == 3) {
 		if (bitLength == 32) {
-			float fval = val;
+			float fval = (float)val;
 			fwrite(&fval, 4, 1, fp);
 		} else if (bitLength == 64) {
 			fwrite(&val, 8, 1, fp);
