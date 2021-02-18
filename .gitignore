@@ -1,6 +1,7 @@
 \#*
-*.bak
+*.d
 *.o
+*.bak
 *\~
 /eq_tools
 /dsp
@@ -24,3 +25,18 @@
 /rand
 /showinst
 *.exe
+Debug
+Release
+*.ncb
+*.aps
+*.dsp
+*.opt
+*.plg
+*.suo
+*.sdf
+ipch/
+*.vcproj.*.user
+*.vcxproj.user
+*.vcxproj.filters
+.project
+.vs/
