@@ -184,7 +184,8 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 		int aCurPosition = 0;
 		while (aCurPosition < wavSamples) {
 			int aRemainSize = wavSamples - aCurPosition;
-			int aReadDataSize = (aRemainSize > sFFTLength / 2) ? sFFTLength / 2 : aRemainSize;
+			int aReadDataSize = (aRemainSize >= sFFTLength / 2) ? sFFTLength / 2 : aRemainSize;
+			bool aIsFullfilled = (aRemainSize >= sFFTLength / 2) ? true : false;
 
 			for (int i = 0; i < aReadDataSize; i++) {
 				for (int ch = 0; ch < num_ch; ch++) {
@@ -226,6 +227,7 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 					std::complex<double> aResult = aSrc * aIR;	// convolution
 #else
 					std::complex<double> aResult = aSrc / aIR;	// deconvolution
+					if (i == 0) { aResult *= abs(aIR); }
 #endif
 					REAL(out_fft_data[ch], i) = aResult.real();
 					IMAG(out_fft_data[ch], i) = aResult.imag();
@@ -237,7 +239,9 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 				for (int i = 0; i < sFFTLength / 2; i++) {
 					double aData = temp_out_data[ch][i] + REAL(out_fft_data[ch], i) / sFFTLength;
 					out_data[ch][aCurPosition + i] = aData;
-					if (aPeak < fabs(aData)) { aPeak = fabs(aData); }
+					if ((aPeak < fabs(aData)) && aIsFullfilled) {
+						aPeak = fabs(aData);
+					}
 				}
 			}
 
@@ -254,7 +258,6 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 			for (int ch = 0; ch < num_ch; ch++) {
 				double aData = temp_out_data[ch][i];
 				out_data[ch][wavSamples + i] = aData;
-				if (aPeak < fabs(aData)) { aPeak = fabs(aData); }
 			}
 		}
 
