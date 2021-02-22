@@ -12,6 +12,8 @@ my $PI = 4 * atan2(1,1);
 
 my $BLOCK_SIZE = 0x10000;
 
+my $ERROR_THRES = 1 / (1 << 30);
+
 
 sub usage {
 	my $cmd = `basename $0`;
@@ -263,11 +265,12 @@ sub GenerateSqr {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase = 0;
-	my $phase_delta = 2 / $frequency_period;
+	my $phase_count = 0;
 	my $p = 0.5 * $frequency_period;
-	my $m = 2 * int($p / 2 + 1);
-	my $sqr_val = 0.5;
+	my $m = 2 * int($p / 2);	# maximum even value that no more than p
+	my $sqr_val = -1.0;
+
+	print "p:$p m:$m\n";
 
 	my $samples = 0;
 	my $overhang = 0;
@@ -277,11 +280,20 @@ sub GenerateSqr {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
-			if ($denom == 0) {
-				$sqr_val += $m / $p;
+			if (abs($denom) < $ERROR_THRES) {
+				my $impulse_val = (abs(abs($phase) - 1) < $ERROR_THRES) ? -2.0 : 2.0;
+				$sqr_val += $impulse_val;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val sqr_val:$sqr_val (denom:0)\n";
 			} else {
-				$sqr_val += sin($PI * $m * $phase) / ($denom * $p);
+				my $m_phase_count = $m * $phase_count;
+				my $polarity = 1;
+				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
+				my $m_phase = ($m_phase_count / $p);
+				my $impulse_val = 2 * $polarity * sin($PI * $m_phase) / ($denom * $m);
+				$sqr_val += $impulse_val;
+#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val sqr_val:$sqr_val\n";
 			}
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
@@ -291,8 +303,8 @@ sub GenerateSqr {
 				push @dataArray, $output;
 			}
 
-			$phase += $phase_delta;
-			while ($phase >= 1) { $phase -= 2; }
+			$phase_count++;
+			while ($phase_count >= $p) { $phase_count -= 2 * $p; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
@@ -332,14 +344,13 @@ sub GenerateSaw {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase = 0;
-	my $phase_delta = 1 / $frequency_period;
+	my $phase_count = 0;
 	my $p = $frequency_period;
-	my $m = 2 * int($p / 2) + 1;	# maximum odd value that no more than p
-	my $saw_delta = -2 * $phase_delta;
-	my $saw_val = -($m / $p) - $saw_delta;
+	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
+	my $saw_delta = -2 / $frequency_period;
+	my $saw_val = -1 - $saw_delta;
 
-	print "phase_delta:$phase_delta p:$p m:$m\n";
+#	print "p:$p m:$m saw_delta:$saw_delta\n";
 
 	my $samples = 0;
 	my $overhang = 0;
@@ -349,13 +360,20 @@ sub GenerateSaw {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
-			if ($denom == 0) {
-				my $delta = 2 * $m / $p;
-				$saw_val = $delta + $saw_delta + $saw_val * 0.99995;
+			if (abs($denom) < $ERROR_THRES) {
+				my $impulse_val = 2.0;
+				$saw_val = $impulse_val + $saw_delta + $saw_val; # * 0.99995;	# including 1st order LPF;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val saw_val:$saw_val\n";
 			} else {
-				my $delta = 2 * sin($PI * $m * $phase) / ($denom * $p);
-				$saw_val = $delta + $saw_delta + $saw_val * 0.99995;
+				my $m_phase_count = $m * $phase_count;
+				my $polarity = 1;
+				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
+				my $m_phase = ($m_phase_count / $p);
+				my $impulse_val = 2 * $polarity * sin($PI * $m_phase) / ($denom * $m);
+				$saw_val = $impulse_val + $saw_delta + $saw_val * (1 + $saw_delta / 10);	# including 1st order LPF;q
+#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val saw_val:$saw_val\n";
 			}
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
@@ -365,8 +383,8 @@ sub GenerateSaw {
 				push @dataArray, $output;
 			}
 
-			$phase += $phase_delta;
-			while ($phase >= 1) { $phase -= 1; }
+			$phase_count++;
+			while ($phase_count >= $p) { $phase_count -= $p; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
@@ -406,10 +424,11 @@ sub GenerateImpulse {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase = 0;
-	my $phase_delta = 1 / $frequency_period;
+	my $phase_count = 0;
 	my $p = $frequency_period;
-	my $m = 2 * int($p / 2) + 1;	# maximum odd value that no more than p
+	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
+
+	print "p:$p m:$m\n";
 
 	my $samples = 0;
 	my $overhang = 0;
@@ -419,12 +438,19 @@ sub GenerateImpulse {
 		my $prevData;
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
 			my $impulse_val;
-			if ($denom == 0) {
-				$impulse_val = $m / $p;
+			if (abs($denom) < $ERROR_THRES) {
+				$impulse_val = 1.0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val (denom:0)\n";
 			} else {
-				$impulse_val = sin($PI * $m * $phase) / ($denom * $p);
+				my $m_phase_count = $m * $phase_count;
+				my $polarity = 1;
+				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
+				my $m_phase = ($m_phase_count / $p);
+				$impulse_val = $polarity * sin($PI * $m_phase) / ($denom * $m);
+#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val\n";
 			}
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
@@ -434,8 +460,8 @@ sub GenerateImpulse {
 				push @dataArray, $output;
 			}
 
-			$phase += $phase_delta;
-			while ($phase >= 1) { $phase -= 1; }
+			$phase_count++;
+			while ($phase_count >= $p) { $phase_count -= $p; }
 			if (($samples + 1) >= $dur_sample) {
 				if ($prevData * $output > 0) {
 					$blockSize++;
