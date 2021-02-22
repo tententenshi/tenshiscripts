@@ -350,7 +350,8 @@ sub GenerateSaw {
 	my $p = $frequency_period;
 	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
 	my $saw_delta = -2 / $frequency_period;
-	my $saw_val = -1;
+	my $LPF_coef = ($m == $p) ? 1 : 1 + $saw_delta / 10;
+	my $saw_val = -1 - $saw_delta;
 
 #	print "p:$p m:$m saw_delta:$saw_delta\n";
 
@@ -377,7 +378,7 @@ sub GenerateSaw {
 #				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val";
 			}
 
-			$saw_val = $impulse_val + $saw_delta + $saw_val * (1 + $saw_delta / 10);	# including 1st order LPF;q
+			$saw_val = $impulse_val + $saw_delta + $saw_val * $LPF_coef;	# including 1st order LPF;q
 #			print " saw_val:$saw_val\n";
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
