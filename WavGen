@@ -282,19 +282,21 @@ sub GenerateSqr {
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
+			my $impulse_val;
 			if (abs($denom) < $ERROR_THRES) {
-				my $impulse_val = (abs(abs($phase) - 1) < $ERROR_THRES) ? -2.0 : 2.0;
-				$sqr_val += $impulse_val;
-#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val sqr_val:$sqr_val (denom:0)\n";
+				$impulse_val = (abs(abs($phase) - 1) < $ERROR_THRES) ? -2.0 : 2.0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val (denom:0)";
+			} elsif ($m == $p) {
+				$impulse_val = 0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val";
 			} else {
-				my $m_phase_count = $m * $phase_count;
-				my $polarity = 1;
-				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
-				my $m_phase = ($m_phase_count / $p);
-				my $impulse_val = 2 * $polarity * sin($PI * $m_phase) / ($denom * $m);
-				$sqr_val += $impulse_val;
-#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val sqr_val:$sqr_val\n";
+				my $m_phase = $m * $phase;
+				$impulse_val = 2 * sin($PI * $m_phase) / ($denom * $m);
+#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val";
 			}
+
+			$sqr_val += $impulse_val;
+#			print " sqr_val:$sqr_val\n";
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = $sqr_val * $magnitude;
@@ -348,7 +350,7 @@ sub GenerateSaw {
 	my $p = $frequency_period;
 	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
 	my $saw_delta = -2 / $frequency_period;
-	my $saw_val = -1 - $saw_delta;
+	my $saw_val = -1;
 
 #	print "p:$p m:$m saw_delta:$saw_delta\n";
 
@@ -362,19 +364,21 @@ sub GenerateSaw {
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
+			my $impulse_val;
 			if (abs($denom) < $ERROR_THRES) {
-				my $impulse_val = 2.0;
-				$saw_val = $impulse_val + $saw_delta + $saw_val; # * 0.99995;	# including 1st order LPF;
-#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val saw_val:$saw_val\n";
+				$impulse_val = 2.0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val (denom0)";
+			} elsif ($m == $p) {
+				$impulse_val = 0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val";
 			} else {
-				my $m_phase_count = $m * $phase_count;
-				my $polarity = 1;
-				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
-				my $m_phase = ($m_phase_count / $p);
-				my $impulse_val = 2 * $polarity * sin($PI * $m_phase) / ($denom * $m);
-				$saw_val = $impulse_val + $saw_delta + $saw_val * (1 + $saw_delta / 10);	# including 1st order LPF;q
-#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val saw_val:$saw_val\n";
+				my $m_phase = $m * $phase;
+				$impulse_val = 2 * sin($PI * $m_phase) / ($denom * $m);
+#				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val";
 			}
+
+			$saw_val = $impulse_val + $saw_delta + $saw_val * (1 + $saw_delta / 10);	# including 1st order LPF;q
+#			print " saw_val:$saw_val\n";
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 			my $output = $saw_val * $magnitude;
@@ -444,12 +448,12 @@ sub GenerateImpulse {
 			if (abs($denom) < $ERROR_THRES) {
 				$impulse_val = 1.0;
 #				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val (denom:0)\n";
+			} elsif ($m == $p) {
+				$impulse_val = 0;
+#				print "phase_count:$phase_count phase:$phase impulse_val:$impulse_val\n";
 			} else {
-				my $m_phase_count = $m * $phase_count;
-				my $polarity = 1;
-				while ($m_phase_count >= $p) { $m_phase_count -= $p; $polarity = -$polarity; }
-				my $m_phase = ($m_phase_count / $p);
-				$impulse_val = $polarity * sin($PI * $m_phase) / ($denom * $m);
+				my $m_phase = $m * $phase;
+				$impulse_val = sin($PI * $m_phase) / ($denom * $m);
 #				print "phase_count:$phase_count phase:$phase m_phase:$m_phase impulse_val:$impulse_val\n";
 			}
 
