@@ -180,6 +180,7 @@ sub CalcMagnitude {
 }
 
 my $sinePhase = 0;
+my $peakLevel = 0;
 
 sub GenerateSine {
 	my ($fh, $infoHashRef, $ref_desc) = @_;
@@ -217,6 +218,9 @@ sub GenerateSine {
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 
 			my $output = sin($PI * $sinePhase) * $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -299,7 +303,11 @@ sub GenerateSqr {
 #			print " sqr_val:$sqr_val\n";
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
+
 			my $output = $sqr_val * $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -382,7 +390,11 @@ sub GenerateSaw {
 #			print " saw_val:$saw_val\n";
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
+
 			my $output = $saw_val * $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -459,7 +471,11 @@ sub GenerateImpulse {
 			}
 
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
+
 			my $output = $impulse_val * $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -510,7 +526,11 @@ sub GenerateWhite {
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
+
 			my $output = (rand(2) - 1.0) * $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -544,7 +564,11 @@ sub GenerateDC {
 		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
 		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
+
 			my $output = $magnitude;
+			if ($peakLevel < abs($output)) {
+				$peakLevel = abs($output);
+			}
 
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
@@ -633,6 +657,11 @@ sub GenerateDC {
 
 	close(IN);
 	close($fhOut);
+
+	if ($peakLevel > 1) {
+		print "****** CAUTION ******* ";
+	}
+	printf("peak level: %g (%g [dBFS])\n", $peakLevel, 20*log($peakLevel)/log(10));
 
 	wav_util::MaintainWavHeader($out_filename, \%infoHash, $wav_size);
 }
