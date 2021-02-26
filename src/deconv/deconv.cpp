@@ -109,7 +109,7 @@ static void ParseIrWaveFile(FILE* FP_IrWaveFile, SFormatChunk* aFormat)
 		ir_fft_data[ch] = new double[n];
 
 		/* preparation of impulse response */
-		for (int i = 0; i < wavSamples; i++) { REAL(ir_fft_data[ch], i) = dataBuf[ch][i] / powerMax; }	// with Normalize
+		for (int i = 0; i < wavSamples; i++) { REAL(ir_fft_data[ch], i) = dataBuf[ch][i]; }
 		for (int i = wavSamples; i < sFFTLength; i++) { REAL(ir_fft_data[ch], i) = 0; }		// zero padding for linear convolution
 		for (int i = 0; i < sFFTLength; i++) { IMAG(ir_fft_data[ch], i) = 0; }
 	}
@@ -260,6 +260,8 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 				out_data[ch][wavSamples + i] = aData;
 			}
 		}
+
+		printf("detected peak: %g\n", aPeak);
 
 		for (int i = 0; i < wavSamples + sFFTLength / 2; i++) {
 			for (int ch = 0; ch < num_ch; ch++) {
