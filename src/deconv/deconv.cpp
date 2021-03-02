@@ -228,6 +228,7 @@ static void ProcessWaveFile(FILE* FP_SrcWaveFile, FILE* FP_OutWaveFile)
 #else
 					std::complex<double> aResult = aSrc / aIR;	// deconvolution
 					if (i == 0) { aResult *= abs(aIR); }
+					if (abs(aIR) < 0.01) { aResult *= abs(aIR) * 100; }
 #endif
 					REAL(out_fft_data[ch], i) = aResult.real();
 					IMAG(out_fft_data[ch], i) = aResult.imag();
