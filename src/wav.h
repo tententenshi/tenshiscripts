@@ -64,6 +64,11 @@ static int ParseWaveHeader(FILE* fp, SFormatChunk* pFormatChunkBuf)
 		}
 	}
 
+	printf("format: %d\n", pFormatChunkBuf->format);
+	printf("channel: %d\n", pFormatChunkBuf->channel);
+	printf("fsamp: %d\n", pFormatChunkBuf->fsamp);
+	printf("bitLength: %d\n", pFormatChunkBuf->bitLength);
+
 	printf("data size = %d\n", aDataSize);
 
 	return aDataSize;
@@ -87,9 +92,8 @@ static double GetUnityVal(const SFormatChunk* formatChunk)
 		} else if (bitLength == 64) {
 			return 1.0;
 		}
-	} else {
-		return 0;
 	}
+	return 0;
 }
 
 static double ReadWaveData(FILE* fpWav, const SFormatChunk* formatChunk)
