@@ -177,9 +177,8 @@ sub GenerateSine {
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
-		my $prevData;
-		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
-		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+		my $dataSamples = 0;
+		for (my $i_blk = 0; $i_blk < $BLOCK_SIZE; $i_blk++) {
 			my $frequency_period = exp($samples * log($end_frequency_period / $start_frequency_period) / $dur_sample) * $start_frequency_period;
 			my $magnitude = CalcMagnitude($magnitude_curve, $start_magnitude, $end_magnitude, $samples / $dur_sample);
 
@@ -191,26 +190,25 @@ sub GenerateSine {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			$dataSamples++;
+			$samples++;
 
+			my $prev_sinePhase = $sinePhase;
 			my $phase_delta = 2 / $frequency_period;
 			$sinePhase += $phase_delta;
 			while ($sinePhase >= 1) { $sinePhase -= 2; }
 			if (($samples + 1) >= $dur_sample) {
-				if ($prevData * $output > 0) {
-					$blockSize++;
-					$overhang++;
-					$waiting_zerocross = 1;
-				} else {
-					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-						pop @dataArray;
-					}
-					$sinePhase -= $phase_delta;
+				$overhang++;
+#				print "overhang: $overhang, sinePhase: $prev_sinePhase->$sinePhase, output: $output\n";
+				if ($prev_sinePhase < 0 && $sinePhase >= 0) {
 					$waiting_zerocross = 0;
+					last;
+				} else {
+					$waiting_zerocross = 1;
 				}
 			}
-			$prevData = $output;
 		}
-		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $dataSamples);
 	}
 
 	return ($samples, $overhang / $FS);
@@ -235,21 +233,20 @@ sub GenerateSqr {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase_count = 0;
 	my $p = 0.5 * $frequency_period;
 	my $m = 2 * int($p / 2);	# maximum even value that no more than p
 	my $sqr_val = -1.0;
 
 	print "p:$p m:$m\n";
 
+	my $phase_count = 0;
 	my $samples = 0;
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
-		my $prevData;
-		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
-		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+		my $dataSamples = 0;
+		for (my $i_blk = 0; $i_blk < $BLOCK_SIZE; $i_blk++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
 			my $impulse_val;
@@ -278,24 +275,24 @@ sub GenerateSqr {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			$dataSamples++;
+			$samples++;
 
+			my $prev_phase_count = $phase_count;
 			$phase_count++;
 			while ($phase_count >= $p) { $phase_count -= 2 * $p; }
 			if (($samples + 1) >= $dur_sample) {
-				if ($prevData * $output > 0) {
-					$blockSize++;
-					$overhang++;
-					$waiting_zerocross = 1;
-				} else {
-					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-						pop @dataArray;
-					}
+				$overhang++;
+#				print "overhang: $overhang, phase_count: $prev_phase_count->$phase_count, output: $output\n";
+				if ($prev_phase_count < 0 && $phase_count >= 0) {
 					$waiting_zerocross = 0;
+					last;
+				} else {
+					$waiting_zerocross = 1;
 				}
 			}
-			$prevData = $output;
 		}
-		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $dataSamples);
 	}
 
 	return ($samples, $overhang / $FS);
@@ -320,7 +317,6 @@ sub GenerateSaw {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase_count = 0;
 	my $p = $frequency_period;
 	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
 	my $saw_delta = -2 / $frequency_period;
@@ -329,14 +325,14 @@ sub GenerateSaw {
 
 #	print "p:$p m:$m saw_delta:$saw_delta\n";
 
+	my $phase_count = 0;
 	my $samples = 0;
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
-		my $prevData;
-		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
-		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+		my $dataSamples = 0;
+		for (my $i_blk = 0; $i_blk < $BLOCK_SIZE; $i_blk++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
 			my $impulse_val;
@@ -365,24 +361,24 @@ sub GenerateSaw {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			$dataSamples++;
+			$samples++;
 
 			$phase_count++;
+			my $prev_phase_count = $phase_count;
 			while ($phase_count >= $p) { $phase_count -= $p; }
 			if (($samples + 1) >= $dur_sample) {
-				if ($prevData * $output > 0) {
-					$blockSize++;
-					$overhang++;
-					$waiting_zerocross = 1;
-				} else {
-					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-						pop @dataArray;
-					}
+				$overhang++;
+#				print "overhang: $overhang, phase_count: $prev_phase_count->$phase_count, output: $output\n";
+				if ($prev_phase_count >= $p) {
 					$waiting_zerocross = 0;
+					last;
+				} else {
+					$waiting_zerocross = 1;
 				}
 			}
-			$prevData = $output;
 		}
-		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $dataSamples);
 	}
 
 	return ($samples, $overhang / $FS);
@@ -408,7 +404,6 @@ sub GenerateTri {
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
 	my $p = 0.5 * $frequency_period;
-	my $phase_count = $p / 2;
 	my $m = 2 * int($p / 2);	# maximum even value that no more than p
 	my $tri_delta = 4 / $frequency_period;
 	my $sqr_val = 1.0;
@@ -417,14 +412,14 @@ sub GenerateTri {
 
 	print "p:$p m:$m tri_delta:$tri_delta\n";
 
+	my $phase_count = $p / 2;
 	my $samples = 0;
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
-		my $prevData;
-		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
-		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+		my $dataSamples = 0;
+		for (my $i_blk = 0; $i_blk < $BLOCK_SIZE; $i_blk++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
 			my $impulse_val;
@@ -456,24 +451,24 @@ sub GenerateTri {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			$dataSamples++;
+			$samples++;
 
+			my $prev_phase_count = $phase_count;
 			$phase_count++;
 			while ($phase_count >= $p) { $phase_count -= 2 * $p; }
 			if (($samples + 1) >= $dur_sample) {
-				if ($prevData * $output > 0) {
-					$blockSize++;
-					$overhang++;
-					$waiting_zerocross = 1;
-				} else {
-					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-						pop @dataArray;
-					}
+				$overhang++;
+#				print "overhang: $overhang, phase_count: $prev_phase_count->$phase_count, output: $output\n";
+				if (($prev_phase_count < $p / 2) && ($phase_count >= $p / 2)) {
 					$waiting_zerocross = 0;
+					last;
+				} else {
+					$waiting_zerocross = 1;
 				}
 			}
-			$prevData = $output;
 		}
-		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $dataSamples);
 	}
 
 	return ($samples, $overhang / $FS);
@@ -498,20 +493,19 @@ sub GenerateImpulse {
 	my $magnitude_curve = defined($ref_desc->{ magnitude_curve }) ? $ref_desc->{ magnitude_curve } : "linear";
 	my $dur_sample = $ref_desc->{ duration } * $FS;
 
-	my $phase_count = 0;
 	my $p = $frequency_period;
 	my $m = ($p == int($p)) ? $p : 2 * int($p / 2) + 1;	# maximum odd value that no more than p
 
 	print "p:$p m:$m\n";
 
+	my $phase_count = 0;
 	my $samples = 0;
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
 		my @dataArray;
-		my $prevData;
-		my $blockSize = ($dur_sample - $samples - 1 < $BLOCK_SIZE) ? ($dur_sample - $samples - 1) : $BLOCK_SIZE;
-		for (my $i_blk = 0; $i_blk < $blockSize; $i_blk++, $samples++) {
+		my $dataSamples = 0;
+		for (my $i_blk = 0; $i_blk < $BLOCK_SIZE; $i_blk++) {
 			my $phase = $phase_count / $p;
 			my $denom = sin($PI * $phase);
 			my $impulse_val;
@@ -537,24 +531,24 @@ sub GenerateImpulse {
 			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
 				push @dataArray, $output;
 			}
+			$dataSamples++;
+			$samples++;
 
 			$phase_count++;
+			my $prev_phase_count = $phase_count;
 			while ($phase_count >= $p) { $phase_count -= $p; }
 			if (($samples + 1) >= $dur_sample) {
-				if ($prevData * $output > 0) {
-					$blockSize++;
-					$overhang++;
-					$waiting_zerocross = 1;
-				} else {
-					for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-						pop @dataArray;
-					}
+				$overhang++;
+#				print "overhang: $overhang, phase_count: $prev_phase_count->$phase_count, output: $output\n";
+				if ($prev_phase_count >= $p) {
 					$waiting_zerocross = 0;
+					last;
+				} else {
+					$waiting_zerocross = 1;
 				}
 			}
-			$prevData = $output;
 		}
-		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $blockSize);
+		wav_util::WriteWavData($fh, $infoHashRef, \@dataArray, $dataSamples);
 	}
 
 	return ($samples, $overhang / $FS);
@@ -708,9 +702,11 @@ sub GenerateDC {
 			$samples = GenerateWhite($fhOut, \%infoHash, $cur_ref_desc);
 		}
 		$wav_size += $infoHash{ "BLOCK_SIZE" } * $samples;
-		if (defined($sequence_data[$i + 1]) && ($overhang > 0)) {
+		if ($overhang > 0) {
 			print "overhanged $overhang [sec]\n";
-			$sequence_data[$i + 1]->{ duration } -= $overhang;
+			if (defined($sequence_data[$i + 1])) {
+				$sequence_data[$i + 1]->{ duration } -= $overhang;
+			}
 		}
 	}
 
