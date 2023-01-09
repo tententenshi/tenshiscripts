@@ -26,17 +26,20 @@ if ($input_str =~ /^0x(.+)/) {
 		$fVal = $frac / 0x01000000;
 	} elsif ($exp == 3) {
 		$fVal = $frac / 0x00100000;
-    }
-
-	if ($sign) {
-		$fVal = -$fVal;
-    }
+	}
 
 	my $intfVal = $fVal * (2 << 13);
 	my $intfVal_int = int($intfVal);
 	my $intfVal_frac = int(($intfVal - $intfVal_int) * (2 << 19));
+	my $intSign = ($sign) ? "-" : " ";
 
-	printf("%15.12f as internal integer: 0x%x.%05xp0\n", $fVal, $intfVal_int, $intfVal_frac);
+	if ($sign) {
+		$fVal = -$fVal;
+	}
+	my $packedval = pack("f", $fVal);
+	my $hVal = unpack("V", $packedval);
+
+	printf("%15.12f (ieee754:0x%08x) as internal integer: %s0x%x.%05xp0\n", $fVal, $hVal, $intSign, $intfVal_int, $intfVal_frac);
 
 } else {
 #float2hex
