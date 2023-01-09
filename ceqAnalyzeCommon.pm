@@ -62,21 +62,25 @@ sub acos { POSIX::acos($_[0]); }
 sub ParseArgument
 {
 	my ($ARGV_REF) = @_;
-	my @result;
 
 	my @input;
+	my %result;
 
 	foreach my $str (@$ARGV_REF) {
-		my @tmp_array = split(/,/, $str);
-		push @input, @tmp_array;
+		if ($str =~ /(\w+)\s*=\s*(\w+)/) {
+			$result{ "option" }->{ $1 } = $2;
+		} else {
+			my @tmp_array = split(/,/, $str);
+			push @input, @tmp_array;
+		}
 	}
 
 	foreach my $str (@input) {
 		my $val = ($str =~ /0[Xx]/) ? hex2dec($str) : eval($str);
-		push @result, $val;
+		push @{ $result{ "argument" } }, $val;
 	}
 
-	return @result;
+	return %result;
 }
 
 

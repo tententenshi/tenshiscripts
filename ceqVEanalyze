@@ -20,7 +20,13 @@ if (!($ARGV[0] =~ /(PKG|HPF|LPF)/)) {
 	exit 1;
 }
 
-my @argument = ParseArgument(\@ARGV);
+my %argument_hash = ParseArgument(\@ARGV);
+
+my $option_arg;
+foreach my $key (keys %{ $argument_hash{ "option" } }) {
+	my $val = $argument_hash{ "option" }->{ $key };
+	$option_arg .= " $key=$val";
+}
 
 
 # Transfer Function as LPF
@@ -40,7 +46,7 @@ my @argument = ParseArgument(\@ARGV);
 
 
 if ($ARGV[0] =~ /LPF/) {
-	if ($#argument != 7) {
+	if ($#{ $argument_hash{ "argument" } } != 7) {
 		print "usage: $cmd LPF a0 a1 a2 fr0 q fr1 Fs\n";
 		print "        a0               fr0\n";
 		print "  --+---|>-------( + )----|>---(+)-+-[ ]--+--|>----(+)-----+---+---> \n";
@@ -58,7 +64,7 @@ if ($ARGV[0] =~ /LPF/) {
 	}
 	#as LPF
 	{
-		my ($type, $a0, $a1, $a2, $fr0, $q, $fr1, $Fs) = @argument;
+		my ($type, $a0, $a1, $a2, $fr0, $q, $fr1, $Fs) = @{ $argument_hash{ "argument" } };
 
 		my $ma0 = $a0 * $fr0 * $fr1;
 		my $ma1 = $a1 * $fr0 * $fr1;
@@ -73,12 +79,12 @@ if ($ARGV[0] =~ /LPF/) {
 #		print "b1 as EA --> $mb1\n";
 #		print "b2 as EA --> $mb2\n";
 #		print "\n";
-		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs $option_arg");
 	}
 }
 
 if ($ARGV[0] =~ /HPF/) {
-	if ($#argument != 5) {
+	if ($#{ $argument_hash{ "argument" } } != 5) {
 		print "usage: $cmd HPF a0 fr0 q fr1 Fs\n";
 		print "                       +------------------------->\n";
 		print "        a0             | fr0\n";
@@ -95,7 +101,7 @@ if ($ARGV[0] =~ /HPF/) {
 	}
 	#as HPF
 	{
-		my ($type, $a0, $fr0, $q, $fr1, $Fs) = @argument;
+		my ($type, $a0, $fr0, $q, $fr1, $Fs) = @{ $argument_hash{ "argument" } };
 
 		#ignore a1
 		my $ma0 = $a0;
@@ -111,13 +117,13 @@ if ($ARGV[0] =~ /HPF/) {
 #		print "b1 as EA --> $mb1\n";
 #		print "b2 as EA --> $mb2\n";
 #		print "\n";
-		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs");
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs $option_arg");
 	}
 
 }
 
 if ($ARGV[0] =~ /PKG/) {
-	if ($#argument != 7) {
+	if ($#{ $argument_hash{ "argument" } } != 7) {
 		print "usage: $cmd PKG a0 a1 fr0 q fr1 g Fs\n";
 		print "    +---------------------------------------+\n";
 		print "    |                                  g     \\\n";
@@ -154,7 +160,7 @@ if ($ARGV[0] =~ /PKG/) {
 
 	#as PKG
 	{
-		my ($type, $a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @argument;
+		my ($type, $a0, $a1, $fr0, $q, $fr1, $g, $Fs) = @{ $argument_hash{ "argument" } };
 		my $ma0 = $a0 * $fr0;
 		my $ma1 = (-$a0 + $a1) * $fr0;
 		my $ma2 = -$a1 * $fr0;
@@ -172,7 +178,7 @@ if ($ARGV[0] =~ /PKG/) {
 #		print "m0 as EA --> $mm0\n";
 #		print "m1 as EA --> $mm1\n";
 #		print "\n";
-		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs");
+		system ($FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $mm0 $mm1 $Fs $option_arg");
 	}
 }
 

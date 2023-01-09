@@ -7,10 +7,10 @@ use Math::Complex;
 
 require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
-my @argument = ParseArgument(\@ARGV);
+my %argument_hash = ParseArgument(\@ARGV);
 
 
-if ($#argument != 1) {
+if ($#{ $argument_hash{ "argument" } } != 1) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd coef_as_b1 Fs\n";
@@ -21,8 +21,8 @@ if ($#argument != 1) {
 	exit 1;
 }
 
-my $coef = shift @argument;
-my $Fs = shift @argument;
+my $coef = shift @{ $argument_hash{ "argument" } };
+my $Fs = shift @{ $argument_hash{ "argument" } };
 
 my $freq = $Fs / pi() * atan2((1-$coef), (1+$coef));
 

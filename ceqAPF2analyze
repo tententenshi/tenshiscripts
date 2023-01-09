@@ -9,9 +9,9 @@ require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
 
 
-my @argument = ParseArgument(\@ARGV);
+my %argument_hash = ParseArgument(\@ARGV);
 
-if ($#argument != 1) {
+if ($#{ $argument_hash{ "argument" } } != 1) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd r Fs\n";
@@ -24,13 +24,13 @@ if ($#argument != 1) {
 	exit 1;
 }
 
-my $r = shift @argument;
+my $r = shift @{ $argument_hash{ "argument" } };
 my $a0 = 1 + 6 / (3 + $r) - 12 / (4 + $r);
 my $a1 = -2 + 6 / (3 + $r);
 my $a2 = 1.0;
 my $b1 = -$a1;
 my $b2 = -$a0;
-my $Fs = shift @argument;
+my $Fs = shift @{ $argument_hash{ "argument" } };
 
 {
 	print "a0 as EA --> $a0\n";
@@ -40,5 +40,12 @@ my $Fs = shift @argument;
 	print "b2 as EA --> $b2\n";
 }
 
-exec ("ceqEAanalyze $a0 $a1 $a2 $b1 $b2 $Fs");
+my $option_arg;
+foreach my $key (keys %{ $argument_hash{ "option" } }) {
+	my $val = $argument_hash{ "option" }->{ $key };
+	$arg .= " $key=$val";
+}
+
+
+system ($FindBin::RealBin . "/ceqEAanalyze $a0 $a1 $a2 $b1 $b2 $Fs $option_arg");
 

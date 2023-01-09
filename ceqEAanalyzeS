@@ -9,9 +9,9 @@ require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 require $FindBin::RealBin . "/ceqAnalyzeCore.pm";
 
 
-my @argument = ParseArgument(\@ARGV);
+my %argument_hash = ParseArgument(\@ARGV);
 
-if (($#argument != 5) && ($#argument != 7)) {
+if (($#{ $argument_hash{ "argument" } } != 5) && ($#{ $argument_hash{ "argument" } } != 7)) {
 #	my $cmd = `basename $0`;
 #	chomp $cmd;
 #	print "usage: $cmd a0 a1 a2 b1 b2 Fs\n";
@@ -38,21 +38,28 @@ if (($#argument != 5) && ($#argument != 7)) {
 }
 
 my $eb_alg = 0;
-if ($#argument == 7) {
+if ($#{ $argument_hash{ "argument" } } == 7) {
 	$eb_alg = 1;
 }
 
-my $a0 = shift @argument;
-my $a1 = shift @argument;
-my $a2 = shift @argument;
-my $b1 = shift @argument;
-my $b2 = shift @argument;
+my $a0 = shift @{ $argument_hash{ "argument" } };
+my $a1 = shift @{ $argument_hash{ "argument" } };
+my $a2 = shift @{ $argument_hash{ "argument" } };
+my $b1 = shift @{ $argument_hash{ "argument" } };
+my $b2 = shift @{ $argument_hash{ "argument" } };
 my $m0; my $m1;
 if ($eb_alg) {
-	$m0 = shift @argument;
-	$m1 = shift @argument;
+	$m0 = shift @{ $argument_hash{ "argument" } };
+	$m1 = shift @{ $argument_hash{ "argument" } };
 }
-my $Fs = shift @argument;
+my $Fs = shift @{ $argument_hash{ "argument" } };
+
+my $ERROR_LEVEL;
+foreach my $key (keys %{ $argument_hash{ "option" } }) {
+	my $val = $argument_hash{ "option" }->{ $key };
+	print "option: $key: $val\n";
+	if ($key eq "ERROR_LEVEL") { $ERROR_LEVEL = 1 / (1 << $val); }
+}
 
 if ($eb_alg) {
 	$a0 = $m0 + $a0 * $m1;
@@ -73,7 +80,7 @@ if (($a2 != 0) || ($b2 != 0)) {	# 2nd order filter
 }
 
 
-my $result_ref = CeqAnalyzeCore($a0, $a1, $a2, $b1, $b2, $Fs);
+my $result_ref = CeqAnalyzeCore($a0, $a1, $a2, $b1, $b2, $Fs, $ERROR_LEVEL);
 
 #if (defined($$result_ref{ memo })) { print $$result_ref{ memo } . "\n"; }
 

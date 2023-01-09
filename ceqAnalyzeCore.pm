@@ -2,7 +2,8 @@ use strict;
 use POSIX;
 use Math::Complex;
 
-my $ERROR_LEVEL = 1 / (1 << 19);
+my $ERROR_LEVEL_DEFAULT = 1 / (1 << 19);
+my $ERROR_LEVEL;
 
 
 
@@ -103,7 +104,10 @@ sub CeqFA_Analyze {
 #	memo:         memo
 
 sub CeqAnalyzeCore {
-	my ($a0, $a1, $a2, $b1, $b2, $Fs) = @_;
+	my ($a0, $a1, $a2, $b1, $b2, $Fs, $a_ERROR_LEVEL) = @_;
+
+	if (!defined($a_ERROR_LEVEL) || ($a_ERROR_LEVEL < 0)) { $ERROR_LEVEL = $ERROR_LEVEL_DEFAULT; }
+	else { $ERROR_LEVEL = $a_ERROR_LEVEL; }
 
 	my %result;
 
@@ -118,6 +122,11 @@ sub CeqAnalyzeCore {
 	$result{ gain_dc }      = ($result{ mag_dc }      eq "infinite") ? "infinite" : ($result{ mag_dc }      != 0) ? 20 * log(abs($result{ mag_dc })) / log(10) : "-infinite";
 	$result{ gain_nyquist } = ($result{ mag_nyquist } eq "infinite") ? "infinite" : ($result{ mag_nyquist } != 0) ? 20 * log(abs($result{ mag_nyquist })) / log(10) : "-infinite";
 	$result{ gain_cutoff }  = ($result{ mag_cutoff }  eq "infinite") ? "infinite" : ($result{ mag_cutoff }  != 0) ? 20 * log(abs($result{ mag_cutoff })) / log(10) : "-infinite";
+
+	print "ERROR_LEVEL: $ERROR_LEVEL\n";
+	print "mag_dc: $result{ mag_dc }\n";
+	print "mag_nyquist: $result{ mag_nyquist }\n";
+	print "mag_cutoff: $result{ mag_cutoff }\n";
 
 	my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
 	my $w0;
@@ -220,7 +229,6 @@ sub CeqAnalyzeCore {
 	} else {
 		$result{ type } = "UNKNOWN";
 	}
-
 
 	#
 	# not a regular filters (complexed)

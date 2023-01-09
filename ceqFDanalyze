@@ -7,10 +7,10 @@ use Math::Complex;
 
 require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
 
-my @argument = ParseArgument(\@ARGV);
+my %argument_hash = ParseArgument(\@ARGV);
 
 
-if ($#argument != 3) {
+if ($#{ $argument_hash{ "argument" } } != 3) {
 	my $cmd = `basename $0`;
 	chomp $cmd;
 	print "usage: $cmd att a0 a1 Fs\n";
@@ -26,7 +26,7 @@ if ($#argument != 3) {
 	exit 1;
 }
 
-my ($att, $a0, $a1, $Fs) = @argument;
+my ($att, $a0, $a1, $Fs) = @{ $argument_hash{ "argument" } };
 
 
 # HSV
@@ -50,18 +50,23 @@ my $a1_lpf = 0;
 my $b1_lpf = 1 - $a0;
 
 
+my $option_arg;
+foreach my $key (keys %{ $argument_hash{ "option" } }) {
+	my $val = $argument_hash{ "option" }->{ $key };
+	$option_arg .= " $key=$val";
+}
 
 print "as HSV ...\n";
-system ($FindBin::RealBin . "/ceqFAanalyze $a0_hsv $a1_hsv $b1_hsv $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_hsv $a1_hsv $b1_hsv $Fs $option_arg");
 print "\n";
 
 print "as LSV ...\n";
-system ($FindBin::RealBin . "/ceqFAanalyze $a0_lsv $a1_lsv $b1_lsv $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_lsv $a1_lsv $b1_lsv $Fs $option_arg");
 print "\n";
 
 print "as HPF ...\n";
-system ($FindBin::RealBin . "/ceqFAanalyze $a0_hpf $a1_hpf $b1_hpf $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_hpf $a1_hpf $b1_hpf $Fs $option_arg");
 print "\n";
 
 print "as LPF ...\n";
-system ($FindBin::RealBin . "/ceqFAanalyze $a0_lpf $a1_lpf $b1_lpf $Fs");
+system ($FindBin::RealBin . "/ceqFAanalyze $a0_lpf $a1_lpf $b1_lpf $Fs $option_arg");
