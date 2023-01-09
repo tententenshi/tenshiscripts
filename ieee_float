@@ -8,21 +8,21 @@ my $val = eval($input_str);
 
 if ($input_str =~ /^0x/) {
 #hex2float
-    my $packedval = pack("V", $val);
-    my $fVal = unpack("f", $packedval);
+	my $packedval = pack("V", $val);
+	my $fVal = unpack("f", $packedval);
 
-    my $intfVal = $fVal * (2 << 13);
-    my $intfVal_int = int($intfVal);
-    my $intfVal_frac = int(($intfVal - $intfVal_int) * (2 << 19));
+	my $intfVal = $fVal * (2 << 13);
+	my $intfVal_int = int($intfVal);
+	my $intfVal_frac = int(($intfVal - $intfVal_int) * (2 << 19));
 
-    printf("%15.12f as internal integer: 0x%x.%05xp0\n", $fVal, $intfVal_int, $intfVal_frac);
+	printf("%15.12f as internal integer: 0x%x.%05xp0\n", $fVal, $intfVal_int, $intfVal_frac);
 
 } else {
 #float2hex
-    my $packedval = pack("f", $val);
-    my $hVal = unpack("V", $packedval);
+	my $packedval = pack("f", $val);
+	my $hVal = unpack("V", $packedval);
 
-    printf("0x%08x\n", $hVal);
+	printf("0x%08x\n", $hVal);
 
 	my $sign = ($hVal & 0x80000000) != 0;
 	my $exp = (($hVal & (0xff << 23)) >> 23) - 127;
