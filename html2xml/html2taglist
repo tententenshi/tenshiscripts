@@ -1,9 +1,14 @@
 #! /usr/bin/perl
 
-require Dump;
+use strict;
+use FindBin;
+use POSIX;
+
+require $FindBin::RealBin . "/Dump.pm";
 
 
-$p = HTML::Dump->new();
+
+my $p = HTML::Dump->new();
 #$p->handler(start =>  "text", "self, dtext, is_cdata");
 $p->unbroken_text('TRUE'); 
 $p->parse_file(shift);
