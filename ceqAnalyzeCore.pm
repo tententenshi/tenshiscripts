@@ -217,13 +217,19 @@ sub CeqAnalyzeCore {
 	} elsif ((abs($result{ mag_dc } * $result{ mag_nyquist } - $result{ mag_cutoff } ** 2) < $ERROR_LEVEL) && ($b1 != 0)) {
 		my $w0_svf1 = ($result{ mag_cutoff } > 0) ? $w0 / $result{ mag_cutoff } : $w0 * $result{ mag_cutoff };
 		my $w0_svf2 = ($result{ mag_cutoff } < 0) ? $w0 / $result{ mag_cutoff } : $w0 * $result{ mag_cutoff };
-		$result{ freq1_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf1, 1) / pi() * $Fs : $Fs;	# reverse prewarping
-		$result{ freq2_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf2, 1) / pi() * $Fs : $Fs;	# reverse prewarping
 
 		if ($result{ mag_nyquist } >= $result{ mag_dc }) {
 			$result{ type } = "HI_BOOST2";
+			$result{ freq1_a } = (1 + $b1 - $b2 != 0) ? $w0_svf1 / pi() * $Fs : "inrinite";	# reverse prewarping
+			$result{ freq1_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf1, 1) / pi() * $Fs : $Fs;	# reverse prewarping
+			$result{ freq2_a } = (1 + $b1 - $b2 != 0) ? $w0_svf2 / pi() * $Fs : "infinite";	# reverse prewarping
+			$result{ freq2_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf2, 1) / pi() * $Fs : $Fs;	# reverse prewarping
 		} else {
 			$result{ type } = "HI_CUT2";
+			$result{ freq2_a } = (1 + $b1 - $b2 != 0) ? $w0_svf1 / pi() * $Fs : "inrinite";	# reverse prewarping
+			$result{ freq2_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf1, 1) / pi() * $Fs : $Fs;	# reverse prewarping
+			$result{ freq1_a } = (1 + $b1 - $b2 != 0) ? $w0_svf2 / pi() * $Fs : "infinite";	# reverse prewarping
+			$result{ freq1_d } = (1 + $b1 - $b2 != 0) ? atan2($w0_svf2, 1) / pi() * $Fs : $Fs;	# reverse prewarping
 		}
 		return \%result;
 	} else {
