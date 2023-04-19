@@ -75,12 +75,12 @@ while (my $str = <>) {
 	$str =~ s(^\s*(.*)\s*$)(\1);	# remove white space
 
 	my $str_for_eval = $str;
-	while ($str_for_eval =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?([pP][+-]?\d+)(.*)/) {
+	while ($str_for_eval =~ /(.*?)([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?([pP][+-]?\d+)(.*)/) {
 		my ($pre, $hex_float_val, $post) = ($1, $2 . $3 . $4, $5);
 		$str_for_eval = $pre . my_hex_float($hex_float_val) . $post;
 #		print "pre:$pre, hex_float_val:$hex_float_val, post:$post, str_for_eval:$str_for_eval\n";
 	}
-	while ($str_for_eval =~ /(.*)([+-]?0[xX][0-9a-fA-F]+)(.*)/) {
+	while ($str_for_eval =~ /(.*?)([+-]?0[xX][0-9a-fA-F]+)(.*)/) {
 		my ($pre, $hex_float_val, $post) = ($1, $2, $3);
 		$str_for_eval = $pre . hex2float($hex_float_val, length($hex_float_val)) . $post;
 #		print "pre:$pre, hex_float_val:$hex_float_val, post:$post, str_for_eval:$str_for_eval\n";
@@ -89,7 +89,8 @@ while (my $str = <>) {
 	if ($mode eq "uninitialized") {
 		if ($str_for_eval =~ /^\s*(-?0[Xx][\da-fA-F]+|-?[\d\.]+)[uUlLfF]*,?\s*$/) {	# only numeric
 			$mode = "build_table";
-		} elsif ($str_for_eval =~ /.+,.+,/) {
+#		} elsif ($str_for_eval =~ /.+,.+,/) {
+		} else {
 			$mode = "break_table";
 		}
 	}
@@ -145,17 +146,18 @@ if ($mode eq "build_table") {
 	print "break table mode\n";
 
 	foreach my $str (@buf) {
-		if ($str =~ /.+,.+,/) {
+		if ($str =~ /.+,.+/) {
 
-			my @valStrArray = split(/,/, $str);
+			my @valStrArray = split(/[,{}]/, $str);
 			for (my $i = 0; $i <= $#valStrArray; $i++) {
 				my $valStr = $valStrArray[$i];
-		
+
 				if (($i == $#valStrArray) && ($valStr =~ /^\s*$/)) {
- 					last;
+					last;
 				}
-		
+
 				$valStr =~ s(^\s*(.*)\s*$)(\1);	# remove white space
+				if ($valStr eq "") { next; }
 				if ($option eq "o") {
 					print $valStr;
 				} else {
