@@ -1,12 +1,30 @@
 #! /usr/bin/env perl
 
+use strict;
+
 sub Usage {
+	print "convert hex value to decimal/float value\n";
 	print "Usage: $0 -[dfx] file1\n";
 	print "         hex --> dec converter\n";
 	print "         options-> d: hex --> decimal\n";
 	print "                   f: hex         --> float\n";
 	print "                   x: XP coef hex --> float\n";
 	exit 1;
+}
+
+sub my_hex_float {
+	my ($str)=@_;
+	if ($str =~ /([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?[pP]([+-]?\d+)/) {
+		my ($int_val, $frac_val, $shift) = ($1, $2, $3);
+		$frac_val =~ s/\.//;
+		my $frac_digit = length($frac_val);
+		$shift -= $frac_digit * 4;
+		my $shift_val = 2**$shift;
+		my $val = eval($int_val . $frac_val) * $shift_val;
+		return $val;
+	} else {
+		return 0;
+	}
 }
 
 sub hex2float {
@@ -29,9 +47,9 @@ sub hex2float {
 	} else {
 		if ($hexByte > 6) { $retVal = "@@@@@@@"; }
 		else {
-			$shift = ($hexVal & 0xc000) >> 14;
+			my $shift = ($hexVal & 0xc000) >> 14;
 			if ($shift == 3) { $shift = 4; }
-			$value = ($hexVal & 0x3fff) <<2;
+			my $value = ($hexVal & 0x3fff) <<2;
 			if ($value < 0x8000) { $retVal = $value; }
 			else { $retVal = ($value - 0x10000); }
 #			printf "now value is 0x%06x --> 0x%06x, shift = %2d\n", $value, $retVal, $shift;
@@ -46,8 +64,9 @@ unless (defined($ARGV[0])) {
 	Usage();
 }
 
-$option = "d";
-while ($arg = shift) {
+my $option = "d";
+my $fileName;
+while (my $arg = shift) {
 	if ($arg =~ /^-([dfx])/) {
 		$option = $1;
 	} else {
@@ -55,6 +74,7 @@ while ($arg = shift) {
 	}
 }
 
+my @orgData;
 if (defined($fileName)) {
 	open (ORGFILE, $fileName) or die "Cannot open $fileName !\n";
 #	print "come here open $arg\n";
@@ -68,26 +88,36 @@ if (defined($fileName)) {
 	}
 }
 
-foreach $str (@orgData) {
-	if ($str =~ /(.*?)(0x[0-9a-fA-F]+)(.*)/) {
-		print "REWRITED!";
-		$str = $1;
-		$tmpStr = $3;
-		$hexVal = eval($2);
-		$hexByte = length($2);
-		if ($option eq "d") { $result = $hexVal; }
-		else { $result = hex2float($hexVal, $hexByte, $option); }
-		$str .= $result;
-		while ($tmpStr =~ /(.*?)(0x[0-9a-fA-F]+)(.*)/) {
-			$str .= $1;
-			$tmpStr = $3;
-			$hexVal = eval($2);
-			$hexByte = length($2);
+foreach my $str (@orgData) {
+	if ($str =~ /0x[0-9a-fA-F]+/) {
+		my $converted_str;
+
+		while ($str =~ /(.*?)([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?([pP][+-]?\d+)(.*)/s) {
+			my ($pre, $hex_float_val, $post) = ($1, $2 . $3 . $4, $5);
+
+			$converted_str .= $pre;
+			$str = $post;
+			$converted_str .= my_hex_float($hex_float_val);
+		}
+		$converted_str .= $str;
+
+		$str = $converted_str;
+		$converted_str = "";
+
+		while ($str =~ /(.*?)(0x[0-9a-fA-F]+)(.*)/s) {
+			my ($pre, $hexstr, $post) = ($1, $2, $3);
+			$converted_str .= $pre;
+			$str = $post;
+			my $hexVal = eval($hexstr);
+			my $hexByte = length($hexstr);
+			my $result;
 			if ($option eq "d") { $result = $hexVal; }
 			else { $result = hex2float($hexVal, $hexByte, $option); }
-			$str .= $result;
+			$converted_str .= $result;
 		}
-		$str .= $tmpStr . "\n";
+		$converted_str .= $str;
+		print $converted_str;
+	} else {
+		print $str;
 	}
-	print $str;
 }
