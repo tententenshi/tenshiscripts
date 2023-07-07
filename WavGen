@@ -22,11 +22,11 @@ sub usage {
 	print "\tscript descriptions:\n";
 	print "\t\tsine 440Hz [880Hz] 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency [end_frequency] magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
 	print "\t\tsine 256Hzsample [64Hzsample] 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency_by_cycle_sample [end_frequency_by_cycle_sample] magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
-	print "\t\tsqr 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
-	print "\t\tsaw 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
-	print "\t\ttri 440Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
-	print "\t\timpulse 1Hz 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
-	print "\t\timpulse 8192Hzsample 1.0 [0.2] [exp_curve] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] duration\n";
+	print "\t\tsqr 440Hz 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\tsaw 440Hz 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\ttri 440Hz 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\timpulse 1Hz 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
+	print "\t\timpulse 8192Hzsample 1.0 [0.2] [exp_curve] [45degree] 0.5sec	// frequency magnitude [end_magnitude] [magnitude_curve] [start_phase] duration\n";
 	print "\t\tDC 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
 	print "\t\twhite 1.0 [0.2] [exp_curve] 0.5sec	// magnitude [end_magnitude] [magnitude_curve] duration\n";
 	print "\n";
@@ -81,6 +81,7 @@ sub ParseScript {
 			elsif ($desc =~ /^(.*?\s+)?([\d.]+)Hz(.*)$/) { $desc_hash{ end_frequency_period } = $infoHash{ "FS" } / eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)msec(.*)$/) { $desc_hash{ duration } = eval($2) / 1000; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([\d.]+)sec(.*)$/) { $desc_hash{ duration } = eval($2); $desc = $1 . " " . $3; }
+			if ($desc =~ /^(.*?\s+)?([-\d.]+)degree(.*)$/) { my $phase = eval($2) / 180; while ($phase < 0) { $phase += 2; } $desc_hash{ start_phase } = $phase; $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
 			elsif ($desc =~ /^(.*?\s+)?([-\d.]+)(.*)$/) { $desc_hash{ magnitude } = eval($2); $desc = $1 . " " . $3; }
 			if ($desc =~ /^(.*?\s+)?([-\d.]+)dBFS(.*)$/) { $desc_hash{ end_magnitude } = 10**(eval($2)/20); $desc = $1 . " " . $3; }
@@ -222,6 +223,7 @@ sub GenerateSqr {
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
+	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -241,6 +243,11 @@ sub GenerateSqr {
 
 	my $phase_count = 0;
 	my $samples = 0;
+	my $start_offset = 0;
+	if (defined($ref_desc->{ start_phase })) {
+		$start_offset =  $ref_desc->{ start_phase } * 0.5 * $frequency_period;
+	}
+
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
@@ -272,11 +279,15 @@ sub GenerateSqr {
 				$peakLevel = abs($output);
 			}
 
-			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-				push @dataArray, $output;
+			if ($start_offset > 0) {
+				$start_offset--;
+			} else {
+				for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+					push @dataArray, $output;
+				}
+				$dataSamples++;
+				$samples++;
 			}
-			$dataSamples++;
-			$samples++;
 
 			my $prev_phase_count = $phase_count;
 			$phase_count++;
@@ -306,6 +317,7 @@ sub GenerateSaw {
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
+	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -327,6 +339,10 @@ sub GenerateSaw {
 
 	my $phase_count = 0;
 	my $samples = 0;
+	my $start_offset = 0;
+	if (defined($ref_desc->{ start_phase })) {
+		$start_offset =  $ref_desc->{ start_phase } * 0.5 * $frequency_period;
+	}
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
@@ -358,11 +374,15 @@ sub GenerateSaw {
 				$peakLevel = abs($output);
 			}
 
-			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-				push @dataArray, $output;
+			if ($start_offset > 0) {
+				$start_offset--;
+			} else {
+				for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+					push @dataArray, $output;
+				}
+				$dataSamples++;
+				$samples++;
 			}
-			$dataSamples++;
-			$samples++;
 
 			$phase_count++;
 			my $prev_phase_count = $phase_count;
@@ -392,6 +412,7 @@ sub GenerateTri {
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
+	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -414,6 +435,10 @@ sub GenerateTri {
 
 	my $phase_count = $p / 2;
 	my $samples = 0;
+	my $start_offset = 0;
+	if (defined($ref_desc->{ start_phase })) {
+		$start_offset =  $ref_desc->{ start_phase } * 0.5 * $frequency_period;
+	}
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
@@ -448,11 +473,15 @@ sub GenerateTri {
 				$peakLevel = abs($output);
 			}
 
-			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-				push @dataArray, $output;
+			if ($start_offset > 0) {
+				$start_offset--;
+			} else {
+				for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+					push @dataArray, $output;
+				}
+				$dataSamples++;
+				$samples++;
 			}
-			$dataSamples++;
-			$samples++;
 
 			my $prev_phase_count = $phase_count;
 			$phase_count++;
@@ -482,6 +511,7 @@ sub GenerateImpulse {
 	print("magnitude: ". $ref_desc->{ magnitude } .", ");
 	if (defined($ref_desc->{ end_magnitude })) { print("end_magnitude: ". $ref_desc->{ end_magnitude } .", "); }
 	if (defined($ref_desc->{ magnitude_curve })) { print("magnitude_curve: " . $ref_desc->{ magnitude_curve } . ", "); }
+	if (defined($ref_desc->{ start_phase })) { print("start_phase: ". $ref_desc->{ start_phase } .", "); }
 	print("duration: ". $ref_desc->{ duration } ."\n");
 
 	my $FS = $infoHashRef->{ FS };
@@ -500,6 +530,10 @@ sub GenerateImpulse {
 
 	my $phase_count = 0;
 	my $samples = 0;
+	my $start_offset = 0;
+	if (defined($ref_desc->{ start_phase })) {
+		$start_offset =  $ref_desc->{ start_phase } * 0.5 * $frequency_period;
+	}
 	my $overhang = 0;
 	my $waiting_zerocross = 0;
 	while (($samples < $dur_sample - 1) || ($waiting_zerocross > 0)) {
@@ -528,11 +562,15 @@ sub GenerateImpulse {
 				$peakLevel = abs($output);
 			}
 
-			for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
-				push @dataArray, $output;
+			if ($start_offset > 0) {
+				$start_offset--;
+			} else {
+				for (my $ch = 0; $ch < $NUM_OF_CH; $ch++) {
+					push @dataArray, $output;
+				}
+				$dataSamples++;
+				$samples++;
 			}
-			$dataSamples++;
-			$samples++;
 
 			$phase_count++;
 			my $prev_phase_count = $phase_count;
