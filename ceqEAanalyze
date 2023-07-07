@@ -103,7 +103,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	print "                       |\n";
 	print "                       +--- $$result_ref{ freq_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
-		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+#		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
 		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
 } elsif ($$result_ref{ type } =~ /LPF/) {
@@ -117,7 +117,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	print "                  |\n";
 	print "                  +-------- $$result_ref{ freq_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
-		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+#		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
 		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
 } elsif ($$result_ref{ type } =~ /HI_BOOST/) {
@@ -132,7 +132,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	print "                  |  +--- $$result_ref{ freq2_d } (Hz) (as analog: $$result_ref{ freq2_a } (Hz))\n";
 	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
-		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+#		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
 		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
 } elsif ($$result_ref{ type } =~ /HI_CUT/) {
@@ -147,7 +147,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	print "                  |  +--- $$result_ref{ freq2_d } (Hz) (as analog: $$result_ref{ freq2_a } (Hz))\n";
 	print "                  +------ $$result_ref{ freq1_d } (Hz)\n";
 	if ($$result_ref{ type } =~ /2$/) {
-		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+#		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
 		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
 } elsif ($$result_ref{ type } =~ /APF/) {
@@ -156,7 +156,7 @@ if ($$result_ref{ type } eq "ERROR") {
 	printf "%5.1f(dB) | --------------------\n", $$result_ref{ gain_dc };
 	print "          |\n";
 	if ($$result_ref{ type } =~ /2$/) {
-		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
+#		printf "	q            --> %9.2f      ($$result_ref{ q_d })\n", $$result_ref{ q_d };
 		printf "	q (as analog)--> %9.2f      ($$result_ref{ q_a })\n", $$result_ref{ q_a };
 	}
 } elsif ($$result_ref{ type } =~ /BPF/) {

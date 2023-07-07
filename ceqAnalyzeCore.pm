@@ -123,10 +123,10 @@ sub CeqAnalyzeCore {
 	$result{ gain_nyquist } = ($result{ mag_nyquist } eq "infinite") ? "infinite" : ($result{ mag_nyquist } != 0) ? 20 * log(abs($result{ mag_nyquist })) / log(10) : "-infinite";
 	$result{ gain_cutoff }  = ($result{ mag_cutoff }  eq "infinite") ? "infinite" : ($result{ mag_cutoff }  != 0) ? 20 * log(abs($result{ mag_cutoff })) / log(10) : "-infinite";
 
-	print "ERROR_LEVEL: $ERROR_LEVEL\n";
-	print "mag_dc: $result{ mag_dc }\n";
-	print "mag_nyquist: $result{ mag_nyquist }\n";
-	print "mag_cutoff: $result{ mag_cutoff }\n";
+#	print "ERROR_LEVEL: $ERROR_LEVEL\n";
+#	print "mag_dc: $result{ mag_dc }\n";
+#	print "mag_nyquist: $result{ mag_nyquist }\n";
+#	print "mag_cutoff: $result{ mag_cutoff }\n";
 
 	my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
 	my $w0;
