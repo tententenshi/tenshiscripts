@@ -12,8 +12,9 @@ sub usage {
 	print "	      doller '\$' should be preceded by single backslashes '\\\$'\n";
 	print "	      backslash itself '\\' should be preceded by triple backslashes '\\\\\\\\'\n";
 	print "	      add single backslash to escape ()[]{}/|^+?* as same as describing in the perl script\n";
+	print "	      add single backslash to escape ! not to parsed by bash\n";
 	print "	      new lines are expressed as \"\\n\" (linux) \"\\r\\n\" (windows)\n";
-	print "	      no particular escaping is needed for !#&<>_~='%\n";
+	print "	      no particular escaping is needed for #&<>_~='%\n";
 	exit 1;
 }
 
