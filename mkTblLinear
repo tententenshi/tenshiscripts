@@ -15,9 +15,8 @@ sub Usage {
 
 sub my_hex_float {
 	my ($str)=@_;
-	if ($str =~ /([+-]?0[xX][0-9a-fA-F]+)(\.[0-9a-fA-F]*)?[pP]([+-]?\d+)/) {
+	if ($str =~ /([+-]?0[xX][0-9a-fA-F]+)\.([0-9a-fA-F]*)?[pP]([+-]?\d+)/) {
 		my ($int_val, $frac_val, $shift) = ($1, $2, $3);
-		$frac_val =~ s/\.//;
 		my $frac_digit = length($frac_val);
 		$shift -= $frac_digit * 4;
 		my $shift_val = 2**$shift;
