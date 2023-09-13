@@ -19,7 +19,7 @@ sub CeqFA_Analyze {
 
 	if (abs($$result_ref{ pole1 }) >= 1) {
 		$$result_ref{ type } = "ERROR";
-		$$result_ref{ memo } = "pole is outof stable area!";
+		$$result_ref{ memo } .= "pole is outof stable area!\n";
 		return;
 	}
 
@@ -29,7 +29,7 @@ sub CeqFA_Analyze {
 	$$result_ref{ gain_nyquist } = ($$result_ref{ mag_nyquist } eq "infinite") ? "infinite" : ($$result_ref{ mag_nyquist } != 0) ? 20 * log(abs($$result_ref{ mag_nyquist })) / log(10) : "-infinite";
 
 	if (abs($$result_ref{ zero1 }) > 1.0) {
-		$$result_ref{ memo } = "****** not minimum phase filter (zero is out of unit circle) ******";
+		$$result_ref{ memo } .= "****** not minimum phase filter (zero is out of unit circle) ******\n";
 		$$result_ref{ zero1 } = 1 / $$result_ref{ zero1 };
 	}
 
@@ -40,7 +40,7 @@ sub CeqFA_Analyze {
 	if (($a0 == 0) || ($a1 == 0)) {
 		if ($b1 >= 3 - 2 * sqrt(2)) {
 			my $freq_d_Zplane = acos(-(1 + $b1**2 - 4 * $b1) / (2 * $b1)) * $Fs / (2 * pi());
-			$$result_ref{ memo } = "filter without zero, cutoff from Z-plane direct method --> $freq_d_Zplane";
+			$$result_ref{ memo } .= "filter without zero, cutoff from Z-plane direct method --> $freq_d_Zplane\n";
 			# reverse calculation from b1 = 2 - cos - sqrt((2 - cos)**2 - 1)
 			$$result_ref{ freq_d_Zplane } = $freq_d_Zplane;
 		}
@@ -70,7 +70,7 @@ sub CeqFA_Analyze {
 		$$result_ref{ freq1_a } = $$result_ref{ freq_a };
 	} else {
 		$$result_ref{ type } = "ERROR";
-		$$result_ref{ memo } = "unknown filter type\n";
+		$$result_ref{ memo } .= "unknown filter type\n";
 	}
 }
 
@@ -132,14 +132,14 @@ sub CeqAnalyzeCore {
 	my $w0;
 
 	if ((abs(1 + $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 - $a1 + $a2) < $ERROR_LEVEL)) {	# s^2 become zero
-		$result{ memo } = "this filter is actually 1st order filter";
+		$result{ memo } .= "this filter is actually 1st order filter (s^2 become zero)\n";
 		my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
 		my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
 		my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
 		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
 		return \%result;
 	} elsif ((abs(1 - $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 + $a1 + $a2) < $ERROR_LEVEL)) {	# s^0 become zero
-		$result{ memo } = "this filter is actually 1st order filter";
+		$result{ memo } .= "this filter is actually 1st order filter (s^0 become zero)\n";
 		my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
 		my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
 		my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
@@ -148,7 +148,7 @@ sub CeqAnalyzeCore {
 	} elsif ($w0_2 > 0) {
 		$w0 = sqrt($w0_2);
 	} else {
-		$result{ memo } = "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"";
+		$result{ memo } .= "cannot proceed calculation, this coefficients were not calculated with \"bilinear arithmetic\"\n";
 		$result{ type } = "ERROR";
 		return \%result;
 	}
@@ -167,7 +167,7 @@ sub CeqAnalyzeCore {
 
 
 	if ((abs($result{ pole1 }) > 1) || (abs($result{ pole2 }) > 1)) {
-		$result{ memo } = "pole is out of unit circle. this filter will be unstable!";
+		$result{ memo } .= "pole is out of unit circle. this filter will be unstable!\n";
 		$result{ type } = "ERROR";
 		return \%result;
 	}
