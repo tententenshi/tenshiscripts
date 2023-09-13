@@ -21,6 +21,9 @@ while (<>) {
 $curState = $StateData;
 $lastVal = 0;
 foreach $hexval (@tmplist) {
+	$hexval =~ s/^0x//;
+	$hexVal =~ s/,$//;
+
 	if ($hexval =~ /f0/i) {
 		$curState = $StateExcHead;
 #		print "stateHead\n";
@@ -35,27 +38,27 @@ foreach $hexval (@tmplist) {
 
 	if ($curState == $StateExcHead) {
 		$curState = $StateMaker;
-#		print "stateMaker\n";
+#		print "stateMaker:$hexval\n";
 		next;
 	} elsif ($curState == $StateMaker) {
 		$curState = $StateDevID;
-#		print "stateDevID\n";
+#		print "stateDevID:$hexval\n";
 		next;
 	} elsif ($curState == $StateDevID) {
 		if (!($hexval =~ /00/)) {
 			$curState = $StateModelID;
-#			print "stateModelID\n";
+#			print "stateModelID:$hexval\n";
 		}
 		next;
 	} elsif ($curState == $StateModelID) {
 		$curState = $StateCommand;
-#		print "stateCommand\n";
+#		print "stateCommand:$hexval\n";
 		next;
 	} elsif ($curState == $StateCommand) {
 		$curState = $StateData;
-#		print "stateData\n";
+#		print "stateData:$hexval\n";
 	}
-		
+
 	$hexval = "0x".$hexval;
 	$hexval = eval($hexval);
 	$sum += $hexval;
