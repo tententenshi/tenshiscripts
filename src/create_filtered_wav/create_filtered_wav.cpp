@@ -28,6 +28,7 @@ void Usage(const char* command)
 	fprintf(stderr, "\t\tHSV2      -- 2nd order high shelving filter\n");
 	fprintf(stderr, "\t\tLSV2      -- 2nd order low shelving filter\n");
 	fprintf(stderr, "\t\tPKG2      -- 2nd order peaking filter\n");
+	fprintf(stderr, "\t\tBPF2      -- 2nd order band pass filter\n");
 	fprintf(stderr, "\t\tAPF2      -- 2nd order all pass filter\n");
 }
 
@@ -100,6 +101,7 @@ enum EType {
 	HSV2,
 	LSV2,
 	PKG2,
+	BPF2,
 	APF2,
 	NONE,
 };
@@ -134,6 +136,8 @@ EType ParseEType(const char* str)
 		return LSV2;
 	} else if (strcmp(str, "PKG2") == 0) {
 		return PKG2;
+	} else if (strcmp(str, "BPF2") == 0) {
+		return BPF2;
 	} else if (strcmp(str, "APF2") == 0) {
 		return APF2;
 	}
@@ -228,6 +232,9 @@ void ParseInputFile(FILE *fp, const SFormatChunk& formatChunk)
 				break;
 			case PKG2:
 				{ CFilterBase* aIns = new CPKG2(FSAMP);    spList[ch].push_back(aIns); ((CPKG2*)aIns)->SetProperty(freq, gain, q); }
+				break;
+			case BPF2:
+				{ CFilterBase* aIns = new CBPF2(FSAMP);    spList[ch].push_back(aIns); ((CBPF2*)aIns)->SetProperty(freq, gain, q); }
 				break;
 			case APF2:
 				{ CFilterBase* aIns = new CAPF2(FSAMP);      spList[ch].push_back(aIns);

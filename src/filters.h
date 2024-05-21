@@ -414,6 +414,33 @@ class CPKG2 : public CEA {
 	}
 };
 
+class CBPF2 : public CEA {
+	double mFreq;
+	double mGain;
+	double mQ;
+  public:
+	CBPF2(double theFS) : CEA(theFS) {}
+	void SetProperty(double theFreq, double theGain, double theQ) {
+		mFreq = theFreq; mGain = theGain; mQ = theQ;
+		double w0 = tan(M_PI * theFreq / FS);
+		theQ = (theGain < 0) ? (theQ * dB2Gain(theGain)) : theQ;
+		theQ = theQ * theFreq * M_PI / (FS * w0);	// prewarping ?
+
+		double den = 1 + w0 / theQ + w0 * w0;
+		a0 = dB2Gain(theGain) * w0 / theQ / den;
+		a1 = 0;
+		a2 = -a0;
+		b1 = -2 * (w0 * w0 - 1) / den;
+		b2 = -(1 - w0 / theQ + w0 * w0) / den;
+	}
+	void ShowProperty() {
+		printf("BPF2\n");
+		printf(" freq %g (Hz)\n", mFreq);
+		printf(" gain %g (dB)\n", mGain);
+		printf(" Q    %g\n", mQ);
+	}
+};
+
 class CBEF2 : public CEA {
 	double mFreq;
 	double mGain;
