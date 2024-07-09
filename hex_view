@@ -1,0 +1,146 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+
+
+sub ParseIndexWord
+{
+	my ($indexWord) = @_;
+	my $index = $indexWord >> 8;
+	my $additional_mem_inst = ($indexWord & 0x00c0) >> 6;
+	my $step_length = ($indexWord & 0x001f);
+
+	if ($index == 0) {
+		if ($step_length == 0x1f) {
+			# halt
+		} elsif ($step_length > 0) {
+			#nop
+		}
+	}
+
+	my $inst_array_ref = $dis_fspa_index_tbl::index_tbl[$index];
+	my $inst_num = $#{ $dis_fspa_index_tbl::index_tbl[$index] } + 1;
+	return ($inst_array_ref, $inst_num, $additional_mem_inst, $step_length);
+}
+
+sub ParseIntelData
+{
+	my ($data) = @_;
+
+	my $count = 0;
+	my @val_array;
+	while ($data =~ /^(..)(.*)$/) {
+		my ($val, $rest) = (eval("0x".$1), $2);
+		$val_array[int($count / 4) * 4 + (3 - $count % 4)] = $val;
+		$data = $rest;
+		$count++;
+	}
+#	print "val_array: @val_array\n";
+	return @val_array;
+}
+
+my @val_array_16bit;
+my $cur_literal_adrs;
+
+sub GetLiteral {
+	my ($bytes, $offset) = @_;
+
+	return GetLiteralStr($bytes, $offset, \@val_array_16bit, $cur_literal_adrs);
+}
+
+sub GetLiteralInt {
+	my ($bytes, $offset) = @_;
+
+	return GetLiteralIntStr($bytes, $offset, \@val_array_16bit, $cur_literal_adrs);
+}
+
+
+#
+# main
+#
+
+
+while (my $str = <>) {
+	my @val_array;
+
+	if ($str =~ /^:([0-9a-fA-F]{2})([0-9a-fA-F]{4})([0-9a-fA-F]{2})([0-9a-fA-F]*)([0-9a-fA-F]{2})[\n\r]?/s) {
+#		print "$str\n";
+		my ($data_length, $offset_adrs, $record_type, $data, $checksum) = (eval("0x".$1), eval("0x".$2), eval("0x".$3), $4, eval("0x".$5));
+#		print "data_length:$data_length, offset_adrs:$offset_adrs, record_type:$record_type, data:$data, checksum:$checksum\n";
+		if ($record_type == 0) {
+			@val_array = ParseIntelData($data);
+		}
+	} elsif ($str =~ /^:([0-9a-fA-F]{2})([0-9a-fA-F]{4})([0-9a-fA-F]{2})([0-9a-fA-F]*)([0-9a-fA-F]{2})$/) {
+		my ($data_length, $offset_adrs, $record_type, $data, $checksum) = ($1, $2, $3, $4, $5);
+	} elsif ($str =~ /DRP \(DRAMIO program\): address = 0x....../) {
+		$str = <>;
+		while (!($str =~ /PRG \(DSP program\)   : address = 0x....../)) {	# skip DRAMIO part
+			$str = <>;
+		}
+		$str = <>;
+	} elsif ($str =~ /0x......	(........) (........) (........) (........)/) {
+		my @val = ("0x".$1, "0x".$2, "0x".$3, "0x".$4);
+		push @val_array, @val;
+	} elsif ($str =~ /CODE_BEGIN DRAMIO \w+ 0x......../) {
+		$str = <>;
+		while (!($str =~ /CODE_END DRAMIO \w+ 0x......../)) {	# skip DRAMIO part
+			$str = <>;
+		}
+	} else {
+		while ($str =~ /^(.*?)(0[xX][0-9a-fA-F]+)[,\s]+(.*)$/) {
+			my ($lead, $val, $trail) = ($1, $2, $3);
+			if ($lead =~ /^(CODE)?\s*$/) {
+#				printf "parsing:$val, trail:$trail\n";
+				push @val_array, $val;
+				$str = $trail;
+			} else {
+				last;
+			}
+		}
+	}
+
+	if ($#val_array < 0) { next; }
+
+	for (my $i = 0; $i < @val_array; $i++) {
+		my $val = $val_array[$i];
+		my $val16bit = 0;
+		if (length($val) <= 4) {
+#			printf "0x%02x ", $val;
+			my $val_upper = eval($val) << 8;
+			$i++;
+			$val = $val_array[$i];
+#			printf "0x%02x ", $val;
+			my $val_lower = eval($val);
+			$val16bit = $val_upper | $val_lower;
+			push @val_array_16bit, $val16bit;
+		} elsif (length($val) > 6) {
+#			printf "0x%02x ", $val;
+			my $val = eval($val);
+			my $val_upper = $val >> 16;
+			push @val_array_16bit, $val_upper;
+			my $val_lower = $val & 0xffff;
+			push @val_array_16bit, $val_lower;
+		} else {
+#			printf "0x%02x ", $val;
+			my $val = eval($val);
+			push @val_array_16bit, $val;
+		}
+		if (($i % 16) == 15) {
+#			print "\n";
+		}
+	}
+}
+
+{
+	print "	";
+	for (my $j = 0; $j < @val_array_16bit; $j = $j + 2) {
+		my $val = ($val_array_16bit[$j] << 16) | $val_array_16bit[$j + 1];
+		printf "0x%08x, ", $val;
+		if (($j % 16) == 14) {
+			print "\n	";
+		}
+	}
+}
+
