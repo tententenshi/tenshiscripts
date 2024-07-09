@@ -177,6 +177,318 @@ sub PrintEventTime
 	return sprintf("(%3d'%02d\"%03d)", int($usec / 60000000), int($seconds / 1000000), $miliseconds / 1000);
 }
 
+sub PrintControlChange
+{
+	my ($cc_num) = @_;
+
+	if      ($cc_num == 0x00) {
+		return "Bank Select MSB";
+	} elsif ($cc_num == 0x01) {
+		return "Modulation";
+	} elsif ($cc_num == 0x02) {
+		return "Breath Controller";
+	} elsif ($cc_num == 0x04) {
+		return "Foot Controller";
+	} elsif ($cc_num == 0x05) {
+		return "Portament Time";
+	} elsif ($cc_num == 0x06) {
+		return "Data Entry MSB";
+	} elsif ($cc_num == 0x07) {
+		return "Volume";
+	} elsif ($cc_num == 0x08) {
+		return "Balance";
+	} elsif ($cc_num == 0x0a) {
+		return "Panning";
+	} elsif ($cc_num == 0x0b) {
+		return "Expression";
+	} elsif ($cc_num == 0x10) {
+		return "General Purpose Controllers #1";
+	} elsif ($cc_num == 0x11) {
+		return "General Purpose Controllers #2";
+	} elsif ($cc_num == 0x12) {
+		return "General Purpose Controllers #3";
+	} elsif ($cc_num == 0x13) {
+		return "General Purpose Controllers #4";
+	} elsif ($cc_num == 0x20) {
+		return "Bank Select LSB";
+	} elsif ($cc_num == 0x21) {
+		return "Modulation LSB";
+	} elsif ($cc_num == 0x22) {
+		return "Breath Controller LSB";
+	} elsif ($cc_num == 0x24) {
+		return "Foot Controller LSB";
+	} elsif ($cc_num == 0x25) {
+		return "Portament Time LSB";
+	} elsif ($cc_num == 0x26) {
+		return "Data Entry LSB";
+	} elsif ($cc_num == 0x27) {
+		return "Volume LSB";
+	} elsif ($cc_num == 0x28) {
+		return "Balance LSB";
+	} elsif ($cc_num == 0x2a) {
+		return "Panning LSB";
+	} elsif ($cc_num == 0x2b) {
+		return "Expression LSB";
+	} elsif ($cc_num == 0x30) {
+		return "General Purpose Controllers #1 LSB";
+	} elsif ($cc_num == 0x31) {
+		return "General Purpose Controllers #2 LSB";
+	} elsif ($cc_num == 0x32) {
+		return "General Purpose Controllers #3 LSB";
+	} elsif ($cc_num == 0x33) {
+		return "General Purpose Controllers #4 LSB";
+	} elsif ($cc_num == 0x40) {
+		return "Hold1 Sustain Pedal";
+	} elsif ($cc_num == 0x41) {
+		return "Portamento";
+	} elsif ($cc_num == 0x42) {
+		return "Sostenuto";
+	} elsif ($cc_num == 0x43) {
+		return "Soft Pedal";
+	} elsif ($cc_num == 0x45) {
+		return "Hold2";
+	} elsif ($cc_num == 0x46) {
+		return "Sound Variation";
+	} elsif ($cc_num == 0x47) {
+		return "Harmonic Intensity";
+	} elsif ($cc_num == 0x48) {
+		return "Release Time";
+	} elsif ($cc_num == 0x49) {
+		return "Attack Time";
+	} elsif ($cc_num == 0x4a) {
+		return "Brightness";
+	} elsif ($cc_num == 0x50) {
+		return "General Purpose Controllers #5";
+	} elsif ($cc_num == 0x51) {
+		return "General Purpose Controllers #6";
+	} elsif ($cc_num == 0x52) {
+		return "General Purpose Controllers #7";
+	} elsif ($cc_num == 0x53) {
+		return "General Purpose Controllers #8";
+	} elsif ($cc_num == 0x54) {
+		return "Portament Control";
+	} elsif ($cc_num == 0x5b) {
+		return "Reverb Depth";
+	} elsif ($cc_num == 0x5c) {
+		return "Tremolo Depth";
+	} elsif ($cc_num == 0x5d) {
+		return "Chorus Depth";
+	} elsif ($cc_num == 0x5e) {
+		return "Celeste (Detune) Depth";
+	} elsif ($cc_num == 0x5f) {
+		return "Phaser Depth";
+	} elsif ($cc_num == 0x60) {
+		return "Data Increment";
+	} elsif ($cc_num == 0x61) {
+		return "Data Decrement";
+	} elsif ($cc_num == 0x62) {
+		return "Non-Registered Parmeter Number (NRPN) LSB";
+	} elsif ($cc_num == 0x63) {
+		return "Non-Registered Parmeter Number (NRPN) MSB";
+	} elsif ($cc_num == 0x64) {
+		return "Registered Parmeter Number (RPN) LSB";
+	} elsif ($cc_num == 0x65) {
+		return "Registered Parmeter Number (RPN) MSB";
+	} elsif ($cc_num == 0x79) {
+		return "Reset All Controller";
+	} elsif ($cc_num == 0x7a) {
+		return "Local Control";
+	} elsif ($cc_num == 0x7b) {
+		return "All Notes Off";
+	} elsif ($cc_num == 0x7c) {
+		return "Omni Mode Off";
+	} elsif ($cc_num == 0x7d) {
+		return "Omni Mode On";
+	} elsif ($cc_num == 0x7e) {
+		return "Mono Mode On (Poly Off)";
+	} elsif ($cc_num == 0x7f) {
+		return "Mono Mode Off (Poly On)";
+	} else {
+		return "";
+	}
+}
+
+sub PrintProgramChange
+{
+	my ($program_num) = @_;
+
+	my @tone_tbl = (
+		"Acoustic Grand",
+		"Bright Acoustic",
+		"Electric Grand",
+		"Honky-Tonk",
+		"Electric Piano 1",
+		"Electric Piano 2",
+		"Harpsichord",
+		"Clavinet",
+		"Celesta",
+		"Glockenspiel",
+		"Music Box",
+		"Vibraphone",
+		"Marimba",
+		"Xylophone",
+		"Tubular Bells",
+		"Dulcimer",
+		"Drawbar Organ",
+		"Percussive Organ",
+		"Rock Organ",
+		"Church Organ",
+		"Reed Organ",
+		"Accoridan",
+		"Harmonica",
+		"Tango Accordian",
+		"Nylon String Guitar",
+		"Steel String Guitar",
+		"Electric Jazz Guitar",
+		"Electric Clean Guitar",
+		"Electric Muted Guitar",
+		"Overdriven Guitar",
+		"Distortion Guitar",
+		"Guitar Harmonics",
+		"Acoustic Bass",
+		"Electric Bass(finger)",
+		"Electric Bass(pick)",
+		"Fretless Bass",
+		"Slap Bass 1",
+		"Slap Bass 2",
+		"Synth Bass 1",
+		"Synth Bass 2",
+		"Violin",
+		"Viola",
+		"Cello",
+		"Contrabass",
+		"Tremolo Strings",
+		"Pizzicato Strings",
+		"Orchestral Strings",
+		"Timpani",
+		"String Ensemble 1",
+		"String Ensemble 2",
+		"SynthStrings 1",
+		"SynthStrings 2",
+		"Choir Aahs",
+		"Voice Oohs",
+		"Synth Voice",
+		"Orchestra Hit",
+		"Trumpet",
+		"Trombone",
+		"Tuba",
+		"Muted Trumpet",
+		"French Horn",
+		"Brass Section",
+		"SynthBrass 1",
+		"SynthBrass 2",
+		"Soprano Sax",
+		"Alto Sax",
+		"Tenor Sax",
+		"Baritone Sax",
+		"Oboe",
+		"English Horn",
+		"Bassoon",
+		"Clarinet",
+		"Piccolo",
+		"Flute",
+		"Recorder",
+		"Pan Flute",
+		"Blown Bottle",
+		"Skakuhachi",
+		"Whistle",
+		"Ocarina",
+		"Square Wave",
+		"Saw Wave",
+		"Syn. Calliope",
+		"Chiffer Lead",
+		"Charang",
+		"Solo Vox",
+		"5th Saw Wave",
+		"Bass& Lead",
+		"Fantasia",
+		"Warm Pad",
+		"Polysynth",
+		"Space Voice",
+		"Bowed Glass",
+		"Metal Pad",
+		"Halo Pad",
+		"Sweep Pad",
+		"Ice Rain",
+		"Soundtrack",
+		"Crystal",
+		"Atmosphere",
+		"Brightness",
+		"Goblin",
+		"Echo Drops",
+		"Star Theme",
+		"Sitar",
+		"Banjo",
+		"Shamisen",
+		"Koto",
+		"Kalimba",
+		"Bagpipe",
+		"Fiddle",
+		"Shanai",
+		"Tinkle Bell",
+		"Agogo",
+		"Steel Drums",
+		"Woodblock",
+		"Taiko Drum",
+		"Melodic Tom",
+		"Synth Drum",
+		"Reverse Cymbal",
+		"Guitar Fret Noise",
+		"Breath Noise",
+		"Seashore",
+		"Bird Tweet",
+		"Telephone Ring",
+		"Helicopter",
+		"Applause",
+		"Gunshot",
+	);
+
+	return $tone_tbl[$program_num];
+}
+
+sub PrintCommands
+{
+	my (@data) = @_;
+
+	my @key_name_tbl = (
+		"C ", "C#", "D ", "Eb", "E ", "F ", "F#", "G ", "Ab", "A ", "Bb", "B ",
+	);
+	if      (($data[0] & 0xf0) == 0x80) {
+		my $note_num = $data[1];
+		my $key_name = $key_name_tbl[$note_num % 12];
+		my $key_octave = int($note_num / 12) - 1;
+		return sprintf("Note Off %s%d", $key_name, $key_octave);
+	} elsif (($data[0] & 0xf0) == 0x90) {
+		my $note_num = $data[1];
+		my $key_name = $key_name_tbl[$note_num % 12];
+		my $key_octave = int($note_num / 12) - 1;
+		if ($data[2] == 0) {
+			return sprintf("Note Off %s%d", $key_name, $key_octave);
+		} else {
+			return sprintf("Note On  %s%d", $key_name, $key_octave);
+		}
+	} elsif (($data[0] & 0xf0) == 0xa0) {
+		my $note_num = $data[1];
+		my $key_name = $key_name_tbl[$note_num % 12];
+		my $key_octave = int($note_num / 12) - 1;
+		return sprintf("Poly Aft %s%d", $key_name, $key_octave);
+	} elsif (($data[0] & 0xf0) == 0xb0) {
+		my $cc_num = $data[1];
+		my $cc_val = $data[2];
+		return sprintf("Control Change No.%3d(0x%02x): %3d(0x%02x)	// %s", $cc_num, $cc_num, $cc_val, $cc_val, PrintControlChange($cc_num));
+	} elsif (($data[0] & 0xf0) == 0xc0) {
+		my $program_num = $data[1];
+		return sprintf("Program Change %3d(0x%02x)	// %s", $program_num + 1, $program_num, PrintProgramChange($program_num));
+	} elsif (($data[0] & 0xf0) == 0xd0) {
+		my $val = $data[1];
+		return sprintf("Channel Pressure %3d(0x%02x)", $val, $val);
+	} elsif (($data[0] & 0xf0) == 0xe0) {
+		my $val = ($data[1] << 7) | $data[2];
+		my $norm_val = $val - 0x2000;
+		return sprintf("Pitch Bend %5d(0x%02x)", $norm_val, $val);
+	}
+}
+
 sub PrintMetaEvent
 {
 	my (@data) = @_;
@@ -288,6 +600,7 @@ sub ShowAllEvent
 				foreach my $val (@data) {
 					$str .= sprintf("%02x ", $val);
 				}
+				$str .= "	// " . PrintCommands(@data);
 				$str .= "\n";
 			}
 			print $str;
@@ -479,7 +792,7 @@ sub ParseText
 			my @data;
 			$data[0] = eval("0x" . $4);
 			my $remain_str = $5;
-			while ($remain_str =~ / ?([0-9a-f][0-9a-f])( .+)?/) {
+			while ($remain_str =~ /^ ?([0-9a-f][0-9a-f])( .+)?/) {
 				push @data, eval("0x" . $1);
 				$remain_str = $2;
 			}
