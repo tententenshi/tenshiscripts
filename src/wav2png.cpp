@@ -97,7 +97,15 @@ int main(int argc, char* argv[])
 		inWavArray[i] = *argv++;
 	}
 
+#if 1
 	FILE *gp = popen("gnuplot", "w");
+#else
+	FILE *gp;
+	if ((gp = fopen("wav2png_debug.txt", "w")) == NULL) {
+		printf("Cannot open %s\n", "wav2png_debug.txt");
+		exit(1);
+	}
+#endif
 //	fprintf(gp, "set terminal gif animate optimize delay 100 size 1024,768\n");
 //	fprintf(gp, "set output \"%s\"\n", outfile);
 	fprintf(gp, "set terminal pngcairo enhanced size 640, 480\n");

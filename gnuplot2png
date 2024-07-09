@@ -98,8 +98,10 @@ if ($isRawData) {
 } else {
 	open(IN, "$inGnuFile") or die "cannot open $inGnuFile!\n";
 	my $firstInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only first data
+	my $secondInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only second data
 	while (my $str = <IN>) {
 		$str =~ s/gnuplotDataFileName/$firstInDataFile/g;
+		$str =~ s/gnuplotDataFile2Name/$secondInDataFile/g;
 		if ($str =~ /set\s+terminal/) {
 			next;
 		}
