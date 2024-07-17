@@ -7,6 +7,7 @@
 #ifndef _filters_h_
 #define _filters_h_
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include "stdio.h"
 
