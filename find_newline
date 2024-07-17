@@ -2,6 +2,20 @@
 
 use strict;
 
+sub usage {
+	my $cmd = `basename $0`;
+	chomp $cmd;
+	print "-- newline checker --\n";
+	print "usage: $cmd [-consistency|unix|win] inFiles\n";
+	print "\n";
+}
+
+if ($#ARGV < 0) {
+	usage();
+	exit 1;
+}
+
+
 my $mode = "consistency";
 
 if ($ARGV[0] =~ /^-(.*)/) {
