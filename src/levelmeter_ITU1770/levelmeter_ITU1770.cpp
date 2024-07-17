@@ -14,9 +14,7 @@ void Usage(const char* command)
 
 void PrepareK_Filter(const SFormatChunk& formatChunk);
 void Destruct(const SFormatChunk& formatChunk);
-//void SetupWavHead(FILE* fp, const SFormatChunk& formatChunk, int dataSize);
-int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, double theMeasurementInterval_sec);
-static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t copySize);
+void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec);
 
 int main(int argc, char* argv[])
 {
@@ -40,21 +38,22 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	SFormatChunk formatChunkBuf;
-	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkBuf);
-	int32_t dataStartPos = ftell(fpWav);
-	rewind(fpWav);
+	SFormatChunk formatChunkIn;
+	SFormatChunk formatChunkOut;
+	int32_t dataSize = ParseWaveHeader(fpWav, &formatChunkIn);
+	int32_t wavSamples = dataSize / formatChunkIn.blockSize;
+	int32_t dataStartPos;
 
 	if (dataSize > 0) {
-		PrepareK_Filter(formatChunkBuf);
+		PrepareK_Filter(formatChunkIn);
 
-		CopyFile(fpWav, fpOut, dataStartPos);
-//		SetupWavHead(fpOut, formatChunkBuf, dataSize);
-		dataSize = Process(fpOut, fpWav, formatChunkBuf, dataSize, 0.4/*sec*/);
-		CopyFile(fpWav, fpOut, -1);
-		MaintainWavHeader(fpOut, dataSize, dataStartPos);
+		dataStartPos = CreateWavHeader(fpOut, &formatChunkOut, 1, formatChunkIn.fsamp, formatChunkIn.bitLength, formatChunkIn.format);
 
-		Destruct(formatChunkBuf);
+		Process(fpOut, fpWav, formatChunkIn, wavSamples, 0.4/*sec*/);
+		int32_t dataSizeOut = wavSamples * formatChunkOut.blockSize;
+		MaintainWavHeader(fpOut, dataSizeOut, dataStartPos);
+
+		Destruct(formatChunkIn);
 	}
 
 	fclose(fpWav);
@@ -101,9 +100,8 @@ void Destruct(const SFormatChunk& formatChunk)
 	delete [] spList;
 }
 
-int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, double theMeasurementInterval_sec)
+void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec)
 {
-	int wavSamples = dataSize / formatChunk.blockSize;
 	int FSAMP = formatChunk.fsamp;
 	int num_ch = formatChunk.channel;
 	int MeasurementInterval_sample = (int)(theMeasurementInterval_sec * FSAMP + 0.5);
@@ -133,13 +131,13 @@ int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dat
 			double mean_square = val * val / MeasurementInterval_sample * 0.9235/*-0.691dB*/;
 			sum[ch] += mean_square - buf[ch][aNewRingPointer];
 			buf[ch][aRingPointer] = mean_square;
-
-			WriteWaveData(fp, &formatChunk, 0);
 		}
+		WriteWaveData(fp, &formatChunk, 0);
 		aRingPointer = aNewRingPointer;
 	}
 	for (; i < wavSamples; i++) {
 		int aNewRingPointer = (aRingPointer + 1) % MeasurementInterval_sample;
+		double aChannel_sum = 0;
 		for (int ch = 0; ch < num_ch; ch++) {
 			double val = ReadWaveData(theWavFile, &formatChunk);
 
@@ -152,32 +150,9 @@ int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dat
 			sum[ch] = fmax(sum[ch] + mean_square - buf[ch][aNewRingPointer], 0);
 			buf[ch][aRingPointer] = mean_square;
 
-			WriteWaveData(fp, &formatChunk, sqrt(sum[ch]));
+			aChannel_sum += sum[ch];
 		}
+		WriteWaveData(fp, &formatChunk, sqrt(aChannel_sum));
 		aRingPointer = aNewRingPointer;
 	}
-
-//	return (wavSamples - MeasurementInterval_sample) * formatChunk.blockSize;
-	return wavSamples * formatChunk.blockSize;
 }
-
-enum { BUF_SIZE = 0x100000, };
-static unsigned char buf[BUF_SIZE];
-
-static void CopyFile(FILE* fpSrc, FILE* fpDst, int32_t theSize)
-{
-	size_t remainSize = theSize;
-	size_t copySize = BUF_SIZE;
-	if ((remainSize >= 0) && (remainSize <= copySize)) { copySize = remainSize; }
-	while (copySize > 0) {
-		size_t readSize = fread(buf, 1, copySize, fpSrc);
-		if (readSize <= 0) { break; }
-		size_t writeSize = fwrite(buf, 1, readSize, fpDst);
-		if (writeSize <= 0) { break; }
-		if (remainSize >= 0) {
-			remainSize -= readSize;
-			if (remainSize <= copySize) { copySize = remainSize; }
-		}
-	}
-}
-
