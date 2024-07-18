@@ -128,13 +128,13 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 					val = (*iter)->Push(val);
 				}
 			}
-			double mean_square = val * val / MeasurementInterval_sample * 0.9235/*-0.691dB*/;
+			double mean_square = val * val / MeasurementInterval_sample;
 			sum[ch] = fmax(sum[ch] + mean_square - buf[ch][aNewRingPointer], 0);
 			buf[ch][aRingPointer] = mean_square;
 
 			aChannel_sum += sum[ch];
 		}
-		WriteWaveData(fp, &formatChunk, (i < MeasurementInterval_sample) ? 0 : sqrt(aChannel_sum));
+		WriteWaveData(fp, &formatChunk, (i < MeasurementInterval_sample) ? 0 : sqrt(aChannel_sum) * 0.9235/*-0.691dB*/);
 		aRingPointer = aNewRingPointer;
 	}
 
