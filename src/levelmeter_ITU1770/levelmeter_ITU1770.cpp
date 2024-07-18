@@ -106,6 +106,8 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 	int num_ch = formatChunk.channel;
 	int MeasurementInterval_sample = (int)(theMeasurementInterval_sec * FSAMP + 0.5);
 
+	double FIXED_GAIN = (num_ch == 1) ? 2.0 : 1.0;
+
 	double** buf = new double* [num_ch];
 	for (int ch = 0; ch < num_ch; ch++) {
 		buf[ch] = new double [MeasurementInterval_sample];
@@ -128,7 +130,7 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 					val = (*iter)->Push(val);
 				}
 			}
-			double mean_square = val * val / MeasurementInterval_sample;
+			double mean_square = val * val / MeasurementInterval_sample * FIXED_GAIN;
 			sum[ch] = fmax(sum[ch] + mean_square - buf[ch][aNewRingPointer], 0);
 			buf[ch][aRingPointer] = mean_square;
 
