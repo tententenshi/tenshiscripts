@@ -71,11 +71,11 @@ void PrepareK_Filter(const SFormatChunk& formatChunk)
 	for (int ch = 0; ch < num_ch; ch++) {
 		{
 			CFilterBase* aIns = new CHPF2(FSAMP);      spList[ch].push_back(aIns);
-			((CHPF2*)aIns)->SetProperty(38.135470876113, 0.5);
+			((CHPF2*)aIns)->SetProperty(38.135470876113, 0.500327037325042);
 		}
 		{
 			CFilterBase* aIns = new CHSV2(FSAMP);    spList[ch].push_back(aIns);
-			((CHSV2*)aIns)->SetProperty(1681.97445095553, 4.0, 0.707);
+			((CHSV2*)aIns)->SetProperty(1681.97445095553, 3.99984385397335, 0.707175236955419);
 		}
 	}
 
@@ -116,26 +116,8 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 		sum[ch] = 0;
 	}
 
-	int i = 0;
 	int aRingPointer = 0;
-	for (i = 0; i < MeasurementInterval_sample; i++) {
-		int aNewRingPointer = (aRingPointer + 1) % MeasurementInterval_sample;
-		for (int ch = 0; ch < num_ch; ch++) {
-			double val = ReadWaveData(theWavFile, &formatChunk);
-
-			for (CList<CFilterBase*>::Iterator iter = spList[ch].begin(); iter != spList[ch].end(); iter++) {
-				if (iter != 0) {
-					val = (*iter)->Push(val);
-				}
-			}
-			double mean_square = val * val / MeasurementInterval_sample * 0.9235/*-0.691dB*/;
-			sum[ch] += mean_square - buf[ch][aNewRingPointer];
-			buf[ch][aRingPointer] = mean_square;
-		}
-		WriteWaveData(fp, &formatChunk, 0);
-		aRingPointer = aNewRingPointer;
-	}
-	for (; i < wavSamples; i++) {
+	for (int i = 0; i < wavSamples; i++) {
 		int aNewRingPointer = (aRingPointer + 1) % MeasurementInterval_sample;
 		double aChannel_sum = 0;
 		for (int ch = 0; ch < num_ch; ch++) {
@@ -152,7 +134,13 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 
 			aChannel_sum += sum[ch];
 		}
-		WriteWaveData(fp, &formatChunk, sqrt(aChannel_sum));
+		WriteWaveData(fp, &formatChunk, (i < MeasurementInterval_sample) ? 0 : sqrt(aChannel_sum));
 		aRingPointer = aNewRingPointer;
 	}
+
+	for (int ch = 0; ch < num_ch; ch++) {
+		delete [] buf[ch];
+	}
+	delete [] buf;
+	delete [] sum;
 }
