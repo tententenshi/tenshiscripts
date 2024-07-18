@@ -14,7 +14,7 @@ void Usage(const char* command)
 
 void PrepareK_Filter(const SFormatChunk& formatChunk);
 void Destruct(const SFormatChunk& formatChunk);
-void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec);
+int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec);
 
 int main(int argc, char* argv[])
 {
@@ -49,8 +49,8 @@ int main(int argc, char* argv[])
 
 		dataStartPos = CreateWavHeader(fpOut, &formatChunkOut, 1, formatChunkIn.fsamp, formatChunkIn.bitLength, formatChunkIn.format);
 
-		Process(fpOut, fpWav, formatChunkIn, wavSamples, 0.4/*sec*/);
-		int32_t dataSizeOut = wavSamples * formatChunkOut.blockSize;
+		int aProcessedSamples = Process(fpOut, fpWav, formatChunkIn, wavSamples, 0.4/*sec*/);
+		int32_t dataSizeOut = aProcessedSamples * formatChunkOut.blockSize;
 		MaintainWavHeader(fpOut, dataSizeOut, dataStartPos);
 
 		Destruct(formatChunkIn);
@@ -100,7 +100,7 @@ void Destruct(const SFormatChunk& formatChunk)
 	delete [] spList;
 }
 
-void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec)
+int Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wavSamples, double theMeasurementInterval_sec)
 {
 	int FSAMP = formatChunk.fsamp;
 	int num_ch = formatChunk.channel;
@@ -119,11 +119,11 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 	}
 
 	int aRingPointer = 0;
-	for (int i = 0; i < wavSamples; i++) {
+	for (int i = 0; i < wavSamples + MeasurementInterval_sample; i++) {
 		int aNewRingPointer = (aRingPointer + 1) % MeasurementInterval_sample;
 		double aChannel_sum = 0;
 		for (int ch = 0; ch < num_ch; ch++) {
-			double val = ReadWaveData(theWavFile, &formatChunk);
+			double val = (i < wavSamples) ? ReadWaveData(theWavFile, &formatChunk) : 0;
 
 			for (CList<CFilterBase*>::Iterator iter = spList[ch].begin(); iter != spList[ch].end(); iter++) {
 				if (iter != 0) {
@@ -145,4 +145,6 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int wa
 	}
 	delete [] buf;
 	delete [] sum;
+
+	return wavSamples + MeasurementInterval_sample;
 }
