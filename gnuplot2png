@@ -15,7 +15,7 @@ if ($#ARGV < 0) {
 	exit 1;
 }
 
-my $inGnuFile = "";
+my @inGnuFileList = ();
 my @inDataFileList = ();
 my $outPngFile = "";
 my $mode = "";
@@ -56,68 +56,82 @@ while (my $str = shift) {
 			$size_set_str = "size $x, $y";
 		}
 	} else {
-		$inGnuFile = $str;
+		push @inGnuFileList, $str;
 	}
 }
 
-if ($outPngFile eq "") {
-	if ($inGnuFile ne "") {
-		$outPngFile = $inGnuFile;
-		$outPngFile =~ s/\.(\w+)$/\.png/;
-	} else {
-		$outPngFile = "output.png";
-	}
-}
-
-my $tmpFile = $inGnuFile . "gnuplot2png_tmp";
-
-
-open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
-
-print "opened $tmpFile\n";
-
-my $isRawData = ($inGnuFile eq "") ? 1 : 0;
+my $isRawData = ($#inGnuFileList < 0) ? 1 : 0;
 if ($isRawData) {
 	print "input file is raw data\n";
-} else {
-	print "input file is gnuplot script\n";
-}
 
-print OUT "set terminal pngcairo enhanced $size_set_str\n";
-print OUT "set output \"$outPngFile\"\n";
-print OUT "set style data lines\n";
-print OUT "set grid\n";
+	if ($outPngFile eq "") {
+		$outPngFile = "output.png";
+	}
 
-if ($isRawData) {
+	my $tmpFile = "gnuplot2png_tmp";
+	open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
+	print "opened $tmpFile\n";
+
+	print OUT "set terminal pngcairo enhanced $size_set_str\n";
+	print OUT "set output \"$outPngFile\"\n";
+	print OUT "set style data lines\n";
+	print OUT "set grid\n";
+
 	my $tmpinfile = shift @inDataFileList;
 	print OUT "plot \"$tmpinfile\"";
 	while (my $tmpinfile = shift @inDataFileList) {
 		print OUT ", \"$tmpinfile\"";
 	}
 	print "\n";
+	close OUT;
+
+	system '/usr/bin/gnuplot', "$tmpFile";
+	unlink $tmpFile;
 } else {
-	open(IN, "$inGnuFile") or die "cannot open $inGnuFile!\n";
-	my $firstInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only first data
-	my $secondInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only second data
-	while (my $str = <IN>) {
-		$str =~ s/gnuplotDataFileName/$firstInDataFile/g;
-		$str =~ s/gnuplotDataFile2Name/$secondInDataFile/g;
-		if ($str =~ /set\s+terminal/) {
-			next;
+	print "input file is gnuplot script\n";
+
+	foreach my $inGnuFile (@inGnuFileList) {
+
+		my $tmpFile = $inGnuFile . "gnuplot2png_tmp";
+		open(OUT, "> $tmpFile") or die "cannot open $tmpFile!\n";
+
+		my $curOutPngFile = $outPngFile;
+		if ($outPngFile eq "") {
+			$curOutPngFile = $inGnuFile;
+			$curOutPngFile =~ s/\.(\w+)$/\.png/;
 		}
-		if ($str =~ /set\s+output/) {
-			next;
-		}
-		if ($str =~ /set\s+size\s+(.+)/) {
-			if ($1 =~ /(ratio|square)/) {
-			} else {
+		print "opened $tmpFile --> $curOutPngFile\n";
+
+		print OUT "set terminal pngcairo enhanced $size_set_str\n";
+		print OUT "set output \"$curOutPngFile\"\n";
+		print OUT "set style data lines\n";
+		print OUT "set grid\n";
+
+		open(IN, "$inGnuFile") or die "cannot open $inGnuFile!\n";
+		my $firstInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only first data
+		my $secondInDataFile = shift @inDataFileList;	# with Gnuplot Script, deal only second data
+
+		while (my $str = <IN>) {
+			$str =~ s/gnuplotDataFileName/$firstInDataFile/g;
+			$str =~ s/gnuplotDataFile2Name/$secondInDataFile/g;
+			if ($str =~ /set\s+terminal/) {
 				next;
 			}
+			if ($str =~ /set\s+output/) {
+				next;
+			}
+			if ($str =~ /set\s+size\s+(.+)/) {
+				if ($1 =~ /(ratio|square)/) {
+				} else {
+					next;
+				}
+			}
+			print OUT $str;
 		}
-		print OUT $str;
+
+		close OUT;
+
+		system '/usr/bin/gnuplot', "$tmpFile";
+		unlink $tmpFile;
 	}
 }
-
-system '/usr/bin/gnuplot', "$tmpFile";
-
-unlink $tmpFile;
