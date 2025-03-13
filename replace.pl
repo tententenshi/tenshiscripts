@@ -15,6 +15,7 @@ sub usage {
 	print "	      add single backslash to escape ! not to parsed by bash\n";
 	print "	      new lines are expressed as \"\\n\" (linux) \"\\r\\n\" (windows)\n";
 	print "	      no particular escaping is needed for #&<>_~='%\n";
+	print "	      '\\t' means single tab, '\\d' means [0-9] number as same as perl's regular expressions\n";
 	exit 1;
 }
 
