@@ -754,7 +754,9 @@ sub GenerateDC {
 	if ($peakLevel > 1) {
 		print "****** CAUTION ******* ";
 	}
-	printf("peak level: %g (%g [dBFS])\n", $peakLevel, 20*log($peakLevel)/log(10));
+	if ($peakLevel > 0) {
+		printf("peak level: %g (%g [dBFS])\n", $peakLevel, 20*log($peakLevel)/log(10));
+	}
 
 	wav_util::MaintainWavHeader($out_filename, \%infoHash, $wav_size);
 }
