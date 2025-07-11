@@ -188,12 +188,27 @@ sub WriteWavTrailer {
 	}
 }
 
+sub MaintainWavHash {
+	my ($infoHashRef) = @_;
+
+	if ($$infoHashRef{ "BLOCK_SIZE" } != $$infoHashRef{ "BIT_LENGTH" }  / 8 * $$infoHashRef{ "NUM_OF_CH" }) {
+		$$infoHashRef{ "BLOCK_SIZE" } = $$infoHashRef{ "BIT_LENGTH" }  / 8 * $$infoHashRef{ "NUM_OF_CH" };
+		print "correct BLOCK_SIZE to " . $$infoHashRef{ "BLOCK_SIZE" } . "\n";
+	}
+	if ($$infoHashRef{ "DATA_RATE" }  != $$infoHashRef{ "FS" } * $$infoHashRef{ "BLOCK_SIZE" }) {
+		$$infoHashRef{ "DATA_RATE" }  = $$infoHashRef{ "FS" } * $$infoHashRef{ "BLOCK_SIZE" };
+		print "correct DATA_RATE to " . $$infoHashRef{ "DATA_RATE" } . "\n";
+	}
+}
+
 sub MaintainWavHeader {
 	my ($outFileName, $infoHashRef, $dataSize) = @_;
 
 	my $fh;
 	open ($fh, "+< $outFileName") or die "cannot open $outFileName!\n";
 	binmode $fh;
+
+	MaintainWavHash($infoHashRef);
 
 	seek($fh, 4, 0);
 	my $totalSize = (stat($fh))[7];
