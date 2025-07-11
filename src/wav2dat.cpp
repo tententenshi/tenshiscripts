@@ -8,10 +8,10 @@
 void Usage(const char* command)
 {
 	fprintf(stderr, "print out wav data\n");
-	fprintf(stderr, "%s input_wav_file output filename.dat\n\n", command);
+	fprintf(stderr, "%s input_wav_file output filename.dat [skip_duty_in_sample] \n\n", command);
 }
 
-void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, double startPoint, double endPoint)
+void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int dataSize, double startPoint, double endPoint, int skipDutySample)
 {
 	int wavSamples = dataSize / formatChunk.blockSize;
 	int FSAMP = formatChunk.fsamp;
@@ -27,25 +27,34 @@ void Process(FILE *fp, FILE *theWavFile, const SFormatChunk& formatChunk, int da
 
 	double aUnityVal = GetUnityVal(&formatChunk);
 	for (int i = 0; i < aEndSample - aStartSample; i++) {
+		bool aIsSkip = (i % skipDutySample) != 0;
+		if (!aIsSkip) {
+			fprintf (fp, "%f	", (double)i / FSAMP);
+		}
 		for (int ch = 0; ch < num_ch; ch++) {
 			double val = ReadWaveData(theWavFile, &formatChunk) * aUnityVal;
-			if (format == 1) {
-				fprintf (fp, "%d", (int)val);
-			} else if (format == 3) {
-				fprintf (fp, "%g", val);
-			}
-			if (ch < num_ch - 1) {
-//				fprintf (fp, ", ");
-				fprintf (fp, "	");
+
+			if (!aIsSkip) {
+				if (format == 1) {
+					fprintf (fp, "%d", (int)val);
+				} else if (format == 3) {
+					fprintf (fp, "%g", val);
+				}
+				if (ch < num_ch - 1) {
+//					fprintf (fp, ", ");
+					fprintf (fp, "	");
+				}
 			}
 		}
-		fprintf (fp, "\n");
+		if (!aIsSkip) {
+			fprintf (fp, "\n");
+		}
 	}
 }
 
 int main(int argc, char* argv[])
 {
-	if ((argc != 3) && (argc != 5)) {
+	if ((argc != 3) && (argc != 4)) {
 		Usage(argv[0]);
 		exit(1);
 	}
@@ -56,11 +65,18 @@ int main(int argc, char* argv[])
 
 	double startPoint = -1;
 	double endPoint = -1;
+	int skipDutySample = 1;
+#if 0
 	if (argc == 5) {
 		char* start = *++argv;
 		char* end = *++argv;
 		startPoint = atof(start);
 		endPoint = atof(end);
+	}
+#endif
+	if (argc == 4) {
+		char* skipDutyInSample = *++argv;
+		skipDutySample = atoi(skipDutyInSample);
 	}
 
 	FILE *fpWav, *fp;
@@ -80,7 +96,7 @@ int main(int argc, char* argv[])
 
 	printf("dataSize is %d\n", dataSize);
 	if (dataSize > 0) {
-		Process(fp, fpWav, formatChunkBuf, dataSize, startPoint, endPoint);
+		Process(fp, fpWav, formatChunkBuf, dataSize, startPoint, endPoint, skipDutySample);
 	}
 
 	fclose(fpWav);
