@@ -131,15 +131,29 @@ sub CeqAnalyzeCore {
 	my $w0_2 = (1 + $b1 - $b2 != 0) ? (1 - $b1 - $b2) / (1 + $b1 - $b2) : 0;
 	my $w0;
 
-	if ((abs(1 + $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 - $a1 + $a2) < $ERROR_LEVEL)) {	# s^2 become zero
-		$result{ memo } .= "this filter is actually 1st order filter (s^2 become zero)\n";
+	if (abs(1 + $b1 - $b2) < $ERROR_LEVEL) {
+		$result{ memo } .= "################## CAUTION ##################\n";
+		if (abs($a0 - $a1 + $a2) < $ERROR_LEVEL) {	# s^2 become zero
+			$result{ memo } .= "this filter almost act as 1st order filter (s^2 become zero).\n";
+			$result{ memo } .= "but VERY unstable around high frequency.\n";
+		} else {
+			$result{ memo } .= "this filter seems to be unstable.\n";
+			$result{ memo } .= "use other types of filter instead.\n";
+		}
 		my $a0_FA = (-3 * $a0 - $a1 + $a2) / (-3 + $b1 - $b2);
 		my $a1_FA = ($a0 - $a1 - 3 * $a2) / (-3 + $b1 - $b2);
 		my $b1_FA = -(1 + $b1 + 3 * $b2) / (-3 + $b1 - $b2);
 		CeqFA_Analyze($a0_FA, $a1_FA, $b1_FA, $Fs, \%result);
 		return \%result;
 	} elsif ((abs(1 - $b1 - $b2) < $ERROR_LEVEL) && (abs($a0 + $a1 + $a2) < $ERROR_LEVEL)) {	# s^0 become zero
-		$result{ memo } .= "this filter is actually 1st order filter (s^0 become zero)\n";
+		$result{ memo } .= "################## CAUTION ##################\n";
+		if (abs($a0 + $a1 + $a2) < $ERROR_LEVEL) {	# s^2 become zero
+			$result{ memo } .= "this filter almost act as 1st order filter (s^0 become zero).\n";
+			$result{ memo } .= "but VERY unstable around low frequency.\n";
+		} else {
+			$result{ memo } .= "this filter seems to be unstable.\n";
+			$result{ memo } .= "use other types of filter instead.\n";
+		}
 		my $a0_FA = (3 * $a0 - $a1 - $a2) / (3 + $b1 + $b2);
 		my $a1_FA = ($a0 + $a1 - 3 * $a2) / (3 + $b1 + $b2);
 		my $b1_FA = -(1 - $b1 + 3 * $b2) / (3 + $b1 + $b2);
