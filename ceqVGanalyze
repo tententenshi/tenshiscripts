@@ -1,0 +1,82 @@
+#! /usr/bin/env perl
+
+use strict;
+use FindBin;
+use POSIX;
+use Math::Complex;
+
+require $FindBin::RealBin . "/ceqAnalyzeCommon.pm";
+
+
+my $cmd = `basename $0`;
+chomp $cmd;
+
+sub Usage {
+	print "usage: $cmd fr q thru hpf bpf Fs\n";
+	print "       q is negative value (q < 0)\n";
+	print "                                      thru\n";
+	print "     +---------------------------------|>----( + )---------------->\n";
+	print "     |                                 hpf   / /\n";
+	print "     |          +----------------------|>---+ /\n";
+	print "     |          |                      bpf   /\n";
+	print "     |          |           +-----(+)--|>---+\n";
+	print "     |          |  fr       |      |\n";
+	print "  ---+---( + )--+--|>---(+)-+-[ ]--+--|>----(+)-----+---+\n";
+	print "           \\ \\            \\        |  fr      \\     |   |\n";
+	print "            \\ \\            +-------+           \\   [ ]  |\n";
+	print "             \\ \\                   |            \\   |   |\n";
+	print "              \\ +------<|----------+             +--+   |\n";
+	print "               \\       q                                |\n";
+	print "                +------------------------<|-------------+\n";
+	print "                                        -1.0\n";
+}
+
+if ($#ARGV <= 0) {
+		Usage();
+
+		exit 1;
+	}
+
+
+my %argument_hash = ParseArgument(\@ARGV);
+
+my $option_arg;
+foreach my $key (keys %{ $argument_hash{ "option" } }) {
+	my $val = $argument_hash{ "option" }->{ $key };
+	$option_arg .= " $key=$val";
+}
+
+
+# Transfer Function as PKG
+#                          fr0 * q * (a0 - (a0 - a1)*Z^-1 - a1*Z^-2)
+#  H(Z) = 1 + g * --------------------------------------------------------
+#                 1 - (-fr0 * q - fr0 * fr1 + 2)*Z^-1 + (1 - fr0 * q)*Z^-2
+
+
+	if ($#{ $argument_hash{ "argument" } } != 5) {
+		Usage();
+
+		exit 1;
+	}
+	{
+		my ($fr, $q, $thru, $hpf, $bpf, $Fs) = @{ $argument_hash{ "argument" } };
+
+		#ignore a1
+		my $mb1 = $fr * $q - $fr**2 + 2;
+		my $mb2 = -(1 + $fr * $q);
+
+		my $ma0 = $thru * 1 + $hpf + $bpf * $fr;
+		my $ma1 = - $thru * $mb1 - 2 * $hpf;
+		my $ma2 = - $thru * $mb2 + $hpf - $bpf * $fr;
+
+#		print "as HPF...\n";
+#		print "a0 as EA --> $ma0\n";
+#		print "a1 as EA --> $ma1\n";
+#		print "a2 as EA --> $ma2\n";
+#		print "b1 as EA --> $mb1\n";
+#		print "b2 as EA --> $mb2\n";
+#		print "\n";
+		my $command = $FindBin::RealBin . "/ceqEAanalyze $ma0 $ma1 $ma2 $mb1 $mb2 $Fs $option_arg";
+		print "$command\n";
+		system ($command);
+	}
